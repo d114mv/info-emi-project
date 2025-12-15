@@ -129,6 +129,45 @@ def get_api_data(endpoint: str, params: dict = None):
     except Exception as e:
         logger.error(f"Error inesperado en get_api_data: {e}")
         return None
+# --- FUNCIONES DE FORMATO NUEVAS ---
+
+def format_scholarship(item: dict) -> str:
+    text = f"💰 <b>{item['name']}</b>\n"
+    if item.get('coverage'):
+        text += f"💎 Cobertura: {item['coverage']}\n"
+    if item.get('deadline'):
+        text += f"📅 Límite: {item['deadline']}\n"
+    
+    if item.get('description'):
+        text += f"\n📝 {item['description']}\n"
+    
+    if item.get('requirements'):
+        text += f"\n📋 <b>Requisitos:</b>\n{item['requirements']}\n"
+        
+    if item.get('application_link'):
+        text += f"\n🔗 <a href='{item['application_link']}'>Link de aplicación</a>\n"
+        
+    return text
+
+def format_contact(item: dict) -> str:
+    text = f"🏢 <b>{item['department']}</b>\n"
+    if item.get('responsible'):
+        text += f"👤 Resp: {item['responsible']}\n"
+    
+    text += "\n"
+    if item.get('phone'):
+        text += f"📞 {item['phone']}\n"
+    if item.get('email'):
+        text += f"📧 {item['email']}\n"
+    if item.get('office'):
+        text += f"📍 {item['office']}\n"
+    if item.get('schedule'):
+        text += f"🕐 {item['schedule']}\n"
+        
+    return text
+
+def format_faq(item: dict) -> str:
+    return f"❓ <b>{item['question']}</b>\n💬 {item['answer']}\n"
 
 # ========== HANDLERS DE COMANDOS ==========
 
@@ -332,52 +371,60 @@ def handle_events(message):
     
     bot.send_message(message.chat.id, response_text, parse_mode="HTML")
 
+# --- HANDLERS CONECTADOS A LA BD ---
+
+@bot.message_handler(commands=['becas', 'beca'])
+def handle_scholarships(message):
+    """Manejador dinámico de Becas"""
+    # 1. Pedir datos a tu API
+    data = get_api_data("api/scholarships")
+    
+    if not data:
+        bot.send_message(message.chat.id, "📭 No hay becas disponibles por ahora.")
+        return
+
+    # 2. Enviar mensaje
+    bot.send_message(message.chat.id, "🎓 <b>BECAS Y DESCUENTOS DISPONIBLES</b>", parse_mode="HTML")
+    
+    for item in data:
+        text = format_scholarship(item)
+        bot.send_message(message.chat.id, text, parse_mode="HTML", disable_web_page_preview=True)
+
 @bot.message_handler(commands=['faq', 'preguntas'])
 def handle_faq(message):
-    """Manejador del comando /faq"""
-    bot.send_message(
-        message.chat.id,
-        "❓ <b>PREGUNTAS FRECUENTES</b>\n\n"
-        "1. <b>¿Cuándo son las inscripciones?</b>\n"
-        "   Las inscripciones para el próximo semestre inician el 15 de enero.\n\n"
-        "2. <b>¿Qué documentos necesito?</b>\n"
-        "   Fotocopia de cédula, título de bachiller, 2 fotografías.\n\n"
-        "3. <b>¿Cuáles son los horarios de atención?</b>\n"
-        "   Lunes a Viernes de 8:00 a 18:00, Sábados de 9:00 a 12:00.\n\n"
-        "<i>¿Tienes otra pregunta? Escribe tu consulta.</i>",
-        parse_mode="HTML"
-    )
+    """Manejador dinámico de FAQs"""
+    # 1. Pedir datos a tu API
+    data = get_api_data("api/faqs")
+    
+    if not data:
+        bot.send_message(message.chat.id, "📭 No hay preguntas frecuentes cargadas.")
+        return
+
+    response = "❓ <b>PREGUNTAS FRECUENTES</b>\n\n"
+    for item in data:
+        response += format_faq(item) + "\n"
+    
+    # Telegram tiene límite de 4096 caracteres, si es muy largo cortamos
+    if len(response) > 4000:
+        response = response[:4000] + "\n... (hay más preguntas)"
+        
+    bot.send_message(message.chat.id, response, parse_mode="HTML")
 
 @bot.message_handler(commands=['contacto', 'contactos'])
 def handle_contacts(message):
-    """Manejador del comando /contacto"""
-    contacts_text = """
-<b>📞 CONTACTOS IMPORTANTES</b>
-
-<u>Admisiones:</u>
-📱 Teléfono: 1234-5678
-📧 Email: admisiones@emi.edu
-🏢 Oficina: Edificio A, Piso 1
-
-<u>Tesorería:</u>
-📱 Teléfono: 8765-4321
-📧 Email: tesoreria@emi.edu
-🏢 Oficina: Edificio B, Piso 2
-
-<u>Secretaría Académica:</u>
-📱 Teléfono: 2345-6789
-📧 Email: secretaria@emi.edu
-🏢 Oficina: Edificio Principal
-
-<u>Preuniversitarios:</u>
-📱 Teléfono: 3456-7890
-📧 Email: preuniversitario@emi.edu
-🏢 Oficina: Edificio C, Piso 1
-
-<i>Horario de atención: Lunes a Viernes 8:00-18:00</i>
-"""
+    """Manejador dinámico de Contactos"""
+    # 1. Pedir datos a tu API
+    data = get_api_data("api/contacts")
     
-    bot.send_message(message.chat.id, contacts_text, parse_mode="HTML")
+    if not data:
+        bot.send_message(message.chat.id, "📭 No hay contactos disponibles.")
+        return
+
+    bot.send_message(message.chat.id, "📞 <b>DIRECTORIO DE CONTACTOS</b>", parse_mode="HTML")
+    
+    for item in data:
+        text = format_contact(item)
+        bot.send_message(message.chat.id, text, parse_mode="HTML")
 
 @bot.message_handler(commands=['calendario'])
 def handle_calendar(message):
@@ -399,7 +446,7 @@ def handle_calendar(message):
 📅 Vacaciones: 16 - 20 Septiembre
 📅 Exámenes finales: 18 - 29 Noviembre
 
-<i>Las fechas están sujetas a cambios. Consulta la página oficial.</i>
+<i>Las fechas están sujetas a cambios. Consulta la página oficial: emi.edu.bo .</i>
 """
     
     bot.send_message(message.chat.id, calendar_text, parse_mode="HTML")
@@ -614,7 +661,8 @@ def handle_text_messages(message):
         'pre': handle_preuniversity,
         'eventos': handle_events,
         'evento': handle_events,
-        'becas': handle_help,  # Temporal
+        'becas': handle_scholarships,
+        'beca': handle_scholarships,
         'faq': handle_faq,
         'preguntas': handle_faq,
         'contactos': handle_contacts,
@@ -671,6 +719,12 @@ def start_bot():
     logger.info(f"API URL: {API_URL}")
     logger.info("=" * 50)
     
+    try:
+        bot.remove_webhook()
+        time.sleep(1)
+    except Exception as e:
+        logger.warning(f"No se pudo eliminar webhook: {e}")
+
     # Iniciar thread para monitoreo de API
     health_thread = threading.Thread(target=check_api_health, daemon=True)
     health_thread.start()
