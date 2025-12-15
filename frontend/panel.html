@@ -4,438 +4,393 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Control - Info EMI</title>
-    <link rel="stylesheet" href="static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        /* Estilos inline adicionales */
         :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --secondary: #64748b;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
+            /* COLORES CORPORATIVOS EMI (Aproximados: Azul Marino y Dorado) */
+            --primary: #002E5F;       /* Azul oscuro institucional */
+            --primary-light: #004a99; /* Azul más claro para hovers */
+            --accent: #F4B400;        /* Dorado/Amarillo para detalles */
+            --dark: #0f172a;
             --light: #f8fafc;
-            --dark: #1e293b;
-            --gray: #94a3b8;
-            --gray-light: #e2e8f0;
+            --gray: #64748b;
+            --danger: #ef4444;
+            --success: #10b981;
+            
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
         
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Poppins', sans-serif; /* Fuente moderna */
         }
         
         body {
-            background-color: #f1f5f9;
+            background-color: var(--light);
             color: var(--dark);
-            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        /* =========================================
+           DISEÑO DEL LOGIN (RENOVADO)
+           ========================================= */
+        .login-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            /* Fondo tecnológico/institucional */
+            background: linear-gradient(135deg, var(--primary) 0%, #00152e 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Elementos decorativos de fondo (círculos abstractos) */
+        .login-wrapper::before {
+            content: '';
+            position: absolute;
+            top: -10%;
+            left: -10%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, var(--primary-light) 0%, transparent 70%);
+            opacity: 0.4;
+            border-radius: 50%;
         }
         
+        .login-wrapper::after {
+            content: '';
+            position: absolute;
+            bottom: -10%;
+            right: -10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
+            opacity: 0.15;
+            border-radius: 50%;
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: var(--shadow-xl);
+            width: 100%;
+            max-width: 420px;
+            position: relative;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+            border-top: 5px solid var(--accent); /* Detalle dorado superior */
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            background: #eef2ff;
+            width: 80px;
+            height: 80px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .login-header h2 {
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 1.5rem;
+        }
+
+        .login-header p {
+            color: var(--gray);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray);
+            transition: color 0.3s;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px 12px 45px; /* Espacio para el icono */
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-color: #f8fafc;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            background-color: #fff;
+            box-shadow: 0 0 0 4px rgba(0, 46, 95, 0.1);
+        }
+
+        .form-control:focus + i {
+            color: var(--primary);
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(to right, var(--primary), var(--primary-light));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 46, 95, 0.2);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.8rem;
+            color: var(--gray);
+            border-top: 1px solid #e2e8f0;
+            padding-top: 1rem;
+        }
+
+        /* =========================================
+           ESTILOS DEL DASHBOARD (MANTENIDOS Y ADAPTADOS)
+           ========================================= */
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
         }
-        
-        /* Header */
+
         .header {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
-            padding: 1.5rem;
-            border-radius: 10px;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        
-        .header h1 {
-            font-size: 1.8rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .header h1 i {
-            font-size: 2rem;
-        }
-        
-        /* Login */
-        .login-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 70vh;
-        }
-        
-        .login-box {
-            background: white;
-            padding: 2.5rem;
-            border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px;
-        }
-        
-        .login-box h2 {
-            margin-bottom: 1.5rem;
+            background: white; /* Ahora blanco para limpieza */
             color: var(--dark);
-            text-align: center;
-        }
-        
-        .form-group {
-            margin-bottom: 1.2rem;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: var(--secondary);
-            font-weight: 500;
-        }
-        
-        .form-control {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1px solid var(--gray-light);
-            border-radius: 5px;
-            font-size: 1rem;
-            transition: border 0.3s;
-        }
-        
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-        
-        .btn {
-            display: inline-block;
-            padding: 0.75rem 1.5rem;
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.3s;
-            text-decoration: none;
-            text-align: center;
-        }
-        
-        .btn:hover {
-            background-color: var(--primary-dark);
-        }
-        
-        .btn-block {
-            display: block;
-            width: 100%;
-        }
-        
-        .btn-success {
-            background-color: var(--success);
-        }
-        
-        .btn-success:hover {
-            background-color: #0da271;
-        }
-        
-        .btn-danger {
-            background-color: var(--danger);
-        }
-        
-        .btn-danger:hover {
-            background-color: #dc2626;
-        }
-        
-        .btn-warning {
-            background-color: var(--warning);
-        }
-        
-        .btn-warning:hover {
-            background-color: #d97706;
-        }
-        
-        /* Panel principal */
-        .panel-container {
-            display: none;
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        .stat-card {
-            background: white;
             padding: 1.5rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-            text-align: center;
-            transition: transform 0.3s;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .stat-icon {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .stat-value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--primary);
-        }
-        
-        .stat-label {
-            color: var(--secondary);
-            font-size: 0.9rem;
-        }
-        
-        /* Tabs */
-        .tabs {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
+            border-radius: 15px;
             margin-bottom: 2rem;
-            background: white;
-            padding: 1rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-        
-        .tab-btn {
-            padding: 0.75rem 1.5rem;
-            background: var(--gray-light);
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.3s;
-        }
-        
-        .tab-btn:hover {
-            background: var(--gray);
-        }
-        
-        .tab-btn.active {
-            background: var(--primary);
-            color: white;
-        }
-        
-        /* Contenido de tabs */
-        .tab-content {
-            display: none;
-            background: white;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-        }
-        
-        .tab-content.active {
-            display: block;
-        }
-        
-        .tab-header {
+            box-shadow: var(--shadow-lg);
+            border-left: 5px solid var(--primary);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
         }
-        
-        /* Formularios */
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        textarea.form-control {
-            min-height: 120px;
-            resize: vertical;
-        }
-        
-        /* Tablas */
-        .table-container {
-            overflow-x: auto;
-            margin-top: 1.5rem;
-        }
-        
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-        }
-        
-        .data-table th {
-            background-color: var(--gray-light);
-            padding: 1rem;
-            text-align: left;
-            font-weight: 600;
-            color: var(--dark);
-            border-bottom: 2px solid var(--gray);
-        }
-        
-        .data-table td {
-            padding: 1rem;
-            border-bottom: 1px solid var(--gray-light);
-        }
-        
-        .data-table tr:hover {
-            background-color: #f8fafc;
-        }
-        
-        .actions {
+
+        .header h1 {
+            color: var(--primary);
+            font-size: 1.5rem;
             display: flex;
-            gap: 0.5rem;
+            align-items: center;
+            gap: 15px;
         }
-        
-        .action-btn {
-            padding: 0.25rem 0.5rem;
+
+        /* Botones generales del sistema */
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
             border: none;
-            border-radius: 3px;
+            font-weight: 500;
             cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
             font-size: 0.9rem;
         }
+
+        .btn-danger { background: #fee2e2; color: var(--danger); }
+        .btn-danger:hover { background: var(--danger); color: white; }
         
-        .action-edit {
-            background-color: var(--warning);
+        .btn-success { background: var(--primary); color: white; }
+        .btn-success:hover { background: var(--primary-light); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+
+        /* Tabs modernas */
+        .tabs {
+            background: transparent;
+            box-shadow: none;
+            gap: 10px;
+            padding: 0;
+            margin-bottom: 1.5rem;
+        }
+
+        .tab-btn {
+            background: white;
+            color: var(--gray);
+            border: 1px solid transparent;
+            box-shadow: var(--shadow-lg);
+            border-radius: 10px;
+            padding: 1rem 1.5rem;
+            flex: 1;
+            min-width: 140px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-btn i { font-size: 1.5rem; margin-bottom: 5px; }
+
+        .tab-btn.active {
+            background: var(--primary);
             color: white;
+            transform: translateY(-3px);
+            border-bottom: 4px solid var(--accent);
         }
+
+        .tab-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: var(--shadow-lg);
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Tablas mejoradas */
+        .table-container { border-radius: 10px; overflow: hidden; box-shadow: 0 0 0 1px #e2e8f0; }
+        .data-table th { background: #f1f5f9; color: var(--primary); font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px; }
+        .data-table tr:last-child td { border-bottom: none; }
         
-        .action-delete {
-            background-color: var(--danger);
-            color: white;
-        }
+        /* Modal mejorado */
+        .modal { backdrop-filter: blur(5px); }
+        .modal-content { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 15px; border-top: 5px solid var(--primary); }
+
+        /* Utilidades */
+        .badge { background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
         
-        /* Mensajes */
-        .alert {
-            padding: 1rem;
-            border-radius: 5px;
-            margin-bottom: 1rem;
-        }
-        
-        .alert-success {
-            background-color: #d1fae5;
-            color: #065f46;
-            border: 1px solid #a7f3d0;
-        }
-        
-        .alert-error {
-            background-color: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #fecaca;
-        }
-        
-        .alert-info {
-            background-color: #dbeafe;
-            color: #1e40af;
-            border: 1px solid #bfdbfe;
-        }
-        
-        /* Footer */
-        .footer {
-            text-align: center;
-            margin-top: 3rem;
-            padding: 1rem;
-            color: var(--secondary);
-            font-size: 0.9rem;
-            border-top: 1px solid var(--gray-light);
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .container {
-                padding: 10px;
-            }
-            
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .tab-btn {
-                padding: 0.5rem 1rem;
-                font-size: 0.9rem;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .login-box {
-                padding: 1.5rem;
-            }
-        }
+        .panel-container { display: none; padding-bottom: 3rem; }
+
+        /* Form Controls dentro del modal */
+        .form-group label { color: var(--dark); font-weight: 600; font-size: 0.9rem; margin-bottom: 0.4rem; }
+        .form-control { border: 1px solid #cbd5e1; border-radius: 8px; padding: 0.7rem; }
+        .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0, 46, 95, 0.1); }
+
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Login -->
-        <div id="loginContainer" class="login-container">
-            <div class="login-box">
-                <h2><i class="fas fa-robot"></i> Panel de Control Info EMI</h2>
-                <div class="alert alert-info" id="loginMessage" style="display: none;"></div>
-                <div class="form-group">
-                    <label for="username"><i class="fas fa-user"></i> Usuario</label>
-                    <input type="text" id="username" class="form-control" placeholder="Ingresa tu usuario">
+
+    <div id="loginContainer" class="login-wrapper">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="login-icon">
+                    <i class="fas fa-university"></i>
                 </div>
-                <div class="form-group">
-                    <label for="password"><i class="fas fa-lock"></i> Contraseña</label>
-                    <input type="password" id="password" class="form-control" placeholder="Ingresa tu contraseña">
-                </div>
-                <button id="loginBtn" class="btn btn-block">
-                    <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
-                </button>
-                <div class="footer" style="margin-top: 1.5rem;">
-                    <small>Panel de administración del bot @emicbba_bot</small>
+                <h2>Bienvenido</h2>
+                <p>Sistema de Gestión del Bot - Info EMI</p>
+            </div>
+            
+            <div class="alert alert-error" id="loginMessage" style="display: none; margin-bottom: 1.5rem; font-size: 0.9rem; border-radius: 8px;"></div>
+            
+            <div class="input-group">
+                <label for="username">Usuario Institucional</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="username" class="form-control" placeholder="Ej: admin">
                 </div>
             </div>
+
+            <div class="input-group">
+                <label for="password">Contraseña</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" class="form-control" placeholder="••••••••">
+                </div>
+            </div>
+
+            <button id="loginBtn" class="btn-login">
+                <span>Ingresar al Sistema</span>
+                <i class="fas fa-arrow-right"></i>
+            </button>
+
+            <div class="login-footer">
+                <p>&copy; 2025 Escuela Militar de Ingeniería<br>Dpto. de Sistemas</p>
+            </div>
         </div>
-        
-        <!-- Panel Principal -->
-        <div id="panelContainer" class="panel-container">
-            <!-- Header -->
+    </div>
+    
+    <div id="panelContainer" class="panel-container">
+        <div class="container">
             <div class="header">
                 <h1>
-                    <i class="fas fa-robot"></i>
+                    <i class="fas fa-robot" style="color: var(--accent);"></i>
                     <div>
-                        Panel de Control - Info EMI
-                        <small style="display: block; font-size: 0.9rem; font-weight: normal;">
-                            Administración del bot universitario
+                        Administración Info EMI
+                        <small style="display: block; font-size: 0.85rem; color: var(--gray); font-weight: normal; margin-top: 2px;">
+                            Panel de Control y Gestión de Contenido
                         </small>
                     </div>
                 </h1>
-                <div style="display: flex; gap: 10px; margin-top: 1rem;">
-                    <span id="userWelcome"></span>
-                    <button id="logoutBtn" class="btn btn-danger" style="margin-left: auto;">
-                        <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div style="text-align: right;">
+                        <small style="color: var(--gray); display: block;">Usuario conectado</small>
+                        <span id="userWelcome" style="font-weight: 600; color: var(--primary);">Admin</span>
+                    </div>
+                    <button id="logoutBtn" class="btn btn-danger">
+                        <i class="fas fa-sign-out-alt"></i> Salir
                     </button>
                 </div>
             </div>
             
-            <!-- Estadísticas -->
-            <div class="stats-grid" id="statsContainer">
-                <!-- Se llena con JavaScript -->
-            </div>
-            
-            <!-- Tabs -->
             <div class="tabs">
                 <button class="tab-btn active" data-tab="dashboard">
-                    <i class="fas fa-dashboard"></i> Dashboard
+                    <i class="fas fa-chart-pie"></i> Dashboard
                 </button>
                 <button class="tab-btn" data-tab="careers">
                     <i class="fas fa-graduation-cap"></i> Carreras
@@ -458,117 +413,115 @@
             </div>
 
             <div id="dashboard" class="tab-content active">
-                <h3>Bienvenido al Panel de Administración</h3>
-                <p>Selecciona una opción del menú para gestionar el contenido del bot.</p>
-            </div>
-            <div id="careers" class="tab-content">
-    <div class="tab-header">
-        <h3>Gestión de Carreras</h3>
-        <button class="btn btn-success" onclick="openCareerModal()">
-            <i class="fas fa-plus"></i> Nueva Carrera
-        </button>
-    </div>
-    <div class="table-container">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Código</th>
-                    <th>Nombre</th>
-                    <th>Facultad</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="careersTableBody">
-                </tbody>
-        </table>
-    </div>
-</div>
-
-<div id="events" class="tab-content">
-    <div class="tab-header">
-        <h3>Gestión de Eventos</h3>
-        <button class="btn btn-success" onclick="openEventModal()">
-            <i class="fas fa-plus"></i> Nuevo Evento
-        </button>
-    </div>
-    <div class="table-container">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Fecha</th>
-                    <th>Título</th>
-                    <th>Lugar</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="eventsTableBody">
-                </tbody>
-        </table>
-    </div>
-</div>
-<div id="preuniversity" class="tab-content">
-    <div class="tab-header">
-        <h3>Gestión de Preuniversitarios</h3>
-        <button class="btn btn-success" onclick="openPreuModal()"><i class="fas fa-plus"></i> Nuevo Curso</button>
-    </div>
-    <div class="table-container">
-        <table class="data-table">
-            <thead><tr><th>Programa</th><th>Duración</th><th>Costo</th><th>Inicio</th><th>Acciones</th></tr></thead>
-            <tbody id="preuTableBody"></tbody>
-        </table>
-    </div>
-</div>
-<div id="faqs" class="tab-content">
-    <div class="tab-header">
-        <h3>Gestión de FAQs</h3>
-        <button class="btn btn-success" onclick="openFaqModal()"><i class="fas fa-plus"></i> Nueva Pregunta</button>
-    </div>
-    <div class="table-container">
-        <table class="data-table">
-            <thead><tr><th>Pregunta</th><th>Categoría</th><th>Prioridad</th><th>Acciones</th></tr></thead>
-            <tbody id="faqsTableBody"></tbody>
-        </table>
-    </div>
-</div>
-<div id="contacts" class="tab-content">
-    <div class="tab-header">
-        <h3>Gestión de Contactos</h3>
-        <button class="btn btn-success" onclick="openContactModal()"><i class="fas fa-plus"></i> Nuevo Contacto</button>
-    </div>
-    <div class="table-container">
-        <table class="data-table">
-            <thead><tr><th>Departamento</th><th>Teléfono</th><th>Email</th><th>Acciones</th></tr></thead>
-            <tbody id="contactsTableBody"></tbody>
-        </table>
-    </div>
-</div>
-<div id="scholarships" class="tab-content">
-    <div class="tab-header">
-        <h3>Gestión de Becas</h3>
-        <button class="btn btn-success" onclick="openScholarshipModal()"><i class="fas fa-plus"></i> Nueva Beca</button>
-    </div>
-    <div class="table-container">
-        <table class="data-table">
-            <thead><tr><th>Nombre</th><th>Cobertura</th><th>Deadline</th><th>Acciones</th></tr></thead>
-            <tbody id="scholarshipsTableBody"></tbody>
-        </table>
-    </div>
-</div>            
-        <div id="crudModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
-    <div class="modal-content" style="background: white; padding: 2rem; border-radius: 10px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;">
-        <h2 id="modalTitle" style="margin-bottom: 1.5rem;">Título Modal</h2>
-        <form id="crudForm">
-            <div id="modalFields">
+                <div style="text-align: center; padding: 3rem;">
+                    <i class="fas fa-robot" style="font-size: 4rem; color: var(--gray); margin-bottom: 1rem; opacity: 0.3;"></i>
+                    <h3 style="color: var(--primary);">Bienvenido al Panel de Administración</h3>
+                    <p style="color: var(--gray);">Selecciona una opción del menú superior para comenzar a gestionar el contenido de tu bot.</p>
                 </div>
-            <div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: flex-end;">
-                <button type="button" class="btn btn-danger" onclick="closeModal()">Cancelar</button>
-                <button type="submit" class="btn btn-success">Guardar</button>
+                <div class="stats-grid" id="statsContainer" style="margin-top: 2rem;"></div>
             </div>
-        </form>
+
+            <div id="careers" class="tab-content">
+                <div class="tab-header">
+                    <h3><i class="fas fa-graduation-cap" style="color: var(--primary);"></i> Gestión de Carreras</h3>
+                    <button class="btn btn-success" onclick="openCareerModal()">
+                        <i class="fas fa-plus"></i> Nueva Carrera
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead><tr><th>Código</th><th>Nombre</th><th>Facultad</th><th>Estado</th><th>Acciones</th></tr></thead>
+                        <tbody id="careersTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="events" class="tab-content">
+                <div class="tab-header">
+                    <h3><i class="fas fa-calendar-alt" style="color: var(--primary);"></i> Gestión de Eventos</h3>
+                    <button class="btn btn-success" onclick="openEventModal()">
+                        <i class="fas fa-plus"></i> Nuevo Evento
+                    </button>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead><tr><th>Fecha</th><th>Título</th><th>Lugar</th><th>Acciones</th></tr></thead>
+                        <tbody id="eventsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="preuniversity" class="tab-content">
+                <div class="tab-header">
+                    <h3><i class="fas fa-book-open" style="color: var(--primary);"></i> Gestión de Preuniversitarios</h3>
+                    <button class="btn btn-success" onclick="openPreuModal()"><i class="fas fa-plus"></i> Nuevo Curso</button>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead><tr><th>Programa</th><th>Duración</th><th>Costo</th><th>Inicio</th><th>Acciones</th></tr></thead>
+                        <tbody id="preuTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="faqs" class="tab-content">
+                <div class="tab-header">
+                    <h3><i class="fas fa-question-circle" style="color: var(--primary);"></i> Gestión de FAQs</h3>
+                    <button class="btn btn-success" onclick="openFaqModal()"><i class="fas fa-plus"></i> Nueva Pregunta</button>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead><tr><th>Pregunta</th><th>Categoría</th><th>Prioridad</th><th>Acciones</th></tr></thead>
+                        <tbody id="faqsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="contacts" class="tab-content">
+                <div class="tab-header">
+                    <h3><i class="fas fa-address-book" style="color: var(--primary);"></i> Gestión de Contactos</h3>
+                    <button class="btn btn-success" onclick="openContactModal()"><i class="fas fa-plus"></i> Nuevo Contacto</button>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead><tr><th>Departamento</th><th>Teléfono</th><th>Email</th><th>Acciones</th></tr></thead>
+                        <tbody id="contactsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="scholarships" class="tab-content">
+                <div class="tab-header">
+                    <h3><i class="fas fa-hand-holding-usd" style="color: var(--primary);"></i> Gestión de Becas</h3>
+                    <button class="btn btn-success" onclick="openScholarshipModal()"><i class="fas fa-plus"></i> Nueva Beca</button>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead><tr><th>Nombre</th><th>Cobertura</th><th>Deadline</th><th>Acciones</th></tr></thead>
+                        <tbody id="scholarshipsTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div> <div id="crudModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center;">
+        <div class="modal-content" style="background: white; padding: 2rem; border-radius: 15px; width: 95%; max-width: 550px; max-height: 90vh; overflow-y: auto; border-top: 6px solid var(--primary);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2 id="modalTitle" style="color: var(--primary); font-size: 1.4rem;">Título Modal</h2>
+                <button type="button" onclick="closeModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray);">&times;</button>
+            </div>
+            
+            <form id="crudForm">
+                <div id="modalFields" class="form-grid">
+                    </div>
+                <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end; border-top: 1px solid #f1f5f9; padding-top: 1rem;">
+                    <button type="button" class="btn btn-danger" onclick="closeModal()" style="background: white; border: 1px solid var(--danger); color: var(--danger);">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
     </div>
-</div>
- <script>
+
+    <script>
     // --- CONFIGURACIÓN Y UTILIDADES ---
     const API_URL = '/api';
     let currentMode = 'create'; // 'create' o 'edit'
@@ -584,7 +537,7 @@
         }
 
         const defaultHeaders = {
-            'Authorization': `Basic ${token}`, // Usamos Basic Auth con el token
+            'Authorization': `Basic ${token}`,
             'Content-Type': 'application/json'
         };
 
@@ -600,14 +553,10 @@
         return response;
     }
 
-    // --- LÓGICA DE LOGIN (Mantenemos la que ya funcionaba) ---
+    // --- LÓGICA DE LOGIN ---
     const loginContainer = document.getElementById('loginContainer');
     const panelContainer = document.getElementById('panelContainer');
-    const loginBtn = document.getElementById('loginBtn');
     
-    // ... (Tu código de handleLogin anterior estaba bien, lo simplifico aquí para ahorrar espacio) ...
-    // Asegúrate de que handleLogin use: localStorage.setItem('auth_token', data.token);
-
     // --- GESTIÓN DE CARRERAS ---
     async function loadCareers() {
         const response = await apiFetch(`${API_URL}/careers?active_only=false`);
@@ -620,10 +569,10 @@
         careers.forEach(c => {
             tbody.innerHTML += `
                 <tr>
-                    <td>${c.code}</td>
+                    <td><b>${c.code}</b></td>
                     <td>${c.name}</td>
                     <td>${c.faculty || '-'}</td>
-                    <td><span class="badge">${c.is_active ? 'Activo' : 'Inactivo'}</span></td>
+                    <td><span class="badge" style="background: ${c.is_active ? '#dcfce7' : '#fee2e2'}; color: ${c.is_active ? '#166534' : '#991b1b'}">${c.is_active ? 'Activo' : 'Inactivo'}</span></td>
                     <td class="actions">
                         <button class="action-btn action-edit" onclick='openCareerModal(${JSON.stringify(c)})'><i class="fas fa-edit"></i></button>
                         <button class="action-btn action-delete" onclick="deleteItem('careers', ${c.id})"><i class="fas fa-trash"></i></button>
@@ -635,73 +584,45 @@
 
     function openCareerModal(career = null) {
         currentSection = 'careers';
-        const fields = document.getElementById('modalFields');
-        
-        if (career) {
-            currentMode = 'edit';
-            currentId = career.id;
-            document.getElementById('modalTitle').innerText = 'Editar Carrera';
-        } else {
-            currentMode = 'create';
-            currentId = null;
-            document.getElementById('modalTitle').innerText = 'Nueva Carrera';
-        }
-
-        // Generar formulario dinámico
-        fields.innerHTML = `
-            <div class="form-group">
-                <label>Código *</label>
-                <input type="text" name="code" class="form-control" required value="${career ? career.code : ''}">
-            </div>
-            <div class="form-group">
-                <label>Nombre *</label>
-                <input type="text" name="name" class="form-control" required value="${career ? career.name : ''}">
-            </div>
-            <div class="form-group">
-                <label>Facultad</label>
-                <input type="text" name="faculty" class="form-control" value="${career ? career.faculty : ''}">
-            </div>
-            <div class="form-group">
-                <label>Duración</label>
-                <input type="text" name="duration" class="form-control" value="${career ? career.duration : ''}">
-            </div>
-            <div class="form-group">
-                <label>Costo</label>
-                <input type="number" name="cost" class="form-control" value="${career ? career.cost : ''}">
-            </div>
-            <div class="form-group">
-                <label>Descripción</label>
-                <textarea name="description" class="form-control">${career ? career.description : ''}</textarea>
-            </div>
-        `;
-        
-        document.getElementById('crudModal').style.display = 'flex';
+        setupModal(career, 'Carrera', `
+            <div class="form-group"><label>Código *</label><input type="text" name="code" class="form-control" required value="${career ? career.code : ''}"></div>
+            <div class="form-group"><label>Nombre *</label><input type="text" name="name" class="form-control" required value="${career ? career.name : ''}"></div>
+            <div class="form-group"><label>Facultad</label><input type="text" name="faculty" class="form-control" value="${career ? career.faculty : ''}"></div>
+            <div class="form-group"><label>Duración</label><input type="text" name="duration" class="form-control" value="${career ? career.duration : ''}"></div>
+            <div class="form-group"><label>Costo</label><input type="number" name="cost" class="form-control" value="${career ? career.cost : ''}"></div>
+            <div class="form-group" style="grid-column: 1/-1;"><label>Descripción</label><textarea name="description" class="form-control">${career ? career.description : ''}</textarea></div>
+        `, career ? career.id : null);
     }
-    // --- FUNCIÓN FALTANTE: ABRIR MODAL DE EVENTOS ---
+
+    // --- GESTIÓN DE EVENTOS ---
+    async function loadEvents() {
+        const response = await apiFetch(`${API_URL}/events?upcoming_only=false`);
+        if (!response) return;
+        const events = await response.json();
+        
+        const tbody = document.getElementById('eventsTableBody');
+        tbody.innerHTML = '';
+        
+        events.forEach(e => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${e.date}</td>
+                    <td><b>${e.title}</b></td>
+                    <td><i class="fas fa-map-marker-alt" style="color:var(--gray);"></i> ${e.location || '-'}</td>
+                    <td class="actions">
+                        <button class="action-btn action-edit" onclick='openEventModal(${JSON.stringify(e)})'><i class="fas fa-edit"></i></button>
+                        <button class="action-btn action-delete" onclick="deleteItem('events', ${e.id})"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
     function openEventModal(event = null) {
         currentSection = 'events';
-        const fields = document.getElementById('modalFields');
-        
-        if (event) {
-            currentMode = 'edit';
-            currentId = event.id;
-            document.getElementById('modalTitle').innerText = 'Editar Evento';
-        } else {
-            currentMode = 'create';
-            currentId = null;
-            document.getElementById('modalTitle').innerText = 'Nuevo Evento';
-        }
-
-        // Generar formulario dinámico específico para EVENTOS
-        // Nota: Ajustamos los campos para que coincidan con tu base de datos
-        fields.innerHTML = `
-            <div class="form-group">
-                <label>Título del Evento *</label>
-                <input type="text" name="title" class="form-control" required value="${event ? event.title : ''}">
-            </div>
-            
-            <div class="form-group">
-                <label>Tipo de Evento</label>
+        setupModal(event, 'Evento', `
+            <div class="form-group"><label>Título del Evento *</label><input type="text" name="title" class="form-control" required value="${event ? event.title : ''}"></div>
+            <div class="form-group"><label>Tipo de Evento</label>
                 <select name="event_type" class="form-control">
                     <option value="academico" ${event && event.event_type === 'academico' ? 'selected' : ''}>Académico</option>
                     <option value="cultural" ${event && event.event_type === 'cultural' ? 'selected' : ''}>Cultural</option>
@@ -710,36 +631,17 @@
                     <option value="otro" ${event && event.event_type === 'otro' ? 'selected' : ''}>Otro</option>
                 </select>
             </div>
-
-            <div class="form-group">
-                <label>Fecha *</label>
-                <input type="date" name="date" class="form-control" required value="${event ? event.date : ''}">
+            <div class="form-group"><label>Fecha *</label><input type="date" name="date" class="form-control" required value="${event ? event.date : ''}"></div>
+            <div style="display: flex; gap: 10px; grid-column: 1/-1;">
+                <div class="form-group" style="flex: 1;"><label>Hora Inicio</label><input type="time" name="start_time" class="form-control" value="${event ? event.start_time : ''}"></div>
+                <div class="form-group" style="flex: 1;"><label>Hora Fin</label><input type="time" name="end_time" class="form-control" value="${event ? event.end_time : ''}"></div>
             </div>
-
-            <div style="display: flex; gap: 10px;">
-                <div class="form-group" style="flex: 1;">
-                    <label>Hora Inicio</label>
-                    <input type="time" name="start_time" class="form-control" value="${event ? event.start_time : ''}">
-                </div>
-                <div class="form-group" style="flex: 1;">
-                    <label>Hora Fin</label>
-                    <input type="time" name="end_time" class="form-control" value="${event ? event.end_time : ''}">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>Lugar / Ubicación</label>
-                <input type="text" name="location" class="form-control" value="${event ? event.location : ''}">
-            </div>
-
-            <div class="form-group">
-                <label>Descripción</label>
-                <textarea name="description" class="form-control" placeholder="Detalles del evento...">${event ? event.description : ''}</textarea>
-            </div>
-        `;
-        
-        document.getElementById('crudModal').style.display = 'flex';
+            <div class="form-group" style="grid-column: 1/-1;"><label>Lugar / Ubicación</label><input type="text" name="location" class="form-control" value="${event ? event.location : ''}"></div>
+            <div class="form-group" style="grid-column: 1/-1;"><label>Descripción</label><textarea name="description" class="form-control" placeholder="Detalles del evento...">${event ? event.description : ''}</textarea></div>
+        `, event ? event.id : null);
     }
+
+    // --- RESTO DE FUNCIONES (Preu, FAQs, etc) ---
     async function loadPreuniversity() {
         const response = await apiFetch(`${API_URL}/preuniversity?active_only=false`);
         if (!response) return;
@@ -759,18 +661,16 @@
             </tr>`;
         });
     }
-
     function openPreuModal(item = null) {
         currentSection = 'preuniversity';
         setupModal(item, 'Curso Preuniversitario', `
             <div class="form-group"><label>Nombre Programa *</label><input type="text" name="program_name" class="form-control" required value="${item ? item.program_name : ''}"></div>
-            <div class="form-group"><label>Descripción</label><textarea name="description" class="form-control">${item ? item.description : ''}</textarea></div>
-            <div style="display:flex; gap:10px;">
+            <div class="form-group" style="grid-column: 1/-1;"><label>Descripción</label><textarea name="description" class="form-control">${item ? item.description : ''}</textarea></div>
+            <div style="display:flex; gap:10px; grid-column: 1/-1;">
                 <div class="form-group" style="flex:1"><label>Fecha Inicio</label><input type="date" name="start_date" class="form-control" value="${item ? item.start_date : ''}"></div>
                 <div class="form-group" style="flex:1"><label>Fecha Fin</label><input type="date" name="end_date" class="form-control" value="${item ? item.end_date : ''}"></div>
             </div>
             <div class="form-group"><label>Costo</label><input type="number" name="cost" class="form-control" value="${item ? item.cost : ''}"></div>
-            <div class="form-group"><label>Requisitos</label><textarea name="requirements" class="form-control">${item ? item.requirements : ''}</textarea></div>
         `, item ? item.id : null);
     }
     async function loadFaqs() {
@@ -782,7 +682,7 @@
         data.forEach(item => {
             tbody.innerHTML += `<tr>
                 <td>${item.question}</td>
-                <td>${item.category || '-'}</td>
+                <td><span class="badge" style="background:#eff6ff; color:#1e40af">${item.category || 'General'}</span></td>
                 <td>${item.priority}</td>
                 <td class="actions">
                     <button class="action-btn action-edit" onclick='openFaqModal(${JSON.stringify(item)})'><i class="fas fa-edit"></i></button>
@@ -791,14 +691,13 @@
             </tr>`;
         });
     }
-
     function openFaqModal(item = null) {
         currentSection = 'faqs';
         setupModal(item, 'FAQ', `
-            <div class="form-group"><label>Pregunta *</label><input type="text" name="question" class="form-control" required value="${item ? item.question : ''}"></div>
-            <div class="form-group"><label>Respuesta *</label><textarea name="answer" class="form-control" required>${item ? item.answer : ''}</textarea></div>
+            <div class="form-group" style="grid-column: 1/-1;"><label>Pregunta *</label><input type="text" name="question" class="form-control" required value="${item ? item.question : ''}"></div>
+            <div class="form-group" style="grid-column: 1/-1;"><label>Respuesta *</label><textarea name="answer" class="form-control" required>${item ? item.answer : ''}</textarea></div>
             <div class="form-group"><label>Categoría</label><input type="text" name="category" class="form-control" value="${item ? item.category : ''}"></div>
-            <div class="form-group"><label>Prioridad (1-10)</label><input type="number" name="priority" class="form-control" value="${item ? item.priority : 1}"></div>
+            <div class="form-group"><label>Prioridad</label><input type="number" name="priority" class="form-control" value="${item ? item.priority : 1}"></div>
         `, item ? item.id : null);
     }
     async function loadContacts() {
@@ -809,7 +708,7 @@
         tbody.innerHTML = '';
         data.forEach(item => {
             tbody.innerHTML += `<tr>
-                <td>${item.department}</td>
+                <td><b>${item.department}</b></td>
                 <td>${item.phone || '-'}</td>
                 <td>${item.email || '-'}</td>
                 <td class="actions">
@@ -819,14 +718,13 @@
             </tr>`;
         });
     }
-
     function openContactModal(item = null) {
         currentSection = 'contacts';
         setupModal(item, 'Contacto', `
             <div class="form-group"><label>Departamento *</label><input type="text" name="department" class="form-control" required value="${item ? item.department : ''}"></div>
             <div class="form-group"><label>Teléfono</label><input type="text" name="phone" class="form-control" value="${item ? item.phone : ''}"></div>
             <div class="form-group"><label>Email</label><input type="email" name="email" class="form-control" value="${item ? item.email : ''}"></div>
-            <div class="form-group"><label>Ubicación/Oficina</label><input type="text" name="office" class="form-control" value="${item ? item.office : ''}"></div>
+            <div class="form-group"><label>Oficina</label><input type="text" name="office" class="form-control" value="${item ? item.office : ''}"></div>
         `, item ? item.id : null);
     }
     async function loadScholarships() {
@@ -837,7 +735,7 @@
         tbody.innerHTML = '';
         data.forEach(item => {
             tbody.innerHTML += `<tr>
-                <td>${item.name}</td>
+                <td><b>${item.name}</b></td>
                 <td>${item.coverage || '-'}</td>
                 <td>${item.deadline || '-'}</td>
                 <td class="actions">
@@ -847,73 +745,46 @@
             </tr>`;
         });
     }
-
     function openScholarshipModal(item = null) {
         currentSection = 'scholarships';
         setupModal(item, 'Beca', `
             <div class="form-group"><label>Nombre Beca *</label><input type="text" name="name" class="form-control" required value="${item ? item.name : ''}"></div>
-            <div class="form-group"><label>Descripción</label><textarea name="description" class="form-control">${item ? item.description : ''}</textarea></div>
-            <div class="form-group"><label>Cobertura (Ej: 100%, Parcial)</label><input type="text" name="coverage" class="form-control" value="${item ? item.coverage : ''}"></div>
+            <div class="form-group" style="grid-column: 1/-1;"><label>Descripción</label><textarea name="description" class="form-control">${item ? item.description : ''}</textarea></div>
+            <div class="form-group"><label>Cobertura</label><input type="text" name="coverage" class="form-control" value="${item ? item.coverage : ''}"></div>
             <div class="form-group"><label>Fecha Límite</label><input type="date" name="deadline" class="form-control" value="${item ? item.deadline : ''}"></div>
-            <div class="form-group"><label>Link Aplicación</label><input type="text" name="application_link" class="form-control" value="${item ? item.application_link : ''}"></div>
         `, item ? item.id : null);
     }
 
-    // --- GESTIÓN DE EVENTOS ---
-    async function loadEvents() {
-        const response = await apiFetch(`${API_URL}/events?upcoming_only=false`);
-        if (!response) return;
-        const events = await response.json();
+    // --- UTILS ---
+    function setupModal(item, title, htmlFields, id) {
+        const fields = document.getElementById('modalFields');
+        const modalTitle = document.getElementById('modalTitle');
+        const modal = document.getElementById('crudModal');
         
-        const tbody = document.getElementById('eventsTableBody');
-        tbody.innerHTML = '';
-        
-        events.forEach(e => {
-            tbody.innerHTML += `
-                <tr>
-                    <td>${e.date}</td>
-                    <td>${e.title}</td>
-                    <td>${e.location || '-'}</td>
-                    <td class="actions">
-                        <button class="action-btn action-delete" onclick="deleteItem('events', ${e.id})"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>
-            `;
-        });
+        modalTitle.innerText = item ? `Editar ${title}` : `Nueva ${title}`;
+        currentMode = item ? 'edit' : 'create';
+        currentId = id;
+        fields.innerHTML = htmlFields;
+        modal.style.display = 'flex';
     }
 
-    // --- LÓGICA GENÉRICA DE GUARDADO ---
+    // --- GUARDAR ---
     document.getElementById('crudForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        
-        // Recoger datos del formulario
         const formData = new FormData(e.target);
         const data = Object.fromEntries(formData.entries());
-        
-        // Convertir tipos si es necesario
         if(data.cost) data.cost = parseFloat(data.cost);
-        data.is_active = true; // Por defecto
+        if(data.priority) data.priority = parseInt(data.priority);
+        data.is_active = true;
 
-        let url, method;
-        
-        if (currentMode === 'create') {
-            url = `${API_URL}/${currentSection}`;
-            method = 'POST';
-        } else {
-            url = `${API_URL}/${currentSection}/${currentId}`;
-            method = 'PUT';
-        }
+        let url = currentMode === 'create' ? `${API_URL}/${currentSection}` : `${API_URL}/${currentSection}/${currentId}`;
+        let method = currentMode === 'create' ? 'POST' : 'PUT';
 
         try {
-            const response = await apiFetch(url, {
-                method: method,
-                body: JSON.stringify(data)
-            });
-
-            if (response.ok) {
+            const response = await apiFetch(url, { method: method, body: JSON.stringify(data) });
+            if (response && response.ok) {
                 alert('Guardado exitosamente');
                 closeModal();
-                
                 if(currentSection === 'careers') loadCareers();
                 if(currentSection === 'events') loadEvents();
                 if(currentSection === 'preuniversity') loadPreuniversity();
@@ -930,16 +801,11 @@
         }
     });
 
-    // --- LÓGICA DE ELIMINADO ---
+    // --- ELIMINAR ---
     async function deleteItem(section, id) {
         if(!confirm('¿Estás seguro de eliminar este elemento?')) return;
-        
-        const response = await apiFetch(`${API_URL}/${section}/${id}`, {
-            method: 'DELETE'
-        });
-
-        if (response.ok) {
-            // ACTUALIZAR ESTA LISTA TAMBIÉN
+        const response = await apiFetch(`${API_URL}/${section}/${id}`, { method: 'DELETE' });
+        if (response && response.ok) {
             if(section === 'careers') loadCareers();
             if(section === 'events') loadEvents();
             if(section === 'preuniversity') loadPreuniversity();
@@ -951,27 +817,18 @@
         }
     }
 
-    // --- UTILIDADES DE UI ---
-    function closeModal() {
-        document.getElementById('crudModal').style.display = 'none';
-    }
+    function closeModal() { document.getElementById('crudModal').style.display = 'none'; }
+    function logout() { localStorage.removeItem('auth_token'); location.reload(); }
 
-    function logout() {
-        localStorage.removeItem('auth_token');
-        location.reload();
-    }
-
-    // Control de Tabs
+    // --- TABS ---
     document.querySelectorAll('.tab-btn').forEach(button => {
         button.addEventListener('click', () => {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            
             button.classList.add('active');
             const tabId = button.getAttribute('data-tab');
             document.getElementById(tabId).classList.add('active');
             
-            // Cargar datos según la tab
             if (tabId === 'careers') loadCareers();
             if (tabId === 'events') loadEvents();
             if (tabId === 'preuniversity') loadPreuniversity();
@@ -980,18 +837,22 @@
             if (tabId === 'scholarships') loadScholarships();
         });
     });
-    
-    // Login Handler (copiar del anterior o asegurar que exista)
-    // Login Handler CORREGIDO
+
+    // --- LOGIN BTN ---
     document.getElementById('loginBtn').addEventListener('click', async () => {
         const user = document.getElementById('username').value;
         const pass = document.getElementById('password').value;
+        const msgDiv = document.getElementById('loginMessage');
+        const loginBtn = document.getElementById('loginBtn');
 
         if (!user || !pass) {
-            alert('Por favor ingresa usuario y contraseña');
+            msgDiv.style.display = 'block';
+            msgDiv.innerText = 'Por favor ingresa usuario y contraseña';
             return;
         }
 
+        loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Entrando...';
+        
         try {
             const response = await fetch('/api/login', {
                 method: 'POST',
@@ -1002,55 +863,35 @@
             const data = await response.json();
 
             if (response.ok && data.status === 'success') {
-                // Guardar token y usuario
                 localStorage.setItem('auth_token', data.token);
                 localStorage.setItem('username', user);
-                
-                // Mostrar panel
                 document.getElementById('loginContainer').style.display = 'none';
                 document.getElementById('panelContainer').style.display = 'block';
-                document.getElementById('userWelcome').innerText = `Hola, ${user}`;
-                
-                // Cargar datos por defecto
-                loadCareers(); 
+                document.getElementById('userWelcome').innerText = `${user}`;
+                loadCareers(); // Carga inicial
             } else {
-                alert('Error: ' + (data.detail || 'Credenciales incorrectas'));
+                msgDiv.style.display = 'block';
+                msgDiv.innerText = 'Error: ' + (data.detail || 'Credenciales incorrectas');
+                loginBtn.innerHTML = '<span>Ingresar al Sistema</span><i class="fas fa-arrow-right"></i>';
             }
         } catch (error) {
             console.error(error);
-            alert('Error al conectar con el servidor');
+            msgDiv.style.display = 'block';
+            msgDiv.innerText = 'Error al conectar con el servidor';
+            loginBtn.innerHTML = '<span>Ingresar al Sistema</span><i class="fas fa-arrow-right"></i>';
         }
-    });    
-    // Conectar el botón de Cerrar Sesión
-    const logoutButton = document.getElementById('logoutBtn');
-    if (logoutButton) {
-        logoutButton.addEventListener('click', logout);
-    }
-    function setupModal(item, title, htmlFields, id) {
-        const fields = document.getElementById('modalFields');
-        const modalTitle = document.getElementById('modalTitle');
-        const modal = document.getElementById('crudModal');
-        
-        // Configurar título y variables globales
-        modalTitle.innerText = item ? `Editar ${title}` : `Nueva ${title}`;
-        currentMode = item ? 'edit' : 'create';
-        currentId = id;
-        
-        // Inyectar los campos HTML específicos
-        fields.innerHTML = htmlFields;
-        
-        // Mostrar el modal
-        modal.style.display = 'flex';
-    }
-    // Inicialización
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', logout);
+
+    // --- INIT ---
     window.addEventListener('DOMContentLoaded', () => {
         if (localStorage.getItem('auth_token')) {
             document.getElementById('loginContainer').style.display = 'none';
             document.getElementById('panelContainer').style.display = 'block';
-            // Cargar datos iniciales
-            // loadCareers(); (opcional)
+            document.getElementById('userWelcome').innerText = localStorage.getItem('username') || 'Admin';
         }
     });
-</script>
+    </script>
 </body>
 </html>
