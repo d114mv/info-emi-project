@@ -570,6 +570,91 @@ async def get_events(upcoming_only: bool = True):
         cur.close()
         conn.close()
 
+# --- AGREGAR ESTO EN backend/app.py (Debajo de get_events) ---
+
+@app.post("/api/events")
+async def create_event(event: EventCreate, admin: dict = Depends(authenticate_admin)):
+    """Crear nuevo evento"""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    try:
+        cur.execute("""
+            INSERT INTO events (
+                title, event_type, description, date, start_time, 
+                end_time, location, organizer, registration_link, is_active
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            RETURNING id
+        """, (
+            event.title, event.event_type, event.description, event.date, 
+            event.start_time, event.end_time, event.location, 
+            event.organizer, event.registration_link, event.is_active
+        ))
+        
+        event_id = cur.fetchone()['id']
+        conn.commit()
+        
+        log_action(admin['id'], "CREATE", "events", event_id, event.dict())
+        return {"message": "Evento creado exitosamente", "id": event_id}
+    except Exception as e:
+        logger.error(f"Error creando evento: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cur.close()
+        conn.close()
+
+@app.put("/api/events/{event_id}")
+async def update_event(event_id: int, event: EventCreate, admin: dict = Depends(authenticate_admin)):
+    """Actualizar evento existente"""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    try:
+        # Verificar existencia
+        cur.execute("SELECT * FROM events WHERE id = %s", (event_id,))
+        existing = cur.fetchone()
+        if not existing:
+            raise HTTPException(status_code=404, detail="Evento no encontrado")
+
+        cur.execute("""
+            UPDATE events 
+            SET title = %s, event_type = %s, description = %s, date = %s, 
+                start_time = %s, end_time = %s, location = %s, 
+                organizer = %s, registration_link = %s, is_active = %s
+            WHERE id = %s
+        """, (
+            event.title, event.event_type, event.description, event.date, 
+            event.start_time, event.end_time, event.location, 
+            event.organizer, event.registration_link, event.is_active, 
+            event_id
+        ))
+        
+        conn.commit()
+        log_action(admin['id'], "UPDATE", "events", event_id)
+        return {"message": "Evento actualizado exitosamente"}
+    finally:
+        cur.close()
+        conn.close()
+
+@app.delete("/api/events/{event_id}")
+async def delete_event(event_id: int, admin: dict = Depends(authenticate_admin)):
+    """Eliminar evento"""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    try:
+        cur.execute("DELETE FROM events WHERE id = %s", (event_id,))
+        if cur.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Evento no encontrado")
+            
+        conn.commit()
+        log_action(admin['id'], "DELETE", "events", event_id)
+        return {"message": "Evento eliminado exitosamente"}
+    finally:
+        cur.close()
+        conn.close()
+
 # ========== RUTAS PARA EL BOT ==========
 
 @app.get("/bot/careers")
@@ -661,6 +746,156 @@ async def get_bot_events(limit: int = 10):
     finally:
         cur.close()
         conn.close()
+
+# --- RUTAS PARA FAQS ---
+@app.get("/api/faqs")
+async def get_faqs(active_only: bool = True):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        query = "SELECT * FROM faqs"
+        if active_only:
+            query += " WHERE is_active = TRUE"
+        query += " ORDER BY priority, id"
+        cur.execute(query)
+        return cur.fetchall()
+    finally:
+        cur.close(); conn.close()
+
+@app.post("/api/faqs")
+async def create_faq(faq: FAQCreate, admin: dict = Depends(authenticate_admin)):
+    conn = get_db_connection(); cur = conn.cursor()
+    try:
+        cur.execute("""
+            INSERT INTO faqs (question, answer, category, priority, is_active)
+            VALUES (%s, %s, %s, %s, %s) RETURNING id
+        """, (faq.question, faq.answer, faq.category, faq.priority, faq.is_active))
+        conn.commit()
+        return {"message": "FAQ creada", "id": cur.fetchone()['id']}
+    finally:
+        cur.close(); conn.close()
+
+@app.put("/api/faqs/{faq_id}")
+async def update_faq(faq_id: int, faq: FAQCreate, admin: dict = Depends(authenticate_admin)):
+    conn = get_db_connection(); cur = conn.cursor()
+    try:
+        cur.execute("""
+            UPDATE faqs SET question=%s, answer=%s, category=%s, priority=%s, is_active=%s
+            WHERE id=%s
+        """, (faq.question, faq.answer, faq.category, faq.priority, faq.is_active, faq_id))
+        conn.commit()
+        return {"message": "FAQ actualizada"}
+    finally:
+        cur.close(); conn.close()
+
+@app.delete("/api/faqs/{faq_id}")
+async def delete_faq(faq_id: int, admin: dict = Depends(authenticate_admin)):
+    conn = get_db_connection(); cur = conn.cursor()
+    try:
+        cur.execute("DELETE FROM faqs WHERE id=%s", (faq_id,))
+        conn.commit()
+        return {"message": "FAQ eliminada"}
+    finally:
+        cur.close(); conn.close()
+
+# --- RUTAS PARA CONTACTOS ---
+@app.get("/api/contacts")
+async def get_contacts(active_only: bool = True):
+    conn = get_db_connection(); cur = conn.cursor()
+    try:
+        query = "SELECT * FROM contacts"
+        if active_only: query += " WHERE is_active = TRUE"
+        query += " ORDER BY priority, department"
+        cur.execute(query)
+        return cur.fetchall()
+    finally:
+        cur.close(); conn.close()
+
+@app.post("/api/contacts")
+async def create_contact(contact: ContactCreate, admin: dict = Depends(authenticate_admin)):
+    conn = get_db_connection(); cur = conn.cursor()
+    try:
+        cur.execute("""
+            INSERT INTO contacts (department, phone, email, office, schedule, responsible, priority, is_active)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id
+        """, (contact.department, contact.phone, contact.email, contact.office, contact.schedule, contact.responsible, contact.priority, contact.is_active))
+        conn.commit()
+        return {"message": "Contacto creado", "id": cur.fetchone()['id']}
+    finally:
+        cur.close(); conn.close()
+
+@app.put("/api/contacts/{contact_id}")
+async def update_contact(contact_id: int, contact: ContactCreate, admin: dict = Depends(authenticate_admin)):
+    conn = get_db_connection(); cur = conn.cursor()
+    try:
+        cur.execute("""
+            UPDATE contacts SET department=%s, phone=%s, email=%s, office=%s, schedule=%s, responsible=%s, priority=%s, is_active=%s
+            WHERE id=%s
+        """, (contact.department, contact.phone, contact.email, contact.office, contact.schedule, contact.responsible, contact.priority, contact.is_active, contact_id))
+        conn.commit()
+        return {"message": "Contacto actualizado"}
+    finally:
+        cur.close(); conn.close()
+
+@app.delete("/api/contacts/{contact_id}")
+async def delete_contact(contact_id: int, admin: dict = Depends(authenticate_admin)):
+    conn = get_db_connection(); cur = conn.cursor()
+    try:
+        cur.execute("DELETE FROM contacts WHERE id=%s", (contact_id,))
+        conn.commit()
+        return {"message": "Contacto eliminado"}
+    finally:
+        cur.close(); conn.close()
+
+# --- RUTAS PARA BECAS ---
+@app.get("/api/scholarships")
+async def get_scholarships(active_only: bool = True):
+    conn = get_db_connection(); cur = conn.cursor()
+    try:
+        cur.execute("SELECT * FROM scholarships ORDER BY name")
+        res = cur.fetchall()
+        # Convertir fechas a string
+        for r in res:
+            if r.get('deadline'): r['deadline'] = r['deadline'].isoformat()
+        return res
+    finally:
+        cur.close(); conn.close()
+
+@app.post("/api/scholarships")
+async def create_scholarship(sch: ScholarshipCreate, admin: dict = Depends(authenticate_admin)):
+    conn = get_db_connection(); cur = conn.cursor()
+    try:
+        cur.execute("""
+            INSERT INTO scholarships (name, description, requirements, coverage, amount, deadline, application_link, is_active)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id
+        """, (sch.name, sch.description, sch.requirements, sch.coverage, sch.amount, sch.deadline, sch.application_link, sch.is_active))
+        conn.commit()
+        return {"message": "Beca creada", "id": cur.fetchone()['id']}
+    finally:
+        cur.close(); conn.close()
+
+@app.put("/api/scholarships/{sch_id}")
+async def update_scholarship(sch_id: int, sch: ScholarshipCreate, admin: dict = Depends(authenticate_admin)):
+    conn = get_db_connection(); cur = conn.cursor()
+    try:
+        cur.execute("""
+            UPDATE scholarships SET name=%s, description=%s, requirements=%s, coverage=%s, amount=%s, deadline=%s, application_link=%s, is_active=%s
+            WHERE id=%s
+        """, (sch.name, sch.description, sch.requirements, sch.coverage, sch.amount, sch.deadline, sch.application_link, sch.is_active, sch_id))
+        conn.commit()
+        return {"message": "Beca actualizada"}
+    finally:
+        cur.close(); conn.close()
+
+@app.delete("/api/scholarships/{sch_id}")
+async def delete_scholarship(sch_id: int, admin: dict = Depends(authenticate_admin)):
+    conn = get_db_connection(); cur = conn.cursor()
+    try:
+        cur.execute("DELETE FROM scholarships WHERE id=%s", (sch_id,))
+        conn.commit()
+        return {"message": "Beca eliminada"}
+    finally:
+        cur.close(); conn.close()
 
 # ========== RUTAS PARA PANEL ADMIN ==========
 

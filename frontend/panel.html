@@ -507,10 +507,54 @@
         </table>
     </div>
 </div>
-            <div id="preuniversity" class="tab-content"><h3>Gestión de Preuniversitarios</h3><p>Próximamente...</p></div>
-            <div id="faqs" class="tab-content"><h3>Gestión de FAQs</h3><p>Próximamente...</p></div>
-            <div id="contacts" class="tab-content"><h3>Gestión de Contactos</h3><p>Próximamente...</p></div>
-            
+<div id="preuniversity" class="tab-content">
+    <div class="tab-header">
+        <h3>Gestión de Preuniversitarios</h3>
+        <button class="btn btn-success" onclick="openPreuModal()"><i class="fas fa-plus"></i> Nuevo Curso</button>
+    </div>
+    <div class="table-container">
+        <table class="data-table">
+            <thead><tr><th>Programa</th><th>Duración</th><th>Costo</th><th>Inicio</th><th>Acciones</th></tr></thead>
+            <tbody id="preuTableBody"></tbody>
+        </table>
+    </div>
+</div>
+<div id="faqs" class="tab-content">
+    <div class="tab-header">
+        <h3>Gestión de FAQs</h3>
+        <button class="btn btn-success" onclick="openFaqModal()"><i class="fas fa-plus"></i> Nueva Pregunta</button>
+    </div>
+    <div class="table-container">
+        <table class="data-table">
+            <thead><tr><th>Pregunta</th><th>Categoría</th><th>Prioridad</th><th>Acciones</th></tr></thead>
+            <tbody id="faqsTableBody"></tbody>
+        </table>
+    </div>
+</div>
+<div id="contacts" class="tab-content">
+    <div class="tab-header">
+        <h3>Gestión de Contactos</h3>
+        <button class="btn btn-success" onclick="openContactModal()"><i class="fas fa-plus"></i> Nuevo Contacto</button>
+    </div>
+    <div class="table-container">
+        <table class="data-table">
+            <thead><tr><th>Departamento</th><th>Teléfono</th><th>Email</th><th>Acciones</th></tr></thead>
+            <tbody id="contactsTableBody"></tbody>
+        </table>
+    </div>
+</div>
+<div id="scholarships" class="tab-content">
+    <div class="tab-header">
+        <h3>Gestión de Becas</h3>
+        <button class="btn btn-success" onclick="openScholarshipModal()"><i class="fas fa-plus"></i> Nueva Beca</button>
+    </div>
+    <div class="table-container">
+        <table class="data-table">
+            <thead><tr><th>Nombre</th><th>Cobertura</th><th>Deadline</th><th>Acciones</th></tr></thead>
+            <tbody id="scholarshipsTableBody"></tbody>
+        </table>
+    </div>
+</div>            
         <div id="crudModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
     <div class="modal-content" style="background: white; padding: 2rem; border-radius: 10px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;">
         <h2 id="modalTitle" style="margin-bottom: 1.5rem;">Título Modal</h2>
@@ -696,6 +740,124 @@
         
         document.getElementById('crudModal').style.display = 'flex';
     }
+    async function loadPreuniversity() {
+        const response = await apiFetch(`${API_URL}/preuniversity?active_only=false`);
+        if (!response) return;
+        const data = await response.json();
+        const tbody = document.getElementById('preuTableBody');
+        tbody.innerHTML = '';
+        data.forEach(item => {
+            tbody.innerHTML += `<tr>
+                <td>${item.program_name}</td>
+                <td>${item.duration || '-'}</td>
+                <td>${item.cost || '-'}</td>
+                <td>${item.start_date || '-'}</td>
+                <td class="actions">
+                    <button class="action-btn action-edit" onclick='openPreuModal(${JSON.stringify(item)})'><i class="fas fa-edit"></i></button>
+                    <button class="action-btn action-delete" onclick="deleteItem('preuniversity', ${item.id})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>`;
+        });
+    }
+
+    function openPreuModal(item = null) {
+        currentSection = 'preuniversity';
+        setupModal(item, 'Curso Preuniversitario', `
+            <div class="form-group"><label>Nombre Programa *</label><input type="text" name="program_name" class="form-control" required value="${item ? item.program_name : ''}"></div>
+            <div class="form-group"><label>Descripción</label><textarea name="description" class="form-control">${item ? item.description : ''}</textarea></div>
+            <div style="display:flex; gap:10px;">
+                <div class="form-group" style="flex:1"><label>Fecha Inicio</label><input type="date" name="start_date" class="form-control" value="${item ? item.start_date : ''}"></div>
+                <div class="form-group" style="flex:1"><label>Fecha Fin</label><input type="date" name="end_date" class="form-control" value="${item ? item.end_date : ''}"></div>
+            </div>
+            <div class="form-group"><label>Costo</label><input type="number" name="cost" class="form-control" value="${item ? item.cost : ''}"></div>
+            <div class="form-group"><label>Requisitos</label><textarea name="requirements" class="form-control">${item ? item.requirements : ''}</textarea></div>
+        `, item ? item.id : null);
+    }
+    async function loadFaqs() {
+        const response = await apiFetch(`${API_URL}/faqs?active_only=false`);
+        if (!response) return;
+        const data = await response.json();
+        const tbody = document.getElementById('faqsTableBody');
+        tbody.innerHTML = '';
+        data.forEach(item => {
+            tbody.innerHTML += `<tr>
+                <td>${item.question}</td>
+                <td>${item.category || '-'}</td>
+                <td>${item.priority}</td>
+                <td class="actions">
+                    <button class="action-btn action-edit" onclick='openFaqModal(${JSON.stringify(item)})'><i class="fas fa-edit"></i></button>
+                    <button class="action-btn action-delete" onclick="deleteItem('faqs', ${item.id})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>`;
+        });
+    }
+
+    function openFaqModal(item = null) {
+        currentSection = 'faqs';
+        setupModal(item, 'FAQ', `
+            <div class="form-group"><label>Pregunta *</label><input type="text" name="question" class="form-control" required value="${item ? item.question : ''}"></div>
+            <div class="form-group"><label>Respuesta *</label><textarea name="answer" class="form-control" required>${item ? item.answer : ''}</textarea></div>
+            <div class="form-group"><label>Categoría</label><input type="text" name="category" class="form-control" value="${item ? item.category : ''}"></div>
+            <div class="form-group"><label>Prioridad (1-10)</label><input type="number" name="priority" class="form-control" value="${item ? item.priority : 1}"></div>
+        `, item ? item.id : null);
+    }
+    async function loadContacts() {
+        const response = await apiFetch(`${API_URL}/contacts?active_only=false`);
+        if (!response) return;
+        const data = await response.json();
+        const tbody = document.getElementById('contactsTableBody');
+        tbody.innerHTML = '';
+        data.forEach(item => {
+            tbody.innerHTML += `<tr>
+                <td>${item.department}</td>
+                <td>${item.phone || '-'}</td>
+                <td>${item.email || '-'}</td>
+                <td class="actions">
+                    <button class="action-btn action-edit" onclick='openContactModal(${JSON.stringify(item)})'><i class="fas fa-edit"></i></button>
+                    <button class="action-btn action-delete" onclick="deleteItem('contacts', ${item.id})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>`;
+        });
+    }
+
+    function openContactModal(item = null) {
+        currentSection = 'contacts';
+        setupModal(item, 'Contacto', `
+            <div class="form-group"><label>Departamento *</label><input type="text" name="department" class="form-control" required value="${item ? item.department : ''}"></div>
+            <div class="form-group"><label>Teléfono</label><input type="text" name="phone" class="form-control" value="${item ? item.phone : ''}"></div>
+            <div class="form-group"><label>Email</label><input type="email" name="email" class="form-control" value="${item ? item.email : ''}"></div>
+            <div class="form-group"><label>Ubicación/Oficina</label><input type="text" name="office" class="form-control" value="${item ? item.office : ''}"></div>
+        `, item ? item.id : null);
+    }
+    async function loadScholarships() {
+        const response = await apiFetch(`${API_URL}/scholarships?active_only=false`);
+        if (!response) return;
+        const data = await response.json();
+        const tbody = document.getElementById('scholarshipsTableBody');
+        tbody.innerHTML = '';
+        data.forEach(item => {
+            tbody.innerHTML += `<tr>
+                <td>${item.name}</td>
+                <td>${item.coverage || '-'}</td>
+                <td>${item.deadline || '-'}</td>
+                <td class="actions">
+                    <button class="action-btn action-edit" onclick='openScholarshipModal(${JSON.stringify(item)})'><i class="fas fa-edit"></i></button>
+                    <button class="action-btn action-delete" onclick="deleteItem('scholarships', ${item.id})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>`;
+        });
+    }
+
+    function openScholarshipModal(item = null) {
+        currentSection = 'scholarships';
+        setupModal(item, 'Beca', `
+            <div class="form-group"><label>Nombre Beca *</label><input type="text" name="name" class="form-control" required value="${item ? item.name : ''}"></div>
+            <div class="form-group"><label>Descripción</label><textarea name="description" class="form-control">${item ? item.description : ''}</textarea></div>
+            <div class="form-group"><label>Cobertura (Ej: 100%, Parcial)</label><input type="text" name="coverage" class="form-control" value="${item ? item.coverage : ''}"></div>
+            <div class="form-group"><label>Fecha Límite</label><input type="date" name="deadline" class="form-control" value="${item ? item.deadline : ''}"></div>
+            <div class="form-group"><label>Link Aplicación</label><input type="text" name="application_link" class="form-control" value="${item ? item.application_link : ''}"></div>
+        `, item ? item.id : null);
+    }
 
     // --- GESTIÓN DE EVENTOS ---
     async function loadEvents() {
@@ -806,6 +968,10 @@
             // Cargar datos según la tab
             if (tabId === 'careers') loadCareers();
             if (tabId === 'events') loadEvents();
+            if (tabId === 'preuniversity') loadPreuniversity();
+            if (tabId === 'faqs') loadFaqs();
+            if (tabId === 'contacts') loadContacts();
+            if (tabId === 'scholarships') loadScholarships();
         });
     });
     
