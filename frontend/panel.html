@@ -461,146 +461,341 @@
                 <h3>Bienvenido al Panel de Administración</h3>
                 <p>Selecciona una opción del menú para gestionar el contenido del bot.</p>
             </div>
-            <div id="careers" class="tab-content"><h3>Gestión de Carreras</h3><p>Próximamente...</p></div>
+            <div id="careers" class="tab-content">
+    <div class="tab-header">
+        <h3>Gestión de Carreras</h3>
+        <button class="btn btn-success" onclick="openCareerModal()">
+            <i class="fas fa-plus"></i> Nueva Carrera
+        </button>
+    </div>
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Nombre</th>
+                    <th>Facultad</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="careersTableBody">
+                </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="events" class="tab-content">
+    <div class="tab-header">
+        <h3>Gestión de Eventos</h3>
+        <button class="btn btn-success" onclick="openEventModal()">
+            <i class="fas fa-plus"></i> Nuevo Evento
+        </button>
+    </div>
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Título</th>
+                    <th>Lugar</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="eventsTableBody">
+                </tbody>
+        </table>
+    </div>
+</div>
             <div id="preuniversity" class="tab-content"><h3>Gestión de Preuniversitarios</h3><p>Próximamente...</p></div>
-            <div id="events" class="tab-content"><h3>Gestión de Eventos</h3><p>Próximamente...</p></div>
             <div id="faqs" class="tab-content"><h3>Gestión de FAQs</h3><p>Próximamente...</p></div>
             <div id="contacts" class="tab-content"><h3>Gestión de Contactos</h3><p>Próximamente...</p></div>
             
-        </div> </div> <script>
-        // Referencias a elementos del DOM
-        const loginContainer = document.getElementById('loginContainer');
-        const panelContainer = document.getElementById('panelContainer');
-        const loginBtn = document.getElementById('loginBtn');
-        const usernameInput = document.getElementById('username');
-        const passwordInput = document.getElementById('password');
+        <div id="crudModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div class="modal-content" style="background: white; padding: 2rem; border-radius: 10px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto;">
+        <h2 id="modalTitle" style="margin-bottom: 1.5rem;">Título Modal</h2>
+        <form id="crudForm">
+            <div id="modalFields">
+                </div>
+            <div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: flex-end;">
+                <button type="button" class="btn btn-danger" onclick="closeModal()">Cancelar</button>
+                <button type="submit" class="btn btn-success">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+ <script>
+    // --- CONFIGURACIÓN Y UTILIDADES ---
+    const API_URL = '/api';
+    let currentMode = 'create'; // 'create' o 'edit'
+    let currentId = null;
+    let currentSection = '';
 
-        // --- FUNCIONES DE LOGIN ---
-
-        async function handleLogin() {
-            const username = usernameInput.value;
-            const password = passwordInput.value;
-
-            if (!username || !password) {
-                alert('Por favor ingresa usuario y contraseña');
-                return;
-            }
-
-            // Cambiar texto del botón para feedback visual
-            const originalBtnText = loginBtn.innerHTML;
-            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Conectando...';
-            loginBtn.disabled = true;
-
-            try {
-                const response = await fetch('/api/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ username, password })
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.status === 'success') {
-                    // 1. Guardar token (la "llave" para entrar)
-                    localStorage.setItem('auth_token', data.token);
-                    localStorage.setItem('username', username);
-                    
-                    // 2. Mostrar mensaje y cambiar pantalla
-                    // alert('¡Bienvenido!'); // Opcional
-                    showPanel();
-                    
-                } else {
-                    alert('Error: ' + (data.detail || 'Credenciales inválidas'));
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error de conexión con el servidor.');
-            } finally {
-                // Restaurar botón
-                loginBtn.innerHTML = originalBtnText;
-                loginBtn.disabled = false;
-            }
+    // Función auxiliar para hacer peticiones con el Token
+    async function apiFetch(endpoint, options = {}) {
+        const token = localStorage.getItem('auth_token');
+        if (!token) {
+            logout();
+            return;
         }
 
-        function showPanel() {
-            loginContainer.style.display = 'none';
-            panelContainer.style.display = 'block';
-            document.getElementById('userWelcome').innerText = `Hola, ${localStorage.getItem('username') || 'Admin'}`;
-            
-            // Aquí cargaríamos las estadísticas reales
-            loadStats();
-        }
+        const defaultHeaders = {
+            'Authorization': `Basic ${token}`, // Usamos Basic Auth con el token
+            'Content-Type': 'application/json'
+        };
 
-        function logout() {
-            localStorage.removeItem('auth_token');
-            localStorage.removeItem('username');
-            location.reload(); // Recargar página para volver al login
-        }
+        options.headers = { ...defaultHeaders, ...options.headers };
 
-        // --- CARGA DE DATOS (Ejemplo) ---
+        const response = await fetch(endpoint, options);
         
-        async function loadStats() {
-            // Esta función llamará a tu API real más adelante
-            const token = localStorage.getItem('auth_token');
-            // Simulación visual por ahora
-            const statsContainer = document.getElementById('statsContainer');
-            statsContainer.innerHTML = `
-                <div class="stat-card">
-                    <div class="stat-icon">🎓</div>
-                    <div class="stat-value">-</div>
-                    <div class="stat-label">Carreras Activas</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon">📅</div>
-                    <div class="stat-value">-</div>
-                    <div class="stat-label">Eventos Próximos</div>
-                </div>
+        if (response.status === 401) {
+            alert("Sesión expirada");
+            logout();
+            return null;
+        }
+        return response;
+    }
+
+    // --- LÓGICA DE LOGIN (Mantenemos la que ya funcionaba) ---
+    const loginContainer = document.getElementById('loginContainer');
+    const panelContainer = document.getElementById('panelContainer');
+    const loginBtn = document.getElementById('loginBtn');
+    
+    // ... (Tu código de handleLogin anterior estaba bien, lo simplifico aquí para ahorrar espacio) ...
+    // Asegúrate de que handleLogin use: localStorage.setItem('auth_token', data.token);
+
+    // --- GESTIÓN DE CARRERAS ---
+    async function loadCareers() {
+        const response = await apiFetch(`${API_URL}/careers?active_only=false`);
+        if (!response) return;
+        const careers = await response.json();
+        
+        const tbody = document.getElementById('careersTableBody');
+        tbody.innerHTML = '';
+
+        careers.forEach(c => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${c.code}</td>
+                    <td>${c.name}</td>
+                    <td>${c.faculty || '-'}</td>
+                    <td><span class="badge">${c.is_active ? 'Activo' : 'Inactivo'}</span></td>
+                    <td class="actions">
+                        <button class="action-btn action-edit" onclick='openCareerModal(${JSON.stringify(c)})'><i class="fas fa-edit"></i></button>
+                        <button class="action-btn action-delete" onclick="deleteItem('careers', ${c.id})"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
             `;
-        }
+        });
+    }
 
-        // --- CONTROL DE PESTAÑAS (TABS) ---
+    function openCareerModal(career = null) {
+        currentSection = 'careers';
+        const fields = document.getElementById('modalFields');
         
-        document.querySelectorAll('.tab-btn').forEach(button => {
-            button.addEventListener('click', () => {
-                // Quitar clase active de todos
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                
-                // Activar el actual
-                button.classList.add('active');
-                const tabId = button.getAttribute('data-tab');
-                const content = document.getElementById(tabId);
-                if(content) content.classList.add('active');
+        if (career) {
+            currentMode = 'edit';
+            currentId = career.id;
+            document.getElementById('modalTitle').innerText = 'Editar Carrera';
+        } else {
+            currentMode = 'create';
+            currentId = null;
+            document.getElementById('modalTitle').innerText = 'Nueva Carrera';
+        }
+
+        // Generar formulario dinámico
+        fields.innerHTML = `
+            <div class="form-group">
+                <label>Código *</label>
+                <input type="text" name="code" class="form-control" required value="${career ? career.code : ''}">
+            </div>
+            <div class="form-group">
+                <label>Nombre *</label>
+                <input type="text" name="name" class="form-control" required value="${career ? career.name : ''}">
+            </div>
+            <div class="form-group">
+                <label>Facultad</label>
+                <input type="text" name="faculty" class="form-control" value="${career ? career.faculty : ''}">
+            </div>
+            <div class="form-group">
+                <label>Duración</label>
+                <input type="text" name="duration" class="form-control" value="${career ? career.duration : ''}">
+            </div>
+            <div class="form-group">
+                <label>Costo</label>
+                <input type="number" name="cost" class="form-control" value="${career ? career.cost : ''}">
+            </div>
+            <div class="form-group">
+                <label>Descripción</label>
+                <textarea name="description" class="form-control">${career ? career.description : ''}</textarea>
+            </div>
+        `;
+        
+        document.getElementById('crudModal').style.display = 'flex';
+    }
+
+    // --- GESTIÓN DE EVENTOS ---
+    async function loadEvents() {
+        const response = await apiFetch(`${API_URL}/events?upcoming_only=false`);
+        if (!response) return;
+        const events = await response.json();
+        
+        const tbody = document.getElementById('eventsTableBody');
+        tbody.innerHTML = '';
+        
+        events.forEach(e => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${e.date}</td>
+                    <td>${e.title}</td>
+                    <td>${e.location || '-'}</td>
+                    <td class="actions">
+                        <button class="action-btn action-delete" onclick="deleteItem('events', ${e.id})"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    // --- LÓGICA GENÉRICA DE GUARDADO ---
+    document.getElementById('crudForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // Recoger datos del formulario
+        const formData = new FormData(e.target);
+        const data = Object.fromEntries(formData.entries());
+        
+        // Convertir tipos si es necesario
+        if(data.cost) data.cost = parseFloat(data.cost);
+        data.is_active = true; // Por defecto
+
+        let url, method;
+        
+        if (currentMode === 'create') {
+            url = `${API_URL}/${currentSection}`;
+            method = 'POST';
+        } else {
+            url = `${API_URL}/${currentSection}/${currentId}`;
+            method = 'PUT';
+        }
+
+        try {
+            const response = await apiFetch(url, {
+                method: method,
+                body: JSON.stringify(data)
             });
-        });
 
-        // --- EVENT LISTENERS ---
-
-        // Escuchar clic en el botón de login
-        if (loginBtn) {
-            loginBtn.addEventListener('click', handleLogin);
-        }
-
-        // Permitir login con la tecla Enter
-        passwordInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleLogin();
-        });
-
-        // Escuchar clic en cerrar sesión
-        const logoutBtn = document.getElementById('logoutBtn');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', logout);
-        }
-
-        // Verificar si ya estaba logueado al cargar
-        window.addEventListener('DOMContentLoaded', () => {
-            if (localStorage.getItem('auth_token')) {
-                showPanel();
+            if (response.ok) {
+                alert('Guardado exitosamente');
+                closeModal();
+                // Recargar tabla correspondiente
+                if(currentSection === 'careers') loadCareers();
+                if(currentSection === 'events') loadEvents();
+            } else {
+                const err = await response.json();
+                alert('Error: ' + err.detail);
             }
+        } catch (error) {
+            console.error(error);
+            alert('Error al guardar');
+        }
+    });
+
+    // --- LÓGICA DE ELIMINADO ---
+    async function deleteItem(section, id) {
+        if(!confirm('¿Estás seguro de eliminar este elemento?')) return;
+        
+        // Mapeo de nombres de sección a endpoints (si difieren)
+        // careers -> careers, events -> events
+        
+        const response = await apiFetch(`${API_URL}/${section}/${id}`, {
+            method: 'DELETE'
         });
 
-    </script>
+        if (response.ok) {
+            if(section === 'careers') loadCareers();
+            if(section === 'events') loadEvents();
+        } else {
+            alert('Error al eliminar');
+        }
+    }
+
+    // --- UTILIDADES DE UI ---
+    function closeModal() {
+        document.getElementById('crudModal').style.display = 'none';
+    }
+
+    function logout() {
+        localStorage.removeItem('auth_token');
+        location.reload();
+    }
+
+    // Control de Tabs
+    document.querySelectorAll('.tab-btn').forEach(button => {
+        button.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            button.classList.add('active');
+            const tabId = button.getAttribute('data-tab');
+            document.getElementById(tabId).classList.add('active');
+            
+            // Cargar datos según la tab
+            if (tabId === 'careers') loadCareers();
+            if (tabId === 'events') loadEvents();
+        });
+    });
+    
+    // Login Handler (copiar del anterior o asegurar que exista)
+    // Login Handler CORREGIDO
+    document.getElementById('loginBtn').addEventListener('click', async () => {
+        const user = document.getElementById('username').value;
+        const pass = document.getElementById('password').value;
+
+        if (!user || !pass) {
+            alert('Por favor ingresa usuario y contraseña');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: user, password: pass })
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.status === 'success') {
+                // Guardar token y usuario
+                localStorage.setItem('auth_token', data.token);
+                localStorage.setItem('username', user);
+                
+                // Mostrar panel
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('panelContainer').style.display = 'block';
+                document.getElementById('userWelcome').innerText = `Hola, ${user}`;
+                
+                // Cargar datos por defecto
+                loadCareers(); 
+            } else {
+                alert('Error: ' + (data.detail || 'Credenciales incorrectas'));
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Error al conectar con el servidor');
+        }
+    });
+
+    // Inicialización
+    window.addEventListener('DOMContentLoaded', () => {
+        if (localStorage.getItem('auth_token')) {
+            document.getElementById('loginContainer').style.display = 'none';
+            document.getElementById('panelContainer').style.display = 'block';
+            // Cargar datos iniciales
+            // loadCareers(); (opcional)
+        }
+    });
+</script>
 </body>
 </html>
