@@ -913,9 +913,13 @@
             if (response.ok) {
                 alert('Guardado exitosamente');
                 closeModal();
-                // Recargar tabla correspondiente
+                
                 if(currentSection === 'careers') loadCareers();
                 if(currentSection === 'events') loadEvents();
+                if(currentSection === 'preuniversity') loadPreuniversity();
+                if(currentSection === 'faqs') loadFaqs();
+                if(currentSection === 'contacts') loadContacts();
+                if(currentSection === 'scholarships') loadScholarships();
             } else {
                 const err = await response.json();
                 alert('Error: ' + err.detail);
@@ -930,16 +934,18 @@
     async function deleteItem(section, id) {
         if(!confirm('¿Estás seguro de eliminar este elemento?')) return;
         
-        // Mapeo de nombres de sección a endpoints (si difieren)
-        // careers -> careers, events -> events
-        
         const response = await apiFetch(`${API_URL}/${section}/${id}`, {
             method: 'DELETE'
         });
 
         if (response.ok) {
+            // ACTUALIZAR ESTA LISTA TAMBIÉN
             if(section === 'careers') loadCareers();
             if(section === 'events') loadEvents();
+            if(section === 'preuniversity') loadPreuniversity();
+            if(section === 'faqs') loadFaqs();
+            if(section === 'contacts') loadContacts();
+            if(section === 'scholarships') loadScholarships();
         } else {
             alert('Error al eliminar');
         }
@@ -1019,6 +1025,22 @@
     const logoutButton = document.getElementById('logoutBtn');
     if (logoutButton) {
         logoutButton.addEventListener('click', logout);
+    }
+    function setupModal(item, title, htmlFields, id) {
+        const fields = document.getElementById('modalFields');
+        const modalTitle = document.getElementById('modalTitle');
+        const modal = document.getElementById('crudModal');
+        
+        // Configurar título y variables globales
+        modalTitle.innerText = item ? `Editar ${title}` : `Nueva ${title}`;
+        currentMode = item ? 'edit' : 'create';
+        currentId = id;
+        
+        // Inyectar los campos HTML específicos
+        fields.innerHTML = htmlFields;
+        
+        // Mostrar el modal
+        modal.style.display = 'flex';
     }
     // Inicialización
     window.addEventListener('DOMContentLoaded', () => {
