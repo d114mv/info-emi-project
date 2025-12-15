@@ -9,10 +9,9 @@
     
     <style>
         :root {
-            /* COLORES CORPORATIVOS EMI (Aproximados: Azul Marino y Dorado) */
-            --primary: #002E5F;       /* Azul oscuro institucional */
-            --primary-light: #004a99; /* Azul más claro para hovers */
-            --accent: #F4B400;        /* Dorado/Amarillo para detalles */
+            --primary: #002E5F;       
+            --primary-light: #004a99; 
+            --accent: #F4B400;        
             --dark: #0f172a;
             --light: #f8fafc;
             --gray: #64748b;
@@ -27,7 +26,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Poppins', sans-serif; /* Fuente moderna */
+            font-family: 'Poppins', sans-serif; 
         }
         
         body {
@@ -44,13 +43,11 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            /* Fondo tecnológico/institucional */
             background: linear-gradient(135deg, var(--primary) 0%, #00152e 100%);
             position: relative;
             overflow: hidden;
         }
 
-        /* Elementos decorativos de fondo (círculos abstractos) */
         .login-wrapper::before {
             content: '';
             position: absolute;
@@ -85,7 +82,7 @@
             position: relative;
             z-index: 10;
             backdrop-filter: blur(10px);
-            border-top: 5px solid var(--accent); /* Detalle dorado superior */
+            border-top: 5px solid var(--accent);
             animation: slideUp 0.6s ease-out;
         }
 
@@ -142,6 +139,7 @@
             position: relative;
         }
 
+        /* CORRECCIÓN 1: Mejor posicionamiento del ícono */
         .input-wrapper i {
             position: absolute;
             left: 15px;
@@ -149,11 +147,16 @@
             transform: translateY(-50%);
             color: var(--gray);
             transition: color 0.3s;
+            width: 20px; /* Ancho fijo */
+            text-align: center;
+            z-index: 10;
+            pointer-events: none; /* Evita que el click en el ícono bloquee el input */
         }
 
+        /* CORRECCIÓN 2: Más padding a la izquierda (55px) */
         .form-control {
             width: 100%;
-            padding: 12px 15px 12px 45px; /* Espacio para el icono */
+            padding: 12px 15px 12px 55px; /* Aumentado de 45px a 55px */
             border: 2px solid #e2e8f0;
             border-radius: 10px;
             font-size: 1rem;
@@ -208,7 +211,7 @@
         }
 
         /* =========================================
-           ESTILOS DEL DASHBOARD (MANTENIDOS Y ADAPTADOS)
+           ESTILOS DEL DASHBOARD
            ========================================= */
         .container {
             max-width: 1200px;
@@ -217,7 +220,7 @@
         }
 
         .header {
-            background: white; /* Ahora blanco para limpieza */
+            background: white;
             color: var(--dark);
             padding: 1.5rem;
             border-radius: 15px;
@@ -237,7 +240,6 @@
             gap: 15px;
         }
 
-        /* Botones generales del sistema */
         .btn {
             padding: 0.6rem 1.2rem;
             border-radius: 8px;
@@ -257,7 +259,6 @@
         .btn-success { background: var(--primary); color: white; }
         .btn-success:hover { background: var(--primary-light); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 
-        /* Tabs modernas */
         .tabs {
             background: transparent;
             box-shadow: none;
@@ -303,25 +304,20 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Tablas mejoradas */
         .table-container { border-radius: 10px; overflow: hidden; box-shadow: 0 0 0 1px #e2e8f0; }
         .data-table th { background: #f1f5f9; color: var(--primary); font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px; }
         .data-table tr:last-child td { border-bottom: none; }
         
-        /* Modal mejorado */
         .modal { backdrop-filter: blur(5px); }
         .modal-content { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 15px; border-top: 5px solid var(--primary); }
 
-        /* Utilidades */
         .badge { background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
         
         .panel-container { display: none; padding-bottom: 3rem; }
 
-        /* Form Controls dentro del modal */
         .form-group label { color: var(--dark); font-weight: 600; font-size: 0.9rem; margin-bottom: 0.4rem; }
-        .form-control { border: 1px solid #cbd5e1; border-radius: 8px; padding: 0.7rem; }
-        .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0, 46, 95, 0.1); }
-
+        /* padding aquí es para los inputs del modal, no del login */
+        .form-control { border: 1px solid #cbd5e1; border-radius: 8px; } 
     </style>
 </head>
 <body>
@@ -336,7 +332,7 @@
                 <p>Sistema de Gestión del Bot - Info EMI</p>
             </div>
             
-            <div class="alert alert-error" id="loginMessage" style="display: none; margin-bottom: 1.5rem; font-size: 0.9rem; border-radius: 8px;"></div>
+            <div class="alert alert-error" id="loginMessage" style="display: none; margin-bottom: 1.5rem; font-size: 0.9rem; border-radius: 8px; color: var(--danger); background: #fee2e2; padding: 10px;"></div>
             
             <div class="input-group">
                 <label for="username">Usuario Institucional</label>
@@ -360,7 +356,7 @@
             </button>
 
             <div class="login-footer">
-                <p>&copy; 2025 Escuela Militar de Ingeniería<br>Dpto. de Sistemas</p>
+                <p>&copy; 2025 Escuela Militar de Ingeniería<br>UEyBU</p>
             </div>
         </div>
     </div>
@@ -503,7 +499,9 @@
                 </div>
             </div>
         </div>
-    </div> <div id="crudModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center;">
+    </div> 
+    
+    <div id="crudModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center;">
         <div class="modal-content" style="background: white; padding: 2rem; border-radius: 15px; width: 95%; max-width: 550px; max-height: 90vh; overflow-y: auto; border-top: 6px solid var(--primary);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                 <h2 id="modalTitle" style="color: var(--primary); font-size: 1.4rem;">Título Modal</h2>
