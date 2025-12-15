@@ -633,6 +633,69 @@
         
         document.getElementById('crudModal').style.display = 'flex';
     }
+    // --- FUNCIÓN FALTANTE: ABRIR MODAL DE EVENTOS ---
+    function openEventModal(event = null) {
+        currentSection = 'events';
+        const fields = document.getElementById('modalFields');
+        
+        if (event) {
+            currentMode = 'edit';
+            currentId = event.id;
+            document.getElementById('modalTitle').innerText = 'Editar Evento';
+        } else {
+            currentMode = 'create';
+            currentId = null;
+            document.getElementById('modalTitle').innerText = 'Nuevo Evento';
+        }
+
+        // Generar formulario dinámico específico para EVENTOS
+        // Nota: Ajustamos los campos para que coincidan con tu base de datos
+        fields.innerHTML = `
+            <div class="form-group">
+                <label>Título del Evento *</label>
+                <input type="text" name="title" class="form-control" required value="${event ? event.title : ''}">
+            </div>
+            
+            <div class="form-group">
+                <label>Tipo de Evento</label>
+                <select name="event_type" class="form-control">
+                    <option value="academico" ${event && event.event_type === 'academico' ? 'selected' : ''}>Académico</option>
+                    <option value="cultural" ${event && event.event_type === 'cultural' ? 'selected' : ''}>Cultural</option>
+                    <option value="deportivo" ${event && event.event_type === 'deportivo' ? 'selected' : ''}>Deportivo</option>
+                    <option value="conferencia" ${event && event.event_type === 'conferencia' ? 'selected' : ''}>Conferencia</option>
+                    <option value="otro" ${event && event.event_type === 'otro' ? 'selected' : ''}>Otro</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Fecha *</label>
+                <input type="date" name="date" class="form-control" required value="${event ? event.date : ''}">
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <div class="form-group" style="flex: 1;">
+                    <label>Hora Inicio</label>
+                    <input type="time" name="start_time" class="form-control" value="${event ? event.start_time : ''}">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label>Hora Fin</label>
+                    <input type="time" name="end_time" class="form-control" value="${event ? event.end_time : ''}">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Lugar / Ubicación</label>
+                <input type="text" name="location" class="form-control" value="${event ? event.location : ''}">
+            </div>
+
+            <div class="form-group">
+                <label>Descripción</label>
+                <textarea name="description" class="form-control" placeholder="Detalles del evento...">${event ? event.description : ''}</textarea>
+            </div>
+        `;
+        
+        document.getElementById('crudModal').style.display = 'flex';
+    }
 
     // --- GESTIÓN DE EVENTOS ---
     async function loadEvents() {
@@ -785,8 +848,12 @@
             console.error(error);
             alert('Error al conectar con el servidor');
         }
-    });
-
+    });    
+    // Conectar el botón de Cerrar Sesión
+    const logoutButton = document.getElementById('logoutBtn');
+    if (logoutButton) {
+        logoutButton.addEventListener('click', logout);
+    }
     // Inicialización
     window.addEventListener('DOMContentLoaded', () => {
         if (localStorage.getItem('auth_token')) {
