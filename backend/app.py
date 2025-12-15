@@ -145,6 +145,46 @@ class PreUniversityCreate(BaseModel):
 
 # ========== AUTENTICACIÓN ==========
 
+# Modelo para recibir los datos del formulario
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+# Ruta que procesa el login
+@app.post("/api/login")
+async def login(request: LoginRequest):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    try:
+        # 1. Buscar usuario
+        cur.execute("SELECT id, password_hash FROM admins WHERE username = %s", 
+                   (request.username,))
+        admin = cur.fetchone()
+        
+        if not admin:
+            raise HTTPException(status_code=401, detail="Usuario no encontrado")
+        
+        # 2. Verificar contraseña (usando SHA256)
+        input_hash = hashlib.sha256(request.password.encode()).hexdigest()
+        
+        if input_hash != admin['password_hash']:
+            raise HTTPException(status_code=401, detail="Contraseña incorrecta")
+        
+        # 3. Éxito: Generar token simple
+        import base64
+        auth_string = f"{request.username}:{request.password}"
+        token = base64.b64encode(auth_string.encode()).decode()
+        
+        return {
+            "status": "success", 
+            "message": "Login exitoso",
+            "token": token 
+        }
+    finally:
+        cur.close()
+        conn.close()
+
 def authenticate_admin(credentials: HTTPBasicCredentials = Depends(security)):
     """Autenticar administrador"""
     conn = get_db_connection()
@@ -628,8 +668,7 @@ async def get_bot_events(limit: int = 10):
 async def get_panel():
     """Servir panel de administración"""
     try:
-        # Usamos rutas absolutas basadas en la ubicación de este archivo (app.py)
-        # app.py está en backend/, así que subimos un nivel (parent) para ir a la raíz
+
         base_path = Path(__file__).parent.parent
         file_path = base_path / "frontend" / "panel.html"
         
@@ -637,7 +676,6 @@ async def get_panel():
             html_content = f.read()
         return HTMLResponse(content=html_content)
     except FileNotFoundError:
-        # (El resto del código de error igual...)
         return HTMLResponse(content="Error: No encuentro el archivo en: " + str(file_path)) # Útil para depurar
 
 # ========== RUTAS PARA ESTADÍSTICAS ==========
@@ -705,10 +743,10 @@ async def startup_event():
 
 # Montar archivos estáticos
 try:
-    app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
-except:
-    logger.warning("No se encontró carpeta static")
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("app:app", host="0.0.0.0", port=8000, reload=True)
+    # Calculamos la ruta exacta a la carpeta frontend/static
+    static_path = Path(__file__).parent.parent / "frontend" / "static"
+    
+    app.mount("/static", StaticFiles(directory=str(static_path)), name="static")
+    logger.info(f"Carpeta static montada desde: {static_path}")
+except Exception as e:
+    logger.warning(f"No se pudo montar static: {e}")

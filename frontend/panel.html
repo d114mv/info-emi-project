@@ -453,4 +453,154 @@
                     <i class="fas fa-address-book"></i> Contactos
                 </button>
                 <button class="tab-btn" data-tab="scholarships">
-                    <i class="fas fa-hand-holding-usd"></i> Bec
+                    <i class="fas fa-hand-holding-usd"></i> Becas
+                </button>
+            </div>
+
+            <div id="dashboard" class="tab-content active">
+                <h3>Bienvenido al Panel de Administración</h3>
+                <p>Selecciona una opción del menú para gestionar el contenido del bot.</p>
+            </div>
+            <div id="careers" class="tab-content"><h3>Gestión de Carreras</h3><p>Próximamente...</p></div>
+            <div id="preuniversity" class="tab-content"><h3>Gestión de Preuniversitarios</h3><p>Próximamente...</p></div>
+            <div id="events" class="tab-content"><h3>Gestión de Eventos</h3><p>Próximamente...</p></div>
+            <div id="faqs" class="tab-content"><h3>Gestión de FAQs</h3><p>Próximamente...</p></div>
+            <div id="contacts" class="tab-content"><h3>Gestión de Contactos</h3><p>Próximamente...</p></div>
+            
+        </div> </div> <script>
+        // Referencias a elementos del DOM
+        const loginContainer = document.getElementById('loginContainer');
+        const panelContainer = document.getElementById('panelContainer');
+        const loginBtn = document.getElementById('loginBtn');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+
+        // --- FUNCIONES DE LOGIN ---
+
+        async function handleLogin() {
+            const username = usernameInput.value;
+            const password = passwordInput.value;
+
+            if (!username || !password) {
+                alert('Por favor ingresa usuario y contraseña');
+                return;
+            }
+
+            // Cambiar texto del botón para feedback visual
+            const originalBtnText = loginBtn.innerHTML;
+            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Conectando...';
+            loginBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.status === 'success') {
+                    // 1. Guardar token (la "llave" para entrar)
+                    localStorage.setItem('auth_token', data.token);
+                    localStorage.setItem('username', username);
+                    
+                    // 2. Mostrar mensaje y cambiar pantalla
+                    // alert('¡Bienvenido!'); // Opcional
+                    showPanel();
+                    
+                } else {
+                    alert('Error: ' + (data.detail || 'Credenciales inválidas'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error de conexión con el servidor.');
+            } finally {
+                // Restaurar botón
+                loginBtn.innerHTML = originalBtnText;
+                loginBtn.disabled = false;
+            }
+        }
+
+        function showPanel() {
+            loginContainer.style.display = 'none';
+            panelContainer.style.display = 'block';
+            document.getElementById('userWelcome').innerText = `Hola, ${localStorage.getItem('username') || 'Admin'}`;
+            
+            // Aquí cargaríamos las estadísticas reales
+            loadStats();
+        }
+
+        function logout() {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('username');
+            location.reload(); // Recargar página para volver al login
+        }
+
+        // --- CARGA DE DATOS (Ejemplo) ---
+        
+        async function loadStats() {
+            // Esta función llamará a tu API real más adelante
+            const token = localStorage.getItem('auth_token');
+            // Simulación visual por ahora
+            const statsContainer = document.getElementById('statsContainer');
+            statsContainer.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-icon">🎓</div>
+                    <div class="stat-value">-</div>
+                    <div class="stat-label">Carreras Activas</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📅</div>
+                    <div class="stat-value">-</div>
+                    <div class="stat-label">Eventos Próximos</div>
+                </div>
+            `;
+        }
+
+        // --- CONTROL DE PESTAÑAS (TABS) ---
+        
+        document.querySelectorAll('.tab-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                // Quitar clase active de todos
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // Activar el actual
+                button.classList.add('active');
+                const tabId = button.getAttribute('data-tab');
+                const content = document.getElementById(tabId);
+                if(content) content.classList.add('active');
+            });
+        });
+
+        // --- EVENT LISTENERS ---
+
+        // Escuchar clic en el botón de login
+        if (loginBtn) {
+            loginBtn.addEventListener('click', handleLogin);
+        }
+
+        // Permitir login con la tecla Enter
+        passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleLogin();
+        });
+
+        // Escuchar clic en cerrar sesión
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', logout);
+        }
+
+        // Verificar si ya estaba logueado al cargar
+        window.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('auth_token')) {
+                showPanel();
+            }
+        });
+
+    </script>
+</body>
+</html>
