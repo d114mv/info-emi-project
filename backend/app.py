@@ -628,20 +628,17 @@ async def get_bot_events(limit: int = 10):
 async def get_panel():
     """Servir panel de administración"""
     try:
-        with open("frontend/panel.html", "r", encoding="utf-8") as f:
+        # Usamos rutas absolutas basadas en la ubicación de este archivo (app.py)
+        # app.py está en backend/, así que subimos un nivel (parent) para ir a la raíz
+        base_path = Path(__file__).parent.parent
+        file_path = base_path / "frontend" / "panel.html"
+        
+        with open(file_path, "r", encoding="utf-8") as f:
             html_content = f.read()
         return HTMLResponse(content=html_content)
     except FileNotFoundError:
-        # Panel simple si no existe el archivo
-        return HTMLResponse(content="""
-        <html>
-            <head><title>Panel Info EMI</title></head>
-            <body>
-                <h1>Panel de Administración</h1>
-                <p>Sube el archivo panel.html a la carpeta frontend/</p>
-            </body>
-        </html>
-        """)
+        # (El resto del código de error igual...)
+        return HTMLResponse(content="Error: No encuentro el archivo en: " + str(file_path)) # Útil para depurar
 
 # ========== RUTAS PARA ESTADÍSTICAS ==========
 
