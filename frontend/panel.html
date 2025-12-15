@@ -4,427 +4,376 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Control - Info EMI</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         :root {
             --primary: #002E5F;       
-            --primary-light: #004a99; 
+            --primary-dark: #001a38;
             --accent: #F4B400;        
-            --dark: #0f172a;
-            --light: #f8fafc;
-            --gray: #64748b;
+            --text-dark: #1e293b;
+            --text-light: #64748b;
+            --bg-light: #f1f5f9;
+            --white: #ffffff;
             --danger: #ef4444;
             --success: #10b981;
-            
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --sidebar-width: 260px;
         }
         
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif; 
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         
-        body {
-            background-color: var(--light);
-            color: var(--dark);
-            min-height: 100vh;
-        }
+        body { background-color: var(--bg-light); color: var(--text-dark); height: 100vh; overflow: hidden; }
 
-        /* =========================================
-           DISEÑO DEL LOGIN (RENOVADO)
-           ========================================= */
+        /* ================= LOGIN STYLES (MANTENIDOS) ================= */
         .login-wrapper {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center;
             background: linear-gradient(135deg, var(--primary) 0%, #00152e 100%);
-            position: relative;
-            overflow: hidden;
+            z-index: 2000;
         }
-
-        .login-wrapper::before {
-            content: '';
-            position: absolute;
-            top: -10%;
-            left: -10%;
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, var(--primary-light) 0%, transparent 70%);
-            opacity: 0.4;
-            border-radius: 50%;
-        }
-        
-        .login-wrapper::after {
-            content: '';
-            position: absolute;
-            bottom: -10%;
-            right: -10%;
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
-            opacity: 0.15;
-            border-radius: 50%;
-        }
-
         .login-card {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 3rem;
-            border-radius: 20px;
-            box-shadow: var(--shadow-xl);
-            width: 100%;
-            max-width: 420px;
-            position: relative;
-            z-index: 10;
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95); padding: 3rem; border-radius: 20px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); width: 100%; max-width: 420px;
             border-top: 5px solid var(--accent);
-            animation: slideUp 0.6s ease-out;
         }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .login-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
         .login-icon {
-            font-size: 3rem;
-            color: var(--primary);
-            margin-bottom: 1rem;
-            background: #eef2ff;
-            width: 80px;
-            height: 80px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            font-size: 3rem; color: var(--primary); margin-bottom: 1rem;
+            background: #eef2ff; width: 80px; height: 80px; display: inline-flex;
+            align-items: center; justify-content: center; border-radius: 50%;
         }
-
-        .login-header h2 {
-            color: var(--primary);
-            font-weight: 600;
-            font-size: 1.5rem;
+        .input-group { margin-bottom: 1.5rem; position: relative; }
+        .input-group label { display: block; margin-bottom: 0.5rem; color: var(--primary); font-weight: 600; font-size: 0.9rem; }
+        .input-wrapper { position: relative; }
+        .input-wrapper i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--text-light); width: 20px; text-align: center; pointer-events: none; }
+        
+        .form-control-login {
+            width: 100%; padding: 12px 15px 12px 50px; 
+            border: 2px solid #e2e8f0; border-radius: 10px; font-size: 1rem;
         }
-
-        .login-header p {
-            color: var(--gray);
-            font-size: 0.9rem;
-            margin-top: 0.5rem;
-        }
-
-        .input-group {
-            margin-bottom: 1.5rem;
-            position: relative;
-        }
-
-        .input-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: var(--primary);
-            font-weight: 500;
-            font-size: 0.9rem;
-        }
-
-        .input-wrapper {
-            position: relative;
-        }
-
-        /* CORRECCIÓN 1: Mejor posicionamiento del ícono */
-        .input-wrapper i {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--gray);
-            transition: color 0.3s;
-            width: 20px; /* Ancho fijo */
-            text-align: center;
-            z-index: 10;
-            pointer-events: none; /* Evita que el click en el ícono bloquee el input */
-        }
-
-        /* CORRECCIÓN 2: Más padding a la izquierda (55px) */
-        .form-control {
-            width: 100%;
-            padding: 12px 15px 12px 55px; /* Aumentado de 45px a 55px */
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            background-color: #f8fafc;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary);
-            background-color: #fff;
-            box-shadow: 0 0 0 4px rgba(0, 46, 95, 0.1);
-        }
-
-        .form-control:focus + i {
-            color: var(--primary);
-        }
-
+        .form-control-login:focus { outline: none; border-color: var(--primary); }
+        
         .btn-login {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(to right, var(--primary), var(--primary-light));
+            width: 100%; padding: 14px; background: var(--primary); color: white;
+            border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer;
+            transition: all 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px;
+        }
+        .btn-login:hover { background: var(--primary-dark); transform: translateY(-2px); }
+
+        /* ================= DASHBOARD LAYOUT (NUEVO) ================= */
+        .dashboard-layout {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* SIDEBAR (MENÚ IZQUIERDO) */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--primary);
             color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            padding: 2rem 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 10px;
+            gap: 12px;
         }
 
-        .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0, 46, 95, 0.2);
+        .sidebar-header i { font-size: 1.8rem; color: var(--accent); }
+        .sidebar-header h2 { font-size: 1.2rem; font-weight: 600; line-height: 1.2; }
+        .sidebar-header span { font-size: 0.8rem; opacity: 0.7; font-weight: 400; display: block; }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 1.5rem 1rem;
+            overflow-y: auto;
         }
 
-        .btn-login:active {
-            transform: translateY(0);
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            border-radius: 10px;
+            margin-bottom: 5px;
+            transition: all 0.3s;
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            font-size: 0.95rem;
+            text-align: left;
         }
 
-        .login-footer {
-            text-align: center;
-            margin-top: 2rem;
-            font-size: 0.8rem;
-            color: var(--gray);
-            border-top: 1px solid #e2e8f0;
-            padding-top: 1rem;
+        .nav-item:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+            padding-left: 20px; /* Efecto de movimiento */
         }
 
-        /* =========================================
-           ESTILOS DEL DASHBOARD
-           ========================================= */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+        .nav-item.active {
+            background: var(--accent);
+            color: var(--primary-dark);
+            font-weight: 600;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
         }
 
-        .header {
-            background: white;
-            color: var(--dark);
+        .sidebar-footer {
             padding: 1.5rem;
-            border-radius: 15px;
-            margin-bottom: 2rem;
-            box-shadow: var(--shadow-lg);
-            border-left: 5px solid var(--primary);
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+        .user-avatar {
+            width: 35px; height: 35px; background: rgba(255,255,255,0.2);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        }
+
+        /* MAIN CONTENT (CONTENIDO DERECHA) */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            background: var(--bg-light);
+            padding: 2rem;
+        }
+
+        .top-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 2rem;
         }
 
-        .header h1 {
+        .page-title h1 {
+            font-size: 1.8rem;
             color: var(--primary);
-            font-size: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 15px;
+            font-weight: 600;
         }
+
+        /* TARJETAS Y CONTENIDO */
+        .content-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            animation: fadeIn 0.3s ease-out;
+            display: none; /* Ocultos por defecto */
+        }
+
+        .content-card.active {
+            display: block;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .card-header h3 { color: var(--primary); font-size: 1.2rem; }
+
+        /* TABLAS (CORREGIDAS) */
+        .table-responsive {
+            overflow-x: auto;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            white-space: nowrap;
+        }
+
+        .data-table th {
+            background: #f8fafc;
+            color: var(--primary);
+            font-weight: 600;
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 2px solid #e2e8f0;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        .data-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            color: var(--text-dark);
+            font-size: 0.95rem;
+        }
+
+        .data-table tr:hover { background-color: #f8fafc; }
+
+        /* BOTONES ACCIONES */
+        .actions { display: flex; gap: 8px; }
+        .action-btn {
+            width: 32px; height: 32px; border-radius: 6px; border: none;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s; color: white;
+        }
+        .action-edit { background: var(--primary-light); }
+        .action-delete { background: var(--danger); }
+        .action-btn:hover { opacity: 0.8; transform: scale(1.05); }
 
         .btn {
-            padding: 0.6rem 1.2rem;
-            border-radius: 8px;
-            border: none;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.9rem;
+            padding: 0.6rem 1.2rem; border-radius: 8px; border: none;
+            font-weight: 500; cursor: pointer; display: inline-flex;
+            align-items: center; gap: 8px; font-size: 0.9rem; transition: all 0.2s;
         }
-
-        .btn-danger { background: #fee2e2; color: var(--danger); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
         .btn-danger:hover { background: var(--danger); color: white; }
+
+        /* MODAL */
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 2000;
+            display: none; justify-content: center; align-items: center;
+            backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            background: white; width: 95%; max-width: 500px;
+            padding: 2rem; border-radius: 15px; max-height: 90vh; overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+        }
+        .form-group { margin-bottom: 1.2rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; color: var(--text-dark); font-weight: 500; font-size: 0.9rem; }
+        .form-control {
+            width: 100%; padding: 0.7rem; border: 1px solid #cbd5e1;
+            border-radius: 8px; font-size: 0.95rem;
+        }
         
-        .btn-success { background: var(--primary); color: white; }
-        .btn-success:hover { background: var(--primary-light); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        /* ESTADO BADGES */
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+        .badge-active { background: #dcfce7; color: #15803d; }
+        .badge-inactive { background: #fee2e2; color: #991b1b; }
 
-        .tabs {
-            background: transparent;
-            box-shadow: none;
-            gap: 10px;
-            padding: 0;
-            margin-bottom: 1.5rem;
-        }
-
-        .tab-btn {
-            background: white;
-            color: var(--gray);
-            border: 1px solid transparent;
-            box-shadow: var(--shadow-lg);
-            border-radius: 10px;
-            padding: 1rem 1.5rem;
-            flex: 1;
-            min-width: 140px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .tab-btn i { font-size: 1.5rem; margin-bottom: 5px; }
-
-        .tab-btn.active {
-            background: var(--primary);
-            color: white;
-            transform: translateY(-3px);
-            border-bottom: 4px solid var(--accent);
-        }
-
-        .tab-content {
-            background: white;
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: var(--shadow-lg);
-            animation: fadeIn 0.4s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .table-container { border-radius: 10px; overflow: hidden; box-shadow: 0 0 0 1px #e2e8f0; }
-        .data-table th { background: #f1f5f9; color: var(--primary); font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px; }
-        .data-table tr:last-child td { border-bottom: none; }
-        
-        .modal { backdrop-filter: blur(5px); }
-        .modal-content { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border-radius: 15px; border-top: 5px solid var(--primary); }
-
-        .badge { background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
-        
-        .panel-container { display: none; padding-bottom: 3rem; }
-
-        .form-group label { color: var(--dark); font-weight: 600; font-size: 0.9rem; margin-bottom: 0.4rem; }
-        /* padding aquí es para los inputs del modal, no del login */
-        .form-control { border: 1px solid #cbd5e1; border-radius: 8px; } 
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
     <div id="loginContainer" class="login-wrapper">
         <div class="login-card">
-            <div class="login-header">
-                <div class="login-icon">
-                    <i class="fas fa-university"></i>
-                </div>
-                <h2>Bienvenido</h2>
-                <p>Sistema de Gestión del Bot - Info EMI</p>
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <div class="login-icon"><i class="fas fa-university"></i></div>
+                <h2 style="color:var(--primary); font-weight:600;">Bienvenido</h2>
+                <p style="color:var(--text-light); font-size:0.9rem;">Sistema de Gestión - Info EMI</p>
             </div>
             
-            <div class="alert alert-error" id="loginMessage" style="display: none; margin-bottom: 1.5rem; font-size: 0.9rem; border-radius: 8px; color: var(--danger); background: #fee2e2; padding: 10px;"></div>
+            <div id="loginMessage" style="display:none; padding:10px; background:#fee2e2; color:var(--danger); border-radius:8px; margin-bottom:1rem; font-size:0.9rem;"></div>
             
             <div class="input-group">
-                <label for="username">Usuario Institucional</label>
+                <label>Usuario Institucional</label>
                 <div class="input-wrapper">
                     <i class="fas fa-user"></i>
-                    <input type="text" id="username" class="form-control" placeholder="Ej: admin">
+                    <input type="text" id="username" class="form-control-login" placeholder="Ej: admin">
                 </div>
             </div>
-
             <div class="input-group">
-                <label for="password">Contraseña</label>
+                <label>Contraseña</label>
                 <div class="input-wrapper">
                     <i class="fas fa-lock"></i>
-                    <input type="password" id="password" class="form-control" placeholder="••••••••">
+                    <input type="password" id="password" class="form-control-login" placeholder="••••••••">
                 </div>
             </div>
-
-            <button id="loginBtn" class="btn-login">
-                <span>Ingresar al Sistema</span>
-                <i class="fas fa-arrow-right"></i>
-            </button>
-
-            <div class="login-footer">
-                <p>&copy; 2025 Escuela Militar de Ingeniería<br>UEyBU</p>
+            <button id="loginBtn" class="btn-login">Ingresar al Sistema <i class="fas fa-arrow-right"></i></button>
+            <div style="text-align:center; margin-top:2rem; font-size:0.8rem; color:var(--text-light); border-top:1px solid #e2e8f0; padding-top:1rem;">
+                &copy; 2025 Escuela Militar de Ingeniería<br>UEyBU
             </div>
         </div>
     </div>
-    
-    <div id="panelContainer" class="panel-container">
-        <div class="container">
-            <div class="header">
-                <h1>
-                    <i class="fas fa-robot" style="color: var(--accent);"></i>
-                    <div>
-                        Administración Info EMI
-                        <small style="display: block; font-size: 0.85rem; color: var(--gray); font-weight: normal; margin-top: 2px;">
-                            Panel de Control y Gestión de Contenido
-                        </small>
-                    </div>
-                </h1>
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <div style="text-align: right;">
-                        <small style="color: var(--gray); display: block;">Usuario conectado</small>
-                        <span id="userWelcome" style="font-weight: 600; color: var(--primary);">Admin</span>
-                    </div>
-                    <button id="logoutBtn" class="btn btn-danger">
-                        <i class="fas fa-sign-out-alt"></i> Salir
-                    </button>
+
+    <div id="panelContainer" class="dashboard-layout" style="display: none;">
+        
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-robot"></i>
+                <div>
+                    <h2>Info EMI</h2>
+                    <span>Panel Admin</span>
                 </div>
             </div>
             
-            <div class="tabs">
-                <button class="tab-btn active" data-tab="dashboard">
-                    <i class="fas fa-chart-pie"></i> Dashboard
+            <nav class="sidebar-nav">
+                <button class="nav-item active" onclick="switchTab('dashboard')">
+                    <i class="fas fa-chart-pie" style="width:20px;"></i> Dashboard
                 </button>
-                <button class="tab-btn" data-tab="careers">
-                    <i class="fas fa-graduation-cap"></i> Carreras
+                <button class="nav-item" onclick="switchTab('careers')">
+                    <i class="fas fa-graduation-cap" style="width:20px;"></i> Carreras
                 </button>
-                <button class="tab-btn" data-tab="preuniversity">
-                    <i class="fas fa-book-open"></i> Preuniversitarios
+                <button class="nav-item" onclick="switchTab('preuniversity')">
+                    <i class="fas fa-book-open" style="width:20px;"></i> Preuniversitarios
                 </button>
-                <button class="tab-btn" data-tab="events">
-                    <i class="fas fa-calendar-alt"></i> Eventos
+                <button class="nav-item" onclick="switchTab('events')">
+                    <i class="fas fa-calendar-alt" style="width:20px;"></i> Eventos
                 </button>
-                <button class="tab-btn" data-tab="faqs">
-                    <i class="fas fa-question-circle"></i> FAQs
+                <button class="nav-item" onclick="switchTab('faqs')">
+                    <i class="fas fa-question-circle" style="width:20px;"></i> FAQs
                 </button>
-                <button class="tab-btn" data-tab="contacts">
-                    <i class="fas fa-address-book"></i> Contactos
+                <button class="nav-item" onclick="switchTab('contacts')">
+                    <i class="fas fa-address-book" style="width:20px;"></i> Contactos
                 </button>
-                <button class="tab-btn" data-tab="scholarships">
-                    <i class="fas fa-hand-holding-usd"></i> Becas
+                <button class="nav-item" onclick="switchTab('scholarships')">
+                    <i class="fas fa-hand-holding-usd" style="width:20px;"></i> Becas
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar"><i class="fas fa-user"></i></div>
+                    <div>
+                        <div style="font-weight:600; font-size:0.9rem;" id="userWelcome">Admin</div>
+                        <div style="font-size:0.75rem; opacity:0.7;">Conectado</div>
+                    </div>
+                </div>
+                <button id="logoutBtn" class="btn btn-danger" style="width:100%; justify-content:center;">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
                 </button>
             </div>
+        </aside>
 
-            <div id="dashboard" class="tab-content active">
-                <div style="text-align: center; padding: 3rem;">
-                    <i class="fas fa-robot" style="font-size: 4rem; color: var(--gray); margin-bottom: 1rem; opacity: 0.3;"></i>
-                    <h3 style="color: var(--primary);">Bienvenido al Panel de Administración</h3>
-                    <p style="color: var(--gray);">Selecciona una opción del menú superior para comenzar a gestionar el contenido de tu bot.</p>
+        <main class="main-content">
+            <div class="top-bar">
+                <div class="page-title">
+                    <h1 id="pageTitle">Dashboard</h1>
                 </div>
-                <div class="stats-grid" id="statsContainer" style="margin-top: 2rem;"></div>
             </div>
 
-            <div id="careers" class="tab-content">
-                <div class="tab-header">
-                    <h3><i class="fas fa-graduation-cap" style="color: var(--primary);"></i> Gestión de Carreras</h3>
-                    <button class="btn btn-success" onclick="openCareerModal()">
-                        <i class="fas fa-plus"></i> Nueva Carrera
-                    </button>
+            <div id="dashboard" class="content-card active">
+                <div style="text-align: center; padding: 4rem 2rem;">
+                    <div style="background:#f1f5f9; width:80px; height:80px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; margin-bottom:1.5rem;">
+                        <i class="fas fa-robot" style="font-size: 2.5rem; color: var(--primary);"></i>
+                    </div>
+                    <h2 style="color:var(--primary); margin-bottom:0.5rem;">¡Bienvenido al Panel de Administración!</h2>
+                    <p style="color:var(--text-light); max-width:500px; margin:0 auto;">Selecciona una opción del menú lateral para gestionar el contenido del bot de Telegram de la universidad.</p>
                 </div>
-                <div class="table-container">
+            </div>
+
+            <div id="careers" class="content-card">
+                <div class="card-header">
+                    <h3>Gestión de Carreras</h3>
+                    <button class="btn btn-success" onclick="openCareerModal()"><i class="fas fa-plus"></i> Nueva Carrera</button>
+                </div>
+                <div class="table-responsive">
                     <table class="data-table">
                         <thead><tr><th>Código</th><th>Nombre</th><th>Facultad</th><th>Estado</th><th>Acciones</th></tr></thead>
                         <tbody id="careersTableBody"></tbody>
@@ -432,14 +381,12 @@
                 </div>
             </div>
 
-            <div id="events" class="tab-content">
-                <div class="tab-header">
-                    <h3><i class="fas fa-calendar-alt" style="color: var(--primary);"></i> Gestión de Eventos</h3>
-                    <button class="btn btn-success" onclick="openEventModal()">
-                        <i class="fas fa-plus"></i> Nuevo Evento
-                    </button>
+            <div id="events" class="content-card">
+                <div class="card-header">
+                    <h3>Gestión de Eventos</h3>
+                    <button class="btn btn-success" onclick="openEventModal()"><i class="fas fa-plus"></i> Nuevo Evento</button>
                 </div>
-                <div class="table-container">
+                <div class="table-responsive">
                     <table class="data-table">
                         <thead><tr><th>Fecha</th><th>Título</th><th>Lugar</th><th>Acciones</th></tr></thead>
                         <tbody id="eventsTableBody"></tbody>
@@ -447,12 +394,12 @@
                 </div>
             </div>
 
-            <div id="preuniversity" class="tab-content">
-                <div class="tab-header">
-                    <h3><i class="fas fa-book-open" style="color: var(--primary);"></i> Gestión de Preuniversitarios</h3>
+            <div id="preuniversity" class="content-card">
+                <div class="card-header">
+                    <h3>Gestión de Preuniversitarios</h3>
                     <button class="btn btn-success" onclick="openPreuModal()"><i class="fas fa-plus"></i> Nuevo Curso</button>
                 </div>
-                <div class="table-container">
+                <div class="table-responsive">
                     <table class="data-table">
                         <thead><tr><th>Programa</th><th>Duración</th><th>Costo</th><th>Inicio</th><th>Acciones</th></tr></thead>
                         <tbody id="preuTableBody"></tbody>
@@ -460,12 +407,12 @@
                 </div>
             </div>
 
-            <div id="faqs" class="tab-content">
-                <div class="tab-header">
-                    <h3><i class="fas fa-question-circle" style="color: var(--primary);"></i> Gestión de FAQs</h3>
+            <div id="faqs" class="content-card">
+                <div class="card-header">
+                    <h3>Preguntas Frecuentes</h3>
                     <button class="btn btn-success" onclick="openFaqModal()"><i class="fas fa-plus"></i> Nueva Pregunta</button>
                 </div>
-                <div class="table-container">
+                <div class="table-responsive">
                     <table class="data-table">
                         <thead><tr><th>Pregunta</th><th>Categoría</th><th>Prioridad</th><th>Acciones</th></tr></thead>
                         <tbody id="faqsTableBody"></tbody>
@@ -473,12 +420,12 @@
                 </div>
             </div>
 
-            <div id="contacts" class="tab-content">
-                <div class="tab-header">
-                    <h3><i class="fas fa-address-book" style="color: var(--primary);"></i> Gestión de Contactos</h3>
+            <div id="contacts" class="content-card">
+                <div class="card-header">
+                    <h3>Directorio de Contactos</h3>
                     <button class="btn btn-success" onclick="openContactModal()"><i class="fas fa-plus"></i> Nuevo Contacto</button>
                 </div>
-                <div class="table-container">
+                <div class="table-responsive">
                     <table class="data-table">
                         <thead><tr><th>Departamento</th><th>Teléfono</th><th>Email</th><th>Acciones</th></tr></thead>
                         <tbody id="contactsTableBody"></tbody>
@@ -486,330 +433,318 @@
                 </div>
             </div>
 
-            <div id="scholarships" class="tab-content">
-                <div class="tab-header">
-                    <h3><i class="fas fa-hand-holding-usd" style="color: var(--primary);"></i> Gestión de Becas</h3>
+            <div id="scholarships" class="content-card">
+                <div class="card-header">
+                    <h3>Gestión de Becas</h3>
                     <button class="btn btn-success" onclick="openScholarshipModal()"><i class="fas fa-plus"></i> Nueva Beca</button>
                 </div>
-                <div class="table-container">
+                <div class="table-responsive">
                     <table class="data-table">
                         <thead><tr><th>Nombre</th><th>Cobertura</th><th>Deadline</th><th>Acciones</th></tr></thead>
                         <tbody id="scholarshipsTableBody"></tbody>
                     </table>
                 </div>
             </div>
-        </div>
-    </div> 
-    
-    <div id="crudModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center;">
-        <div class="modal-content" style="background: white; padding: 2rem; border-radius: 15px; width: 95%; max-width: 550px; max-height: 90vh; overflow-y: auto; border-top: 6px solid var(--primary);">
+
+        </main>
+    </div>
+
+    <div id="crudModal" class="modal">
+        <div class="modal-content">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-                <h2 id="modalTitle" style="color: var(--primary); font-size: 1.4rem;">Título Modal</h2>
-                <button type="button" onclick="closeModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray);">&times;</button>
+                <h2 id="modalTitle" style="color: var(--primary); font-size: 1.3rem;">Título Modal</h2>
+                <button type="button" onclick="closeModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-light);">&times;</button>
             </div>
             
             <form id="crudForm">
-                <div id="modalFields" class="form-grid">
-                    </div>
-                <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end; border-top: 1px solid #f1f5f9; padding-top: 1rem;">
-                    <button type="button" class="btn btn-danger" onclick="closeModal()" style="background: white; border: 1px solid var(--danger); color: var(--danger);">Cancelar</button>
-                    <button type="submit" class="btn btn-success">Guardar Cambios</button>
+                <div id="modalFields"></div>
+                <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end; padding-top: 1rem; border-top: 1px solid #f1f5f9;">
+                    <button type="button" class="btn btn-danger" onclick="closeModal()" style="background:white; border:1px solid var(--danger); color:var(--danger);">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Guardar</button>
                 </div>
             </form>
         </div>
     </div>
 
     <script>
-    // --- CONFIGURACIÓN Y UTILIDADES ---
     const API_URL = '/api';
-    let currentMode = 'create'; // 'create' o 'edit'
+    let currentMode = 'create';
     let currentId = null;
-    let currentSection = '';
+    let currentSection = 'dashboard';
 
-    // Función auxiliar para hacer peticiones con el Token
+    // --- MANEJO DE PESTAÑAS (SIDEBAR) ---
+    function switchTab(tabId) {
+        // Actualizar menú
+        document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+        const activeBtn = document.querySelector(`button[onclick="switchTab('${tabId}')"]`);
+        if(activeBtn) activeBtn.classList.add('active');
+
+        // Actualizar contenido
+        document.querySelectorAll('.content-card').forEach(card => card.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        
+        // Actualizar título
+        const titles = {
+            'dashboard': 'Dashboard',
+            'careers': 'Gestión de Carreras',
+            'preuniversity': 'Preuniversitarios',
+            'events': 'Eventos',
+            'faqs': 'Preguntas Frecuentes',
+            'contacts': 'Contactos',
+            'scholarships': 'Becas'
+        };
+        document.getElementById('pageTitle').innerText = titles[tabId];
+        currentSection = tabId;
+
+        // Cargar datos automáticamente
+        if (tabId === 'careers') loadCareers();
+        if (tabId === 'events') loadEvents();
+        if (tabId === 'preuniversity') loadPreuniversity();
+        if (tabId === 'faqs') loadFaqs();
+        if (tabId === 'contacts') loadContacts();
+        if (tabId === 'scholarships') loadScholarships();
+    }
+
+    // --- API & AUTH ---
     async function apiFetch(endpoint, options = {}) {
         const token = localStorage.getItem('auth_token');
-        if (!token) {
-            logout();
-            return;
-        }
-
-        const defaultHeaders = {
+        if (!token) { logout(); return; }
+        
+        const headers = {
             'Authorization': `Basic ${token}`,
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            ...options.headers
         };
 
-        options.headers = { ...defaultHeaders, ...options.headers };
-
-        const response = await fetch(endpoint, options);
-        
-        if (response.status === 401) {
-            alert("Sesión expirada");
-            logout();
+        try {
+            const response = await fetch(endpoint, { ...options, headers });
+            if (response.status === 401) { logout(); return null; }
+            return response;
+        } catch (e) {
+            console.error(e);
             return null;
         }
-        return response;
     }
 
-    // --- LÓGICA DE LOGIN ---
-    const loginContainer = document.getElementById('loginContainer');
-    const panelContainer = document.getElementById('panelContainer');
-    
-    // --- GESTIÓN DE CARRERAS ---
+    // --- LOAD FUNCTIONS ---
     async function loadCareers() {
-        const response = await apiFetch(`${API_URL}/careers?active_only=false`);
-        if (!response) return;
-        const careers = await response.json();
-        
+        const res = await apiFetch(`${API_URL}/careers?active_only=false`);
+        if(!res) return;
+        const data = await res.json();
         const tbody = document.getElementById('careersTableBody');
-        tbody.innerHTML = '';
-
-        careers.forEach(c => {
-            tbody.innerHTML += `
-                <tr>
-                    <td><b>${c.code}</b></td>
-                    <td>${c.name}</td>
-                    <td>${c.faculty || '-'}</td>
-                    <td><span class="badge" style="background: ${c.is_active ? '#dcfce7' : '#fee2e2'}; color: ${c.is_active ? '#166534' : '#991b1b'}">${c.is_active ? 'Activo' : 'Inactivo'}</span></td>
-                    <td class="actions">
-                        <button class="action-btn action-edit" onclick='openCareerModal(${JSON.stringify(c)})'><i class="fas fa-edit"></i></button>
-                        <button class="action-btn action-delete" onclick="deleteItem('careers', ${c.id})"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>
-            `;
-        });
+        tbody.innerHTML = data.map(c => `
+            <tr>
+                <td><span style="font-weight:600; color:var(--primary)">${c.code}</span></td>
+                <td>${c.name}</td>
+                <td>${c.faculty || '-'}</td>
+                <td><span class="badge ${c.is_active ? 'badge-active' : 'badge-inactive'}">${c.is_active ? 'Activo' : 'Inactivo'}</span></td>
+                <td class="actions">
+                    <button class="action-btn action-edit" onclick='openCareerModal(${JSON.stringify(c)})'><i class="fas fa-edit"></i></button>
+                    <button class="action-btn action-delete" onclick="deleteItem('careers', ${c.id})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        `).join('');
     }
 
-    function openCareerModal(career = null) {
-        currentSection = 'careers';
-        setupModal(career, 'Carrera', `
-            <div class="form-group"><label>Código *</label><input type="text" name="code" class="form-control" required value="${career ? career.code : ''}"></div>
-            <div class="form-group"><label>Nombre *</label><input type="text" name="name" class="form-control" required value="${career ? career.name : ''}"></div>
-            <div class="form-group"><label>Facultad</label><input type="text" name="faculty" class="form-control" value="${career ? career.faculty : ''}"></div>
-            <div class="form-group"><label>Duración</label><input type="text" name="duration" class="form-control" value="${career ? career.duration : ''}"></div>
-            <div class="form-group"><label>Costo</label><input type="number" name="cost" class="form-control" value="${career ? career.cost : ''}"></div>
-            <div class="form-group" style="grid-column: 1/-1;"><label>Descripción</label><textarea name="description" class="form-control">${career ? career.description : ''}</textarea></div>
-        `, career ? career.id : null);
-    }
-
-    // --- GESTIÓN DE EVENTOS ---
     async function loadEvents() {
-        const response = await apiFetch(`${API_URL}/events?upcoming_only=false`);
-        if (!response) return;
-        const events = await response.json();
-        
-        const tbody = document.getElementById('eventsTableBody');
-        tbody.innerHTML = '';
-        
-        events.forEach(e => {
-            tbody.innerHTML += `
-                <tr>
-                    <td>${e.date}</td>
-                    <td><b>${e.title}</b></td>
-                    <td><i class="fas fa-map-marker-alt" style="color:var(--gray);"></i> ${e.location || '-'}</td>
-                    <td class="actions">
-                        <button class="action-btn action-edit" onclick='openEventModal(${JSON.stringify(e)})'><i class="fas fa-edit"></i></button>
-                        <button class="action-btn action-delete" onclick="deleteItem('events', ${e.id})"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>
-            `;
-        });
+        const res = await apiFetch(`${API_URL}/events?upcoming_only=false`);
+        if(!res) return;
+        const data = await res.json();
+        document.getElementById('eventsTableBody').innerHTML = data.map(e => `
+            <tr>
+                <td>${e.date}</td>
+                <td><strong>${e.title}</strong></td>
+                <td>${e.location || '-'}</td>
+                <td class="actions">
+                    <button class="action-btn action-edit" onclick='openEventModal(${JSON.stringify(e)})'><i class="fas fa-edit"></i></button>
+                    <button class="action-btn action-delete" onclick="deleteItem('events', ${e.id})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        `).join('');
     }
 
-    function openEventModal(event = null) {
-        currentSection = 'events';
-        setupModal(event, 'Evento', `
-            <div class="form-group"><label>Título del Evento *</label><input type="text" name="title" class="form-control" required value="${event ? event.title : ''}"></div>
-            <div class="form-group"><label>Tipo de Evento</label>
-                <select name="event_type" class="form-control">
-                    <option value="academico" ${event && event.event_type === 'academico' ? 'selected' : ''}>Académico</option>
-                    <option value="cultural" ${event && event.event_type === 'cultural' ? 'selected' : ''}>Cultural</option>
-                    <option value="deportivo" ${event && event.event_type === 'deportivo' ? 'selected' : ''}>Deportivo</option>
-                    <option value="conferencia" ${event && event.event_type === 'conferencia' ? 'selected' : ''}>Conferencia</option>
-                    <option value="otro" ${event && event.event_type === 'otro' ? 'selected' : ''}>Otro</option>
-                </select>
-            </div>
-            <div class="form-group"><label>Fecha *</label><input type="date" name="date" class="form-control" required value="${event ? event.date : ''}"></div>
-            <div style="display: flex; gap: 10px; grid-column: 1/-1;">
-                <div class="form-group" style="flex: 1;"><label>Hora Inicio</label><input type="time" name="start_time" class="form-control" value="${event ? event.start_time : ''}"></div>
-                <div class="form-group" style="flex: 1;"><label>Hora Fin</label><input type="time" name="end_time" class="form-control" value="${event ? event.end_time : ''}"></div>
-            </div>
-            <div class="form-group" style="grid-column: 1/-1;"><label>Lugar / Ubicación</label><input type="text" name="location" class="form-control" value="${event ? event.location : ''}"></div>
-            <div class="form-group" style="grid-column: 1/-1;"><label>Descripción</label><textarea name="description" class="form-control" placeholder="Detalles del evento...">${event ? event.description : ''}</textarea></div>
-        `, event ? event.id : null);
-    }
-
-    // --- RESTO DE FUNCIONES (Preu, FAQs, etc) ---
     async function loadPreuniversity() {
-        const response = await apiFetch(`${API_URL}/preuniversity?active_only=false`);
-        if (!response) return;
-        const data = await response.json();
-        const tbody = document.getElementById('preuTableBody');
-        tbody.innerHTML = '';
-        data.forEach(item => {
-            tbody.innerHTML += `<tr>
-                <td>${item.program_name}</td>
-                <td>${item.duration || '-'}</td>
-                <td>${item.cost || '-'}</td>
-                <td>${item.start_date || '-'}</td>
+        const res = await apiFetch(`${API_URL}/preuniversity?active_only=false`);
+        if(!res) return;
+        const data = await res.json();
+        document.getElementById('preuTableBody').innerHTML = data.map(i => `
+            <tr>
+                <td><strong>${i.program_name}</strong></td>
+                <td>${i.duration || '-'}</td>
+                <td>${i.cost || '-'}</td>
+                <td>${i.start_date || '-'}</td>
                 <td class="actions">
-                    <button class="action-btn action-edit" onclick='openPreuModal(${JSON.stringify(item)})'><i class="fas fa-edit"></i></button>
-                    <button class="action-btn action-delete" onclick="deleteItem('preuniversity', ${item.id})"><i class="fas fa-trash"></i></button>
+                    <button class="action-btn action-edit" onclick='openPreuModal(${JSON.stringify(i)})'><i class="fas fa-edit"></i></button>
+                    <button class="action-btn action-delete" onclick="deleteItem('preuniversity', ${i.id})"><i class="fas fa-trash"></i></button>
                 </td>
-            </tr>`;
-        });
-    }
-    function openPreuModal(item = null) {
-        currentSection = 'preuniversity';
-        setupModal(item, 'Curso Preuniversitario', `
-            <div class="form-group"><label>Nombre Programa *</label><input type="text" name="program_name" class="form-control" required value="${item ? item.program_name : ''}"></div>
-            <div class="form-group" style="grid-column: 1/-1;"><label>Descripción</label><textarea name="description" class="form-control">${item ? item.description : ''}</textarea></div>
-            <div style="display:flex; gap:10px; grid-column: 1/-1;">
-                <div class="form-group" style="flex:1"><label>Fecha Inicio</label><input type="date" name="start_date" class="form-control" value="${item ? item.start_date : ''}"></div>
-                <div class="form-group" style="flex:1"><label>Fecha Fin</label><input type="date" name="end_date" class="form-control" value="${item ? item.end_date : ''}"></div>
-            </div>
-            <div class="form-group"><label>Costo</label><input type="number" name="cost" class="form-control" value="${item ? item.cost : ''}"></div>
-        `, item ? item.id : null);
-    }
-    async function loadFaqs() {
-        const response = await apiFetch(`${API_URL}/faqs?active_only=false`);
-        if (!response) return;
-        const data = await response.json();
-        const tbody = document.getElementById('faqsTableBody');
-        tbody.innerHTML = '';
-        data.forEach(item => {
-            tbody.innerHTML += `<tr>
-                <td>${item.question}</td>
-                <td><span class="badge" style="background:#eff6ff; color:#1e40af">${item.category || 'General'}</span></td>
-                <td>${item.priority}</td>
-                <td class="actions">
-                    <button class="action-btn action-edit" onclick='openFaqModal(${JSON.stringify(item)})'><i class="fas fa-edit"></i></button>
-                    <button class="action-btn action-delete" onclick="deleteItem('faqs', ${item.id})"><i class="fas fa-trash"></i></button>
-                </td>
-            </tr>`;
-        });
-    }
-    function openFaqModal(item = null) {
-        currentSection = 'faqs';
-        setupModal(item, 'FAQ', `
-            <div class="form-group" style="grid-column: 1/-1;"><label>Pregunta *</label><input type="text" name="question" class="form-control" required value="${item ? item.question : ''}"></div>
-            <div class="form-group" style="grid-column: 1/-1;"><label>Respuesta *</label><textarea name="answer" class="form-control" required>${item ? item.answer : ''}</textarea></div>
-            <div class="form-group"><label>Categoría</label><input type="text" name="category" class="form-control" value="${item ? item.category : ''}"></div>
-            <div class="form-group"><label>Prioridad</label><input type="number" name="priority" class="form-control" value="${item ? item.priority : 1}"></div>
-        `, item ? item.id : null);
-    }
-    async function loadContacts() {
-        const response = await apiFetch(`${API_URL}/contacts?active_only=false`);
-        if (!response) return;
-        const data = await response.json();
-        const tbody = document.getElementById('contactsTableBody');
-        tbody.innerHTML = '';
-        data.forEach(item => {
-            tbody.innerHTML += `<tr>
-                <td><b>${item.department}</b></td>
-                <td>${item.phone || '-'}</td>
-                <td>${item.email || '-'}</td>
-                <td class="actions">
-                    <button class="action-btn action-edit" onclick='openContactModal(${JSON.stringify(item)})'><i class="fas fa-edit"></i></button>
-                    <button class="action-btn action-delete" onclick="deleteItem('contacts', ${item.id})"><i class="fas fa-trash"></i></button>
-                </td>
-            </tr>`;
-        });
-    }
-    function openContactModal(item = null) {
-        currentSection = 'contacts';
-        setupModal(item, 'Contacto', `
-            <div class="form-group"><label>Departamento *</label><input type="text" name="department" class="form-control" required value="${item ? item.department : ''}"></div>
-            <div class="form-group"><label>Teléfono</label><input type="text" name="phone" class="form-control" value="${item ? item.phone : ''}"></div>
-            <div class="form-group"><label>Email</label><input type="email" name="email" class="form-control" value="${item ? item.email : ''}"></div>
-            <div class="form-group"><label>Oficina</label><input type="text" name="office" class="form-control" value="${item ? item.office : ''}"></div>
-        `, item ? item.id : null);
-    }
-    async function loadScholarships() {
-        const response = await apiFetch(`${API_URL}/scholarships?active_only=false`);
-        if (!response) return;
-        const data = await response.json();
-        const tbody = document.getElementById('scholarshipsTableBody');
-        tbody.innerHTML = '';
-        data.forEach(item => {
-            tbody.innerHTML += `<tr>
-                <td><b>${item.name}</b></td>
-                <td>${item.coverage || '-'}</td>
-                <td>${item.deadline || '-'}</td>
-                <td class="actions">
-                    <button class="action-btn action-edit" onclick='openScholarshipModal(${JSON.stringify(item)})'><i class="fas fa-edit"></i></button>
-                    <button class="action-btn action-delete" onclick="deleteItem('scholarships', ${item.id})"><i class="fas fa-trash"></i></button>
-                </td>
-            </tr>`;
-        });
-    }
-    function openScholarshipModal(item = null) {
-        currentSection = 'scholarships';
-        setupModal(item, 'Beca', `
-            <div class="form-group"><label>Nombre Beca *</label><input type="text" name="name" class="form-control" required value="${item ? item.name : ''}"></div>
-            <div class="form-group" style="grid-column: 1/-1;"><label>Descripción</label><textarea name="description" class="form-control">${item ? item.description : ''}</textarea></div>
-            <div class="form-group"><label>Cobertura</label><input type="text" name="coverage" class="form-control" value="${item ? item.coverage : ''}"></div>
-            <div class="form-group"><label>Fecha Límite</label><input type="date" name="deadline" class="form-control" value="${item ? item.deadline : ''}"></div>
-        `, item ? item.id : null);
+            </tr>
+        `).join('');
     }
 
-    // --- UTILS ---
-    function setupModal(item, title, htmlFields, id) {
-        const fields = document.getElementById('modalFields');
-        const modalTitle = document.getElementById('modalTitle');
-        const modal = document.getElementById('crudModal');
-        
-        modalTitle.innerText = item ? `Editar ${title}` : `Nueva ${title}`;
+    async function loadFaqs() {
+        const res = await apiFetch(`${API_URL}/faqs?active_only=false`);
+        if(!res) return;
+        const data = await res.json();
+        document.getElementById('faqsTableBody').innerHTML = data.map(i => `
+            <tr>
+                <td>${i.question}</td>
+                <td><span class="badge" style="background:#eff6ff; color:#1d4ed8">${i.category || 'General'}</span></td>
+                <td>${i.priority}</td>
+                <td class="actions">
+                    <button class="action-btn action-edit" onclick='openFaqModal(${JSON.stringify(i)})'><i class="fas fa-edit"></i></button>
+                    <button class="action-btn action-delete" onclick="deleteItem('faqs', ${i.id})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    async function loadContacts() {
+        const res = await apiFetch(`${API_URL}/contacts?active_only=false`);
+        if(!res) return;
+        const data = await res.json();
+        document.getElementById('contactsTableBody').innerHTML = data.map(i => `
+            <tr>
+                <td><strong>${i.department}</strong></td>
+                <td>${i.phone || '-'}</td>
+                <td>${i.email || '-'}</td>
+                <td class="actions">
+                    <button class="action-btn action-edit" onclick='openContactModal(${JSON.stringify(i)})'><i class="fas fa-edit"></i></button>
+                    <button class="action-btn action-delete" onclick="deleteItem('contacts', ${i.id})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    async function loadScholarships() {
+        const res = await apiFetch(`${API_URL}/scholarships?active_only=false`);
+        if(!res) return;
+        const data = await res.json();
+        document.getElementById('scholarshipsTableBody').innerHTML = data.map(i => `
+            <tr>
+                <td><strong>${i.name}</strong></td>
+                <td>${i.coverage || '-'}</td>
+                <td>${i.deadline || '-'}</td>
+                <td class="actions">
+                    <button class="action-btn action-edit" onclick='openScholarshipModal(${JSON.stringify(i)})'><i class="fas fa-edit"></i></button>
+                    <button class="action-btn action-delete" onclick="deleteItem('scholarships', ${i.id})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // --- MODALS ---
+    function setupModal(item, title, html, id) {
+        document.getElementById('modalTitle').innerText = item ? `Editar ${title}` : `Nueva ${title}`;
+        document.getElementById('modalFields').innerHTML = html;
         currentMode = item ? 'edit' : 'create';
         currentId = id;
-        fields.innerHTML = htmlFields;
-        modal.style.display = 'flex';
+        document.getElementById('crudModal').style.display = 'flex';
     }
 
-    // --- GUARDAR ---
+    function openCareerModal(c=null) {
+        currentSection = 'careers';
+        setupModal(c, 'Carrera', `
+            <div class="form-group"><label>Código</label><input class="form-control" name="code" value="${c?.code||''}" required></div>
+            <div class="form-group"><label>Nombre</label><input class="form-control" name="name" value="${c?.name||''}" required></div>
+            <div class="form-group"><label>Facultad</label><input class="form-control" name="faculty" value="${c?.faculty||''}"></div>
+            <div class="form-group"><label>Duración</label><input class="form-control" name="duration" value="${c?.duration||''}"></div>
+            <div class="form-group"><label>Costo</label><input type="number" class="form-control" name="cost" value="${c?.cost||''}"></div>
+            <div class="form-group"><label>Descripción</label><textarea class="form-control" name="description">${c?.description||''}</textarea></div>
+        `, c?.id);
+    }
+
+    function openEventModal(e=null) {
+        currentSection = 'events';
+        setupModal(e, 'Evento', `
+            <div class="form-group"><label>Título</label><input class="form-control" name="title" value="${e?.title||''}" required></div>
+            <div class="form-group"><label>Tipo</label>
+                <select name="event_type" class="form-control">
+                    <option value="academico" ${e?.event_type==='academico'?'selected':''}>Académico</option>
+                    <option value="cultural" ${e?.event_type==='cultural'?'selected':''}>Cultural</option>
+                    <option value="deportivo" ${e?.event_type==='deportivo'?'selected':''}>Deportivo</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Fecha</label><input type="date" class="form-control" name="date" value="${e?.date||''}" required></div>
+            <div style="display:flex; gap:10px;">
+                <div class="form-group" style="flex:1"><label>Inicio</label><input type="time" class="form-control" name="start_time" value="${e?.start_time||''}"></div>
+                <div class="form-group" style="flex:1"><label>Fin</label><input type="time" class="form-control" name="end_time" value="${e?.end_time||''}"></div>
+            </div>
+            <div class="form-group"><label>Lugar</label><input class="form-control" name="location" value="${e?.location||''}"></div>
+            <div class="form-group"><label>Descripción</label><textarea class="form-control" name="description">${e?.description||''}</textarea></div>
+        `, e?.id);
+    }
+
+    function openPreuModal(i=null) {
+        currentSection = 'preuniversity';
+        setupModal(i, 'Programa', `
+            <div class="form-group"><label>Nombre</label><input class="form-control" name="program_name" value="${i?.program_name||''}" required></div>
+            <div class="form-group"><label>Descripción</label><textarea class="form-control" name="description">${i?.description||''}</textarea></div>
+            <div style="display:flex; gap:10px;">
+                <div class="form-group" style="flex:1"><label>Inicio</label><input type="date" class="form-control" name="start_date" value="${i?.start_date||''}"></div>
+                <div class="form-group" style="flex:1"><label>Fin</label><input type="date" class="form-control" name="end_date" value="${i?.end_date||''}"></div>
+            </div>
+            <div class="form-group"><label>Costo</label><input type="number" class="form-control" name="cost" value="${i?.cost||''}"></div>
+        `, i?.id);
+    }
+
+    function openFaqModal(i=null) {
+        currentSection = 'faqs';
+        setupModal(i, 'FAQ', `
+            <div class="form-group"><label>Pregunta</label><input class="form-control" name="question" value="${i?.question||''}" required></div>
+            <div class="form-group"><label>Respuesta</label><textarea class="form-control" name="answer" required>${i?.answer||''}</textarea></div>
+            <div class="form-group"><label>Categoría</label><input class="form-control" name="category" value="${i?.category||''}"></div>
+            <div class="form-group"><label>Prioridad</label><input type="number" class="form-control" name="priority" value="${i?.priority||1}"></div>
+        `, i?.id);
+    }
+
+    function openContactModal(i=null) {
+        currentSection = 'contacts';
+        setupModal(i, 'Contacto', `
+            <div class="form-group"><label>Departamento</label><input class="form-control" name="department" value="${i?.department||''}" required></div>
+            <div class="form-group"><label>Teléfono</label><input class="form-control" name="phone" value="${i?.phone||''}"></div>
+            <div class="form-group"><label>Email</label><input class="form-control" name="email" value="${i?.email||''}"></div>
+            <div class="form-group"><label>Oficina</label><input class="form-control" name="office" value="${i?.office||''}"></div>
+        `, i?.id);
+    }
+
+    function openScholarshipModal(i=null) {
+        currentSection = 'scholarships';
+        setupModal(i, 'Beca', `
+            <div class="form-group"><label>Nombre</label><input class="form-control" name="name" value="${i?.name||''}" required></div>
+            <div class="form-group"><label>Descripción</label><textarea class="form-control" name="description">${i?.description||''}</textarea></div>
+            <div class="form-group"><label>Cobertura</label><input class="form-control" name="coverage" value="${i?.coverage||''}"></div>
+            <div class="form-group"><label>Límite</label><input type="date" class="form-control" name="deadline" value="${i?.deadline||''}"></div>
+        `, i?.id);
+    }
+
+    // --- CRUD ACTIONS ---
     document.getElementById('crudForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const formData = new FormData(e.target);
-        const data = Object.fromEntries(formData.entries());
+        const data = Object.fromEntries(new FormData(e.target));
         if(data.cost) data.cost = parseFloat(data.cost);
         if(data.priority) data.priority = parseInt(data.priority);
         data.is_active = true;
 
-        let url = currentMode === 'create' ? `${API_URL}/${currentSection}` : `${API_URL}/${currentSection}/${currentId}`;
-        let method = currentMode === 'create' ? 'POST' : 'PUT';
+        const url = `${API_URL}/${currentSection}` + (currentMode==='edit' ? `/${currentId}` : '');
+        const method = currentMode==='edit' ? 'PUT' : 'POST';
 
-        try {
-            const response = await apiFetch(url, { method: method, body: JSON.stringify(data) });
-            if (response && response.ok) {
-                alert('Guardado exitosamente');
-                closeModal();
-                if(currentSection === 'careers') loadCareers();
-                if(currentSection === 'events') loadEvents();
-                if(currentSection === 'preuniversity') loadPreuniversity();
-                if(currentSection === 'faqs') loadFaqs();
-                if(currentSection === 'contacts') loadContacts();
-                if(currentSection === 'scholarships') loadScholarships();
-            } else {
-                const err = await response.json();
-                alert('Error: ' + err.detail);
-            }
-        } catch (error) {
-            console.error(error);
+        const res = await apiFetch(url, { method, body: JSON.stringify(data) });
+        if(res && res.ok) {
+            closeModal();
+            // Recargar automáticamente la sección actual
+            window['load'+currentSection.charAt(0).toUpperCase()+currentSection.slice(1)]();
+            alert('Guardado exitosamente');
+        } else {
             alert('Error al guardar');
         }
     });
 
-    // --- ELIMINAR ---
     async function deleteItem(section, id) {
-        if(!confirm('¿Estás seguro de eliminar este elemento?')) return;
-        const response = await apiFetch(`${API_URL}/${section}/${id}`, { method: 'DELETE' });
-        if (response && response.ok) {
-            if(section === 'careers') loadCareers();
-            if(section === 'events') loadEvents();
-            if(section === 'preuniversity') loadPreuniversity();
-            if(section === 'faqs') loadFaqs();
-            if(section === 'contacts') loadContacts();
-            if(section === 'scholarships') loadScholarships();
+        if(!confirm('¿Eliminar registro?')) return;
+        const res = await apiFetch(`${API_URL}/${section}/${id}`, { method: 'DELETE' });
+        if(res && res.ok) {
+            // Recargar automáticamente
+            window['load'+section.charAt(0).toUpperCase()+section.slice(1)]();
         } else {
             alert('Error al eliminar');
         }
@@ -818,76 +753,36 @@
     function closeModal() { document.getElementById('crudModal').style.display = 'none'; }
     function logout() { localStorage.removeItem('auth_token'); location.reload(); }
 
-    // --- TABS ---
-    document.querySelectorAll('.tab-btn').forEach(button => {
-        button.addEventListener('click', () => {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            button.classList.add('active');
-            const tabId = button.getAttribute('data-tab');
-            document.getElementById(tabId).classList.add('active');
-            
-            if (tabId === 'careers') loadCareers();
-            if (tabId === 'events') loadEvents();
-            if (tabId === 'preuniversity') loadPreuniversity();
-            if (tabId === 'faqs') loadFaqs();
-            if (tabId === 'contacts') loadContacts();
-            if (tabId === 'scholarships') loadScholarships();
-        });
-    });
-
-    // --- LOGIN BTN ---
-    document.getElementById('loginBtn').addEventListener('click', async () => {
-        const user = document.getElementById('username').value;
-        const pass = document.getElementById('password').value;
-        const msgDiv = document.getElementById('loginMessage');
-        const loginBtn = document.getElementById('loginBtn');
-
-        if (!user || !pass) {
-            msgDiv.style.display = 'block';
-            msgDiv.innerText = 'Por favor ingresa usuario y contraseña';
-            return;
-        }
-
-        loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Entrando...';
-        
-        try {
-            const response = await fetch('/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: user, password: pass })
-            });
-
-            const data = await response.json();
-
-            if (response.ok && data.status === 'success') {
-                localStorage.setItem('auth_token', data.token);
-                localStorage.setItem('username', user);
-                document.getElementById('loginContainer').style.display = 'none';
-                document.getElementById('panelContainer').style.display = 'block';
-                document.getElementById('userWelcome').innerText = `${user}`;
-                loadCareers(); // Carga inicial
-            } else {
-                msgDiv.style.display = 'block';
-                msgDiv.innerText = 'Error: ' + (data.detail || 'Credenciales incorrectas');
-                loginBtn.innerHTML = '<span>Ingresar al Sistema</span><i class="fas fa-arrow-right"></i>';
-            }
-        } catch (error) {
-            console.error(error);
-            msgDiv.style.display = 'block';
-            msgDiv.innerText = 'Error al conectar con el servidor';
-            loginBtn.innerHTML = '<span>Ingresar al Sistema</span><i class="fas fa-arrow-right"></i>';
-        }
-    });
-
-    document.getElementById('logoutBtn').addEventListener('click', logout);
-
     // --- INIT ---
+    document.getElementById('loginBtn').addEventListener('click', async () => {
+        const u = document.getElementById('username').value;
+        const p = document.getElementById('password').value;
+        const btn = document.getElementById('loginBtn');
+        
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        
+        const res = await fetch('/api/login', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({username:u, password:p})
+        });
+        const data = await res.json();
+        
+        if(res.ok && data.status==='success') {
+            localStorage.setItem('auth_token', data.token);
+            localStorage.setItem('username', u);
+            location.reload(); 
+        } else {
+            document.getElementById('loginMessage').style.display='block';
+            document.getElementById('loginMessage').innerText = 'Credenciales incorrectas';
+            btn.innerHTML = 'Ingresar';
+        }
+    });
+
     window.addEventListener('DOMContentLoaded', () => {
-        if (localStorage.getItem('auth_token')) {
+        if(localStorage.getItem('auth_token')) {
             document.getElementById('loginContainer').style.display = 'none';
-            document.getElementById('panelContainer').style.display = 'block';
-            document.getElementById('userWelcome').innerText = localStorage.getItem('username') || 'Admin';
+            document.getElementById('panelContainer').style.display = 'flex'; // FLEX layout activado
+            document.getElementById('userWelcome').innerText = localStorage.getItem('username');
         }
     });
     </script>
