@@ -385,9 +385,6 @@
                 <button class="nav-item" onclick="switchTab('scholarships')">
                     <i class="fas fa-hand-holding-usd" style="width:20px;"></i> Becas
                 </button>
-                <button class="nav-item" onclick="switchTab('scholarships')">
-                    <i class="fas fa-hand-holding-usd" style="width:20px;"></i> Becas
-                </button>
                 <button class="nav-item" onclick="switchTab('calendar')">
                     <i class="fas fa-calendar-alt" style="width:20px;"></i> Calendario
                 </button>
@@ -719,22 +716,40 @@
     }
 
     // --- CALENDARIO ---
-    async function loadCalendar() {
-        const res = await apiFetch(`${API_URL}/calendar?active_only=false`);
-        if(!res) return;
-        const data = await res.json();
-        document.getElementById('calendarTableBody').innerHTML = data.map(i => `
-            <tr>
-                <td>${i.start_date}</td>
-                <td><strong>${i.event_name}</strong></td>
-                <td><span class="badge" style="background:#e0f2fe; color:#0369a1">${i.event_type||'General'}</span></td>
-                <td>${i.academic_period||'-'}</td>
-                <td class="actions">
-                    <button class="action-btn action-edit" onclick='openCalendarModal(${JSON.stringify(i)})'><i class="fas fa-edit"></i></button>
-                    <button class="action-btn action-delete" onclick="deleteItem('calendar', ${i.id})"><i class="fas fa-trash"></i></button>
-                </td>
-            </tr>
-        `).join('');
+   async function loadCalendar() {
+        try {
+            const res = await apiFetch(`${API_URL}/calendar?active_only=false`);
+            if(!res) return;
+            const data = await res.json();
+            
+            console.log("Datos Calendario:", data);
+
+            const tbody = document.getElementById('calendarTableBody');
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">No hay eventos registrados</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(i => {
+                const nombre = i.event_name || i.activity || 'Sin Título';
+                const tipo = i.event_type || 'General';
+                const periodo = i.academic_period || '-';
+                
+                return `
+                <tr>
+                    <td>${i.start_date}</td>
+                    <td><strong>${nombre}</strong></td>
+                    <td><span class="badge" style="background:#e0f2fe; color:#0369a1">${tipo}</span></td>
+                    <td>${periodo}</td>
+                    <td class="actions">
+                        <button class="action-btn action-edit" onclick='openCalendarModal(${JSON.stringify(i)})'><i class="fas fa-edit"></i></button>
+                        <button class="action-btn action-delete" onclick="deleteItem('calendar', ${i.id})"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`;
+            }).join('');
+        } catch (error) {
+            console.error("Error cargando calendario:", error);
+        }
     }
 
     function openCalendarModal(i=null) {
@@ -761,20 +776,37 @@
 
     // --- INSCRIPCIONES ---
     async function loadInscriptions() {
-        const res = await apiFetch(`${API_URL}/inscriptions?active_only=false`);
-        if(!res) return;
-        const data = await res.json();
-        document.getElementById('inscriptionsTableBody').innerHTML = data.map(i => `
-            <tr>
-                <td><strong>${i.period}</strong></td>
-                <td>${i.start_date} al ${i.end_date}</td>
-                <td>${i.requirements.substring(0,50)}...</td>
-                <td class="actions">
-                    <button class="action-btn action-edit" onclick='openInscriptionModal(${JSON.stringify(i)})'><i class="fas fa-edit"></i></button>
-                    <button class="action-btn action-delete" onclick="deleteItem('inscriptions', ${i.id})"><i class="fas fa-trash"></i></button>
-                </td>
-            </tr>
-        `).join('');
+        try {
+            const res = await apiFetch(`${API_URL}/inscriptions?active_only=false`);
+            if(!res) return;
+            const data = await res.json();
+            
+            console.log("Datos Inscripciones:", data);
+
+            const tbody = document.getElementById('inscriptionsTableBody');
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">No hay periodos registrados</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(i => {
+                const reqTexto = (i.requirements || '').substring(0, 50) + '...';
+                const periodo = i.period || 'Periodo Desconocido';
+                
+                return `
+                <tr>
+                    <td><strong>${periodo}</strong></td>
+                    <td>${i.start_date} al ${i.end_date}</td>
+                    <td>${reqTexto}</td>
+                    <td class="actions">
+                        <button class="action-btn action-edit" onclick='openInscriptionModal(${JSON.stringify(i)})'><i class="fas fa-edit"></i></button>
+                        <button class="action-btn action-delete" onclick="deleteItem('inscriptions', ${i.id})"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`;
+            }).join('');
+        } catch (error) {
+            console.error("Error cargando inscripciones:", error);
+        }
     }
 
     function openInscriptionModal(i=null) {
