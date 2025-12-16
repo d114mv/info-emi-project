@@ -141,7 +141,7 @@ def format_scholarship(item: dict) -> str:
         text += f"\n📋 <b>Requisitos:</b>\n{item['requirements']}\n"
         
     if item.get('application_link'):
-        text += f"\n🔗 <a href='{item['application_link']}'>Link de aplicación</a>\n"
+        text += f"\n🔗 <a href='{item['application_link']}'>Link de consulta</a>\n"
         
     return text
 
@@ -476,33 +476,28 @@ def handle_career_callback(call):
     career_code = call.data.split('_')[1]
     
     if career_code == "more":
-        # Lógica para mostrar más carreras
         bot.answer_callback_query(call.id, "Función en desarrollo")
         return
     
-    # Obtener datos de todas las carreras
     data = get_api_data("bot/careers")
     
     if not data or 'careers' not in data:
         bot.answer_callback_query(call.id, "Error al obtener información")
         return
     
-    # Buscar la carrera específica
     career = next((c for c in data['careers'] if c['code'] == career_code), None)
     
     if not career:
         bot.answer_callback_query(call.id, "Carrera no encontrada")
         return
     
-    # Formatear y enviar información
     career_text = format_career(career)
     
-    # Agregar botón para más información
     markup = types.InlineKeyboardMarkup()
     markup.add(
         types.InlineKeyboardButton("📞 Contactar Admisiones", callback_data=f"contact_adm_{career_code}")
     )
-    
+
     try:
         bot.edit_message_text(
             chat_id=call.message.chat.id,
