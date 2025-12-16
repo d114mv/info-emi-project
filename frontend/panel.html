@@ -726,13 +726,36 @@
     function openPreuModal(i=null) {
         currentSection = 'preuniversity';
         setupModal(i, 'Programa', `
-            <div class="form-group"><label>Nombre</label><input class="form-control" name="program_name" value="${i?.program_name||''}" required></div>
-            <div class="form-group"><label>Descripción</label><textarea class="form-control" name="description">${i?.description||''}</textarea></div>
-            <div style="display:flex; gap:10px;">
-                <div class="form-group" style="flex:1"><label>Inicio</label><input type="date" class="form-control" name="start_date" value="${i?.start_date||''}"></div>
-                <div class="form-group" style="flex:1"><label>Fin</label><input type="date" class="form-control" name="end_date" value="${i?.end_date||''}"></div>
+            <div class="form-group">
+                <label>Nombre del Programa</label>
+                <input class="form-control" name="program_name" value="${i?.program_name||''}" required>
             </div>
-            <div class="form-group"><label>Costo</label><input type="number" class="form-control" name="cost" value="${i?.cost||''}"></div>
+            
+            <div class="form-group">
+                <label>Duración</label>
+                <input class="form-control" name="duration" value="${i?.duration||''}" placeholder="Ej: 4 semanas">
+            </div>
+            
+            <div class="form-group">
+                <label>Descripción</label>
+                <textarea class="form-control" name="description">${i?.description||''}</textarea>
+            </div>
+            
+            <div style="display:flex; gap:10px;">
+                <div class="form-group" style="flex:1">
+                    <label>Fecha Inicio</label>
+                    <input type="date" class="form-control" name="start_date" value="${i?.start_date||''}">
+                </div>
+                <div class="form-group" style="flex:1">
+                    <label>Fecha Fin</label>
+                    <input type="date" class="form-control" name="end_date" value="${i?.end_date||''}">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Costo (Bs.)</label>
+                <input type="number" class="form-control" name="cost" value="${i?.cost||''}">
+            </div>
         `, i?.id);
     }
 
