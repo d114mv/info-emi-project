@@ -320,12 +320,12 @@ async def update_career(career_id: int, career: CareerCreate, admin: dict = Depe
 
         cur.execute("""
             UPDATE careers 
-            SET code=%s, name=%s, faculty=%s, duration=%s, description=%s, is_active=%s
+            SET code=%s, name=%s, campus=%s, duration=%s, description=%s, is_active=%s
             WHERE id=%s
         """, (
             career.code, 
             career.name, 
-            career.faculty, 
+            career.campus, 
             career.duration, 
             career.description, 
             career.is_active, 
