@@ -240,11 +240,12 @@ def handle_help(message):
 • Escribir directamente: "carreras", "eventos", etc.
 
 <i>¿Necesitas ayuda específica? Escribe tu pregunta.</i>
+
 """
     
     bot.send_message(message.chat.id, help_text, parse_mode="HTML")
 
-@bot.message_handler(commands=['carreras', 'carrera'])
+@bot.message_handler(commands=['carreras', 'carrera', '🎓 Carreras' ])
 def handle_careers(message):
     """Manejador del comando /carreras"""
     logger.info(f"Comando /carreras de {message.chat.id}")
@@ -284,7 +285,7 @@ def handle_careers(message):
         parse_mode="HTML"
     )
 
-@bot.message_handler(commands=['preuniversitario', 'preuniversitarios', 'pre'])
+@bot.message_handler(commands=['preuniversitario', 'preuniversitarios', 'pre', '📚 Preuniversitarios'])
 def handle_preuniversity(message):
     """Manejador del comando /preuniversitario"""
     logger.info(f"Comando /preuniversitario de {message.chat.id}")
@@ -326,7 +327,7 @@ def handle_preuniversity(message):
         parse_mode="HTML"
     )
 
-@bot.message_handler(commands=['eventos', 'evento'])
+@bot.message_handler(commands=['eventos', 'evento', '📅 Eventos'])
 def handle_events(message):
     """Manejador del comando /eventos"""
     data = get_api_data("bot/events", {"limit": 5})
@@ -373,7 +374,7 @@ def handle_events(message):
 
 # --- HANDLERS CONECTADOS A LA BD ---
 
-@bot.message_handler(commands=['becas', 'beca'])
+@bot.message_handler(commands=['becas', 'beca', '💰 Becas'])
 def handle_scholarships(message):
     """Manejador dinámico de Becas"""
     # 1. Pedir datos a tu API
@@ -390,7 +391,7 @@ def handle_scholarships(message):
         text = format_scholarship(item)
         bot.send_message(message.chat.id, text, parse_mode="HTML", disable_web_page_preview=True)
 
-@bot.message_handler(commands=['faq', 'preguntas'])
+@bot.message_handler(commands=['faq', 'preguntas', '❓ FAQ'])
 def handle_faq(message):
     """Manejador dinámico de FAQs"""
     # 1. Pedir datos a tu API
@@ -410,7 +411,7 @@ def handle_faq(message):
         
     bot.send_message(message.chat.id, response, parse_mode="HTML")
 
-@bot.message_handler(commands=['contacto', 'contactos'])
+@bot.message_handler(commands=['contacto', 'contactos', '📞 Contactos'])
 def handle_contacts(message):
     """Manejador dinámico de Contactos"""
     # 1. Pedir datos a tu API
@@ -426,7 +427,7 @@ def handle_contacts(message):
         text = format_contact(item)
         bot.send_message(message.chat.id, text, parse_mode="HTML")
 
-@bot.message_handler(commands=['calendario'])
+@bot.message_handler(commands=['calendario', '📆 Calendario'])
 def handle_calendar(message):
     """Manejador del comando /calendario"""
     calendar_text = """
@@ -656,25 +657,32 @@ def handle_text_messages(message):
     # Mapeo de textos a comandos
     text_to_command = {
         'carreras': handle_careers,
+        '🎓 Carreras': handle_careers,
         'preuniversitarios': handle_preuniversity,
         'preuniversitario': handle_preuniversity,
+        '📚 Preuniversitarios': handle_preuniversity,
         'pre': handle_preuniversity,
         'eventos': handle_events,
         'evento': handle_events,
+        '📅 Eventos': handle_events,
         'becas': handle_scholarships,
         'beca': handle_scholarships,
+        '💰 Becas': handle_scholarships,
         'faq': handle_faq,
+        '❓ FAQ': handle_faq,
         'preguntas': handle_faq,
         'contactos': handle_contacts,
         'contacto': handle_contacts,
+        '📞 Contactos': handle_contacts,
         'calendario': handle_calendar,
+        '📆 Calendario': handle_calendar,
         'inscripciones': handle_inscriptions,
         'matrícula': handle_inscriptions,
+        'ℹ️ Ayuda': handle_help,
         'ayuda': handle_help,
         'hola': handle_start,
         'inicio': handle_start
-    }
-    
+    }    
     # Buscar handler correspondiente
     handler = text_to_command.get(text)
     
