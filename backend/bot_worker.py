@@ -560,7 +560,6 @@ def handle_preuniversity_callback(call):
     
     markup.add(
         types.InlineKeyboardButton("📞 Contactar", callback_data=f"contact_pre_{program_id}"),
-        types.InlineKeyboardButton("↩️ Volver al listado", callback_data="preuni_back")
     )
     
     try:
