@@ -115,7 +115,6 @@ class ScholarshipCreate(BaseModel):
     requirements: Optional[str] = None
     coverage: Optional[str] = None
     amount: Optional[float] = None
-    deadline: Optional[date] = None
     application_link: Optional[str] = None
     is_active: bool = True
 
@@ -842,10 +841,6 @@ async def get_scholarships(active_only: bool = True):
     try:
         cur.execute("SELECT * FROM scholarships ORDER BY name")
         res = cur.fetchall()
-        # Convertir fechas a string
-        for r in res:
-            if r.get('deadline'): r['deadline'] = r['deadline'].isoformat()
-        return res
     finally:
         cur.close(); conn.close()
 
@@ -854,9 +849,9 @@ async def create_scholarship(sch: ScholarshipCreate, admin: dict = Depends(authe
     conn = get_db_connection(); cur = conn.cursor()
     try:
         cur.execute("""
-            INSERT INTO scholarships (name, description, requirements, coverage, amount, deadline, application_link, is_active)
+            INSERT INTO scholarships (name, description, requirements, coverage, amount, application_link, is_active)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id
-        """, (sch.name, sch.description, sch.requirements, sch.coverage, sch.amount, sch.deadline, sch.application_link, sch.is_active))
+        """, (sch.name, sch.description, sch.requirements, sch.coverage, sch.amount, sch.application_link, sch.is_active))
         conn.commit()
         return {"message": "Beca creada", "id": cur.fetchone()['id']}
     finally:
@@ -867,9 +862,9 @@ async def update_scholarship(sch_id: int, sch: ScholarshipCreate, admin: dict = 
     conn = get_db_connection(); cur = conn.cursor()
     try:
         cur.execute("""
-            UPDATE scholarships SET name=%s, description=%s, requirements=%s, coverage=%s, amount=%s, deadline=%s, application_link=%s, is_active=%s
+            UPDATE scholarships SET name=%s, description=%s, requirements=%s, coverage=%s, amount=%s, application_link=%s, is_active=%s
             WHERE id=%s
-        """, (sch.name, sch.description, sch.requirements, sch.coverage, sch.amount, sch.deadline, sch.application_link, sch.is_active, sch_id))
+        """, (sch.name, sch.description, sch.requirements, sch.coverage, sch.amount, sch.application_link, sch.is_active, sch_id))
         conn.commit()
         return {"message": "Beca actualizada"}
     finally:
@@ -912,7 +907,6 @@ async def get_stats(admin: dict = Depends(authenticate_admin)):
     try:
         stats = {}
         
-        # Contar registros activos
         tables = [
             'careers', 'events', 'faqs', 'contacts', 
             'scholarships', 'academic_calendar', 'pre_university'

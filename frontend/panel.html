@@ -490,7 +490,7 @@
                 </div>
                 <div class="table-responsive">
                     <table class="data-table">
-                        <thead><tr><th>Nombre</th><th>Cobertura</th><th>Deadline</th><th>Acciones</th></tr></thead>
+                        <thead><tr><th>Nombre</th><th>Cobertura</th><th>Acciones</th></tr></thead>
                         <tbody id="scholarshipsTableBody"></tbody>
                     </table>
                 </div>
@@ -673,7 +673,6 @@
             <tr>
                 <td><strong>${i.name}</strong></td>
                 <td>${i.coverage || '-'}</td>
-                <td>${i.deadline || '-'}</td>
                 <td class="actions">
                     <button class="action-btn action-edit" onclick='openScholarshipModal(${JSON.stringify(i)})'><i class="fas fa-edit"></i></button>
                     <button class="action-btn action-delete" onclick="deleteItem('scholarships', ${i.id})"><i class="fas fa-trash"></i></button>
@@ -785,7 +784,6 @@
             <div class="form-group"><label>Nombre</label><input class="form-control" name="name" value="${i?.name||''}" required></div>
             <div class="form-group"><label>Descripción</label><textarea class="form-control" name="description">${i?.description||''}</textarea></div>
             <div class="form-group"><label>Cobertura</label><input class="form-control" name="coverage" value="${i?.coverage||''}"></div>
-            <div class="form-group"><label>Límite</label><input type="date" class="form-control" name="deadline" value="${i?.deadline||''}"></div>
         `, i?.id);
     }
 

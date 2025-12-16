@@ -131,8 +131,6 @@ def format_scholarship(item: dict) -> str:
     text = f"💰 <b>{item['name']}</b>\n"
     if item.get('coverage'):
         text += f"💎 Cobertura: {item['coverage']}\n"
-    if item.get('deadline'):
-        text += f"📅 Límite: {item['deadline']}\n"
     
     if item.get('description'):
         text += f"\n📝 {item['description']}\n"
@@ -171,6 +169,25 @@ def format_faq(item: dict) -> str:
 def handle_start(message):
     """Manejador del comando /start"""
     logger.info(f"Comando /start de {message.chat.id}")
+    
+    # --- 1. CREAR EL MENÚ DE BOTONES (FALTABA ESTO) ---
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
+    
+    # Definir los botones (Coinciden con lo que espera handle_text_messages)
+    btn_carreras = types.KeyboardButton("🎓 Carreras")
+    btn_pre = types.KeyboardButton("📚 Preuniversitarios")
+    btn_eventos = types.KeyboardButton("📅 Eventos")
+    btn_becas = types.KeyboardButton("💰 Becas")
+    btn_faq = types.KeyboardButton("❓ FAQ")
+    btn_contactos = types.KeyboardButton("📞 Contactos")
+    btn_calendario = types.KeyboardButton("📆 Calendario")
+    btn_ayuda = types.KeyboardButton("ℹ️ Ayuda")
+    
+    # Agregar botones al markup
+    markup.add(btn_carreras, btn_pre, btn_eventos, btn_becas, 
+               btn_faq, btn_contactos, btn_calendario, btn_ayuda)
+    # --------------------------------------------------
+
     welcome_text = """
 <b>¡Hola! Soy Info_EMI 🤖</b>
 Tu asistente virtual de la universidad.
