@@ -555,18 +555,15 @@
     let currentId = null;
     let currentSection = 'dashboard';
 
-    // --- MANEJO DE PESTAÑAS (SIDEBAR) ---
     function switchTab(tabId) {
-        // Actualizar menú
         document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
         const activeBtn = document.querySelector(`button[onclick="switchTab('${tabId}')"]`);
         if(activeBtn) activeBtn.classList.add('active');
 
-        // Actualizar contenido
         document.querySelectorAll('.content-card').forEach(card => card.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
+        const targetCard = document.getElementById(tabId);
+        if(targetCard) targetCard.classList.add('active');
         
-        // Actualizar título
         const titles = {
             'dashboard': 'Dashboard',
             'careers': 'Gestión de Carreras',
@@ -574,12 +571,14 @@
             'events': 'Eventos',
             'faqs': 'Preguntas Frecuentes',
             'contacts': 'Contactos',
-            'scholarships': 'Becas'
+            'scholarships': 'Gestión de Becas',
+            'calendar': 'Calendario Académico',
+            'inscriptions': 'Periodos de Inscripción'
         };
-        document.getElementById('pageTitle').innerText = titles[tabId];
+
+        document.getElementById('pageTitle').innerText = titles[tabId] || 'Gestión Info EMI';
         currentSection = tabId;
 
-        // Cargar datos automáticamente
         if (tabId === 'careers') loadCareers();
         if (tabId === 'events') loadEvents();
         if (tabId === 'preuniversity') loadPreuniversity();
