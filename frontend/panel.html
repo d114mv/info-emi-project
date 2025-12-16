@@ -222,12 +222,16 @@
 
         .data-table tr:hover { background-color: #f8fafc; }
 
-        /* BOTONES ACCIONES */
-        /* BOTONES ACCIONES (CORREGIDO) */
         .actions { 
             display: flex; 
             gap: 8px; 
-            align-items: center; /* Centrado vertical */
+            align-items: center;
+        }
+        
+        .actions { 
+            display: flex; 
+            gap: 8px; 
+            align-items: center;
         }
         
         .action-btn {
@@ -239,28 +243,29 @@
             align-items: center; 
             justify-content: center;
             cursor: pointer; 
-            transition: all 0.2s; 
-            color: white !important;
+            transition: all 0.2s;
             font-size: 14px;
         }
 
         .action-edit { 
-            background-color: var(--primary-light); 
+            background-color: #2563eb !important;
+            color: white !important;
         }
         
         .action-delete { 
-            background-color: var(--danger); 
+            background-color: #ef4444 !important;
+            color: white !important;
         }
 
         .action-btn:hover { 
-            opacity: 0.9; 
+            opacity: 0.8; 
             transform: scale(1.05); 
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
         
         .action-btn i {
+            color: inherit;
             pointer-events: none;
-            display: inline-block;
         }
 
         .btn {
@@ -792,6 +797,22 @@
     }
 
     // 2. Conectar botón de Login
+    const passwordInput = document.getElementById('password');
+    const usernameInput = document.getElementById('username');
+
+    function checkEnter(event) {
+        if (event.key === 'Enter') {
+            document.getElementById('loginBtn').click();
+        }
+    }
+
+    if (passwordInput) {
+        passwordInput.addEventListener('keypress', checkEnter);
+    }
+    if (usernameInput) {
+        usernameInput.addEventListener('keypress', checkEnter);
+    }
+
     const loginBtn = document.getElementById('loginBtn');
     if(loginBtn) {
         loginBtn.addEventListener('click', async () => {
