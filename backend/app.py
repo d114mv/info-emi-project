@@ -73,7 +73,7 @@ def get_db_connection():
 class CareerCreate(BaseModel):
     code: str
     name: str
-    faculty: Optional[str] = None
+    campus: Optional[str] = None
     duration: Optional[str] = None
     modality: Optional[str] = None
     description: Optional[str] = None
@@ -292,9 +292,9 @@ async def create_career(career: CareerCreate, admin: dict = Depends(authenticate
     cur = conn.cursor()
     
     try:
-        cur.execute("""INSERT INTO careers (code, name, faculty, duration, description, is_active) 
+        cur.execute("""INSERT INTO careers (code, name, campus, duration, description, is_active) 
     VALUES (%s, %s, %s, %s, %s, %s) RETURNING id""", 
-    (career.code, career.name, career.faculty, career.duration, career.description, career.is_active))
+    (career.code, career.name, career.campus, career.duration, career.description, career.is_active))
         
         career_id = cur.fetchone()['id']
         conn.commit()
@@ -323,8 +323,8 @@ async def update_career(career_id: int, career: CareerCreate, admin: dict = Depe
             raise HTTPException(status_code=404, detail="Carrera no encontrada")
         
         # Actualizar
-        cur.execute("""UPDATE careers SET code=%s, name=%s, faculty=%s, duration=%s, description=%s, is_active=%sWHERE id=%s""", 
-                    (career.code, career.name, career.faculty, career.duration, career.description, career.is_active, career_id))
+        cur.execute("""UPDATE careers SET code=%s, name=%s, campus=%s, duration=%s, description=%s, is_active=%sWHERE id=%s""", 
+                    (career.code, career.name, career.campus, career.duration, career.description, career.is_active, career_id))
         
         conn.commit()
         
@@ -651,7 +651,7 @@ async def get_bot_careers():
     
     try:
         cur.execute("""
-            SELECT code, name, faculty, duration, modality, description, cost
+            SELECT code, name, campus, duration, modality, description, cost
             FROM careers 
             WHERE is_active = TRUE
             ORDER BY name

@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS careers (
     id SERIAL PRIMARY KEY,
     code VARCHAR(20) UNIQUE NOT NULL,
     name VARCHAR(200) NOT NULL,
-    faculty VARCHAR(100),
+    campus VARCHAR(100),
     duration VARCHAR(50),
     modality VARCHAR(50),
     description TEXT,
