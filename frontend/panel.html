@@ -223,15 +223,45 @@
         .data-table tr:hover { background-color: #f8fafc; }
 
         /* BOTONES ACCIONES */
-        .actions { display: flex; gap: 8px; }
-        .action-btn {
-            width: 32px; height: 32px; border-radius: 6px; border: none;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: all 0.2s; color: white;
+        /* BOTONES ACCIONES (CORREGIDO) */
+        .actions { 
+            display: flex; 
+            gap: 8px; 
+            align-items: center; /* Centrado vertical */
         }
-        .action-edit { background: var(--primary-light); }
-        .action-delete { background: var(--danger); }
-        .action-btn:hover { opacity: 0.8; transform: scale(1.05); }
+        
+        .action-btn {
+            width: 32px; 
+            height: 32px; 
+            border-radius: 6px; 
+            border: none;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            cursor: pointer; 
+            transition: all 0.2s; 
+            color: white !important;
+            font-size: 14px;
+        }
+
+        .action-edit { 
+            background-color: var(--primary-light); 
+        }
+        
+        .action-delete { 
+            background-color: var(--danger); 
+        }
+
+        .action-btn:hover { 
+            opacity: 0.9; 
+            transform: scale(1.05); 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .action-btn i {
+            pointer-events: none;
+            display: inline-block;
+        }
 
         .btn {
             padding: 0.6rem 1.2rem; border-radius: 8px; border: none;
@@ -754,35 +784,65 @@
     function logout() { localStorage.removeItem('auth_token'); location.reload(); }
 
     // --- INIT ---
-    document.getElementById('loginBtn').addEventListener('click', async () => {
-        const u = document.getElementById('username').value;
-        const p = document.getElementById('password').value;
-        const btn = document.getElementById('loginBtn');
-        
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-        
-        const res = await fetch('/api/login', {
-            method:'POST', headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({username:u, password:p})
-        });
-        const data = await res.json();
-        
-        if(res.ok && data.status==='success') {
-            localStorage.setItem('auth_token', data.token);
-            localStorage.setItem('username', u);
-            location.reload(); 
-        } else {
-            document.getElementById('loginMessage').style.display='block';
-            document.getElementById('loginMessage').innerText = 'Credenciales incorrectas';
-            btn.innerHTML = 'Ingresar';
-        }
-    });
+    
+    // 1. Conectar botón de Cerrar Sesión (ESTO FALTABA)
+    const logoutBtn = document.getElementById('logoutBtn');
+    if(logoutBtn) {
+        logoutBtn.addEventListener('click', logout);
+    }
 
+    // 2. Conectar botón de Login
+    const loginBtn = document.getElementById('loginBtn');
+    if(loginBtn) {
+        loginBtn.addEventListener('click', async () => {
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            const btn = document.getElementById('loginBtn');
+            const msg = document.getElementById('loginMessage');
+            
+            if(!u || !p) {
+                msg.style.display='block';
+                msg.innerText = 'Por favor ingresa usuario y contraseña';
+                return;
+            }
+
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Entrando...';
+            
+            try {
+                const res = await fetch('/api/login', {
+                    method:'POST', headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify({username:u, password:p})
+                });
+                const data = await res.json();
+                
+                if(res.ok && data.status==='success') {
+                    localStorage.setItem('auth_token', data.token);
+                    localStorage.setItem('username', u);
+                    location.reload(); 
+                } else {
+                    msg.style.display='block';
+                    msg.innerText = data.detail || 'Credenciales incorrectas';
+                    btn.innerHTML = 'Ingresar al Sistema <i class="fas fa-arrow-right"></i>';
+                }
+            } catch(e) {
+                msg.style.display='block';
+                msg.innerText = 'Error de conexión';
+                btn.innerHTML = 'Ingresar al Sistema <i class="fas fa-arrow-right"></i>';
+            }
+        });
+    }
+
+    // 3. Verificar sesión al cargar
     window.addEventListener('DOMContentLoaded', () => {
         if(localStorage.getItem('auth_token')) {
             document.getElementById('loginContainer').style.display = 'none';
-            document.getElementById('panelContainer').style.display = 'flex'; // FLEX layout activado
-            document.getElementById('userWelcome').innerText = localStorage.getItem('username');
+            document.getElementById('panelContainer').style.display = 'flex';
+            
+            const userDisplay = document.getElementById('userWelcome');
+            if(userDisplay) userDisplay.innerText = localStorage.getItem('username');
+            
+            // Cargar dashboard por defecto
+            switchTab('dashboard');
         }
     });
     </script>

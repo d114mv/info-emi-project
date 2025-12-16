@@ -202,7 +202,6 @@ def authenticate_admin(credentials: HTTPBasicCredentials = Depends(security)):
                 headers={"WWW-Authenticate": "Basic"},
             )
         
-        # Verificar contraseña (SHA256)
         password_hash = hashlib.sha256(credentials.password.encode()).hexdigest()
         
         if password_hash != admin['password_hash']:
