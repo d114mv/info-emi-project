@@ -308,36 +308,38 @@ async def create_career(career: CareerCreate, admin: dict = Depends(authenticate
         cur.close()
         conn.close()
 
+
 @app.put("/api/careers/{career_id}")
 async def update_career(career_id: int, career: CareerCreate, admin: dict = Depends(authenticate_admin)):
-    """Actualizar carrera existente"""
     conn = get_db_connection()
     cur = conn.cursor()
-    
     try:
-        # Obtener datos anteriores
         cur.execute("SELECT * FROM careers WHERE id = %s", (career_id,))
-        old_data = cur.fetchone()
-        
-        if not old_data:
-            raise HTTPException(status_code=404, detail="Carrera no encontrada")
-        
-        # Actualizar
-        cur.execute("""UPDATE careers SET code=%s, name=%s, campus=%s, duration=%s, description=%s, is_active=%sWHERE id=%s""", 
-                    (career.code, career.name, career.campus, career.duration, career.description, career.is_active, career_id))
-        
+        if not cur.fetchone():
+             raise HTTPException(status_code=404, detail="Carrera no encontrada")
+
+        cur.execute("""
+            UPDATE careers 
+            SET code=%s, name=%s, faculty=%s, duration=%s, description=%s, is_active=%s
+            WHERE id=%s
+        """, (
+            career.code, 
+            career.name, 
+            career.faculty, 
+            career.duration, 
+            career.description, 
+            career.is_active, 
+            career_id
+        ))
         conn.commit()
         
-        # Registrar cambios
-        changes = {}
-        for key, new_value in career.dict().items():
-            old_value = old_data.get(key)
-            if str(old_value) != str(new_value):
-                changes[key] = {"old": old_value, "new": new_value}
-        
-        log_action(admin['id'], "UPDATE", "careers", career_id, changes)
+        log_action(admin['id'], "UPDATE", "careers", career_id)
         
         return {"message": "Carrera actualizada exitosamente"}
+    except Exception as e:
+        conn.rollback()
+        logger.error(f"Error actualizando carrera: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
         cur.close()
         conn.close()
