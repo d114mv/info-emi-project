@@ -653,7 +653,7 @@ async def get_bot_careers():
     
     try:
         cur.execute("""
-            SELECT code, name, campus, duration, modality, description, cost
+            SELECT code, name, campus, duration, modality, description
             FROM careers 
             WHERE is_active = TRUE
             ORDER BY name

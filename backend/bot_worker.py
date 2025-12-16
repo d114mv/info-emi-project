@@ -34,11 +34,9 @@ from dotenv import load_dotenv
 # Cargar variables de entorno
 load_dotenv()
 
-# Configuración
 TOKEN = os.getenv("BOT_TOKEN", "8577123738:AAEjeNx5cnErCWfm2f1dcpUzhm4Q1xa1qkE")
 API_URL = os.getenv("API_URL", "http://localhost:8000")
 
-# Crear instancia del bot
 bot = telebot.TeleBot(TOKEN, parse_mode="HTML")
 
 # ========== FUNCIONES AUXILIARES ==========
