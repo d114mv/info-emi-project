@@ -54,8 +54,6 @@ def format_career(career: dict) -> str:
         text += f"⏳ <b>Duración:</b> {career['duration']}\n"
     if career.get('modality'):
         text += f"📚 <b>Modalidad:</b> {career['modality']}\n"
-    if career.get('cost'):
-        text += f"💰 <b>Costo:</b> ${career['cost']:,.2f}\n"
     
     if career.get('description'):
         desc = career['description']
@@ -175,21 +173,6 @@ def format_faq(item: dict) -> str:
 def handle_start(message):
     """Manejador del comando /start"""
     logger.info(f"Comando /start de {message.chat.id}")
-    
-    # Crear teclado personalizado
-    markup = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
-    buttons = [
-        types.KeyboardButton('🎓 Carreras'),
-        types.KeyboardButton('📚 Preuniversitarios'),
-        types.KeyboardButton('📅 Eventos'),
-        types.KeyboardButton('💰 Becas'),
-        types.KeyboardButton('❓ FAQ'),
-        types.KeyboardButton('📞 Contactos'),
-        types.KeyboardButton('📆 Calendario'),
-        types.KeyboardButton('ℹ️ Ayuda')
-    ]
-    markup.add(*buttons)
-    
     welcome_text = """
 <b>¡Hola! Soy Info_EMI 🤖</b>
 Tu asistente virtual de la universidad.

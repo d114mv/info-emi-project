@@ -78,7 +78,6 @@ class CareerCreate(BaseModel):
     modality: Optional[str] = None
     description: Optional[str] = None
     requirements: Optional[str] = None
-    cost: Optional[float] = None
     is_active: bool = True
 
 class EventCreate(BaseModel):
@@ -293,14 +292,9 @@ async def create_career(career: CareerCreate, admin: dict = Depends(authenticate
     cur = conn.cursor()
     
     try:
-        cur.execute("""
-            INSERT INTO careers (code, name, faculty, duration, modality, 
-                               description, requirements, cost, is_active)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-            RETURNING id
-        """, (career.code, career.name, career.faculty, career.duration, 
-              career.modality, career.description, career.requirements, 
-              career.cost, career.is_active))
+        cur.execute("""INSERT INTO careers (code, name, faculty, duration, description, is_active) 
+    VALUES (%s, %s, %s, %s, %s, %s) RETURNING id""", 
+    (career.code, career.name, career.faculty, career.duration, career.description, career.is_active))
         
         career_id = cur.fetchone()['id']
         conn.commit()
@@ -329,15 +323,8 @@ async def update_career(career_id: int, career: CareerCreate, admin: dict = Depe
             raise HTTPException(status_code=404, detail="Carrera no encontrada")
         
         # Actualizar
-        cur.execute("""
-            UPDATE careers 
-            SET code = %s, name = %s, faculty = %s, duration = %s, 
-                modality = %s, description = %s, requirements = %s, 
-                cost = %s, is_active = %s, updated_at = CURRENT_TIMESTAMP
-            WHERE id = %s
-        """, (career.code, career.name, career.faculty, career.duration, 
-              career.modality, career.description, career.requirements, 
-              career.cost, career.is_active, career_id))
+        cur.execute("""UPDATE careers SET code=%s, name=%s, faculty=%s, duration=%s, description=%s, is_active=%sWHERE id=%s""", 
+                    (career.code, career.name, career.faculty, career.duration, career.description, career.is_active, career_id))
         
         conn.commit()
         
