@@ -114,6 +114,19 @@
             text-align: left;
         }
 
+        .nav-icon-img {
+            width: 22px;
+            height: 22px;
+            object-fit: contain;
+            filter: brightness(0) invert(1);
+            margin-right: 8px;
+        }
+        .login-logo-img {
+            width: 60%;
+            height: 60%;
+            object-fit: contain;
+        }
+
         .nav-item:hover {
             background: rgba(255,255,255,0.1);
             color: white;
@@ -309,9 +322,9 @@
     <div id="loginContainer" class="login-wrapper">
         <div class="login-card">
             <div style="text-align: center; margin-bottom: 2rem;">
-                <div class="login-icon"><i class="fas fa-university"></i></div>
+                <div class="login-icon"><img src="/static/logo_emi.png" alt="Logo EMI" class="login-logo-img"></div>
                 <h2 style="color:var(--primary); font-weight:600;">Bienvenido</h2>
-                <p style="color:var(--text-light); font-size:0.9rem;">Sistema de Gestión - Info EMI</p>
+                <p style="color:var(--text-light); font-size:0.9rem;">Sistema de Gestión - Bot Info EMI</p>
             </div>
             
             <div id="loginMessage" style="display:none; padding:10px; background:#fee2e2; color:var(--danger); border-radius:8px; margin-bottom:1rem; font-size:0.9rem;"></div>
@@ -332,7 +345,7 @@
             </div>
             <button id="loginBtn" class="btn-login">Ingresar al Sistema <i class="fas fa-arrow-right"></i></button>
             <div style="text-align:center; margin-top:2rem; font-size:0.8rem; color:var(--text-light); border-top:1px solid #e2e8f0; padding-top:1rem;">
-                &copy; 2025 Escuela Militar de Ingeniería<br>UEyBU
+                &copy; 2025 Escuela Militar de Ingeniería<br>UEyBU - UACB
             </div>
         </div>
     </div>
@@ -350,8 +363,9 @@
             
             <nav class="sidebar-nav">
                 <button class="nav-item active" onclick="switchTab('dashboard')">
-                    <i class="fas fa-chart-pie" style="width:20px;"></i> Dashboard
-                </button>
+    <img src="/static/logo_emi.png" alt="Inicio" class="nav-icon-img">
+    Dashboard
+</button>
                 <button class="nav-item" onclick="switchTab('careers')">
                     <i class="fas fa-graduation-cap" style="width:20px;"></i> Carreras
                 </button>
