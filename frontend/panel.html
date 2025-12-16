@@ -496,6 +496,32 @@
                 </div>
             </div>
 
+            <div id="calendar" class="content-card">
+    <div class="card-header">
+        <h3>Calendario Académico</h3>
+        <button class="btn btn-success" onclick="openCalendarModal()"><i class="fas fa-plus"></i> Nuevo Evento</button>
+    </div>
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead><tr><th>Fecha</th><th>Evento</th><th>Tipo</th><th>Periodo</th><th>Acciones</th></tr></thead>
+            <tbody id="calendarTableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<div id="inscriptions" class="content-card">
+    <div class="card-header">
+        <h3>Periodos de Inscripción</h3>
+        <button class="btn btn-success" onclick="openInscriptionModal()"><i class="fas fa-plus"></i> Nueva Inscripción</button>
+    </div>
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead><tr><th>Periodo</th><th>Fechas</th><th>Requisitos (Resumen)</th><th>Acciones</th></tr></thead>
+            <tbody id="inscriptionsTableBody"></tbody>
+        </table>
+    </div>
+</div>
+
         </main>
     </div>
 
@@ -553,6 +579,8 @@
         if (tabId === 'faqs') loadFaqs();
         if (tabId === 'contacts') loadContacts();
         if (tabId === 'scholarships') loadScholarships();
+        if (tabId === 'calendar') loadCalendar();
+        if (tabId === 'inscriptions') loadInscriptions();
     }
 
     // --- API & AUTH ---
@@ -678,6 +706,81 @@
                 </td>
             </tr>
         `).join('');
+    }
+
+    // --- CALENDARIO ---
+    async function loadCalendar() {
+        const res = await apiFetch(`${API_URL}/calendar?active_only=false`);
+        if(!res) return;
+        const data = await res.json();
+        document.getElementById('calendarTableBody').innerHTML = data.map(i => `
+            <tr>
+                <td>${i.start_date}</td>
+                <td><strong>${i.event_name}</strong></td>
+                <td><span class="badge" style="background:#e0f2fe; color:#0369a1">${i.event_type||'General'}</span></td>
+                <td>${i.academic_period||'-'}</td>
+                <td class="actions">
+                    <button class="action-btn action-edit" onclick='openCalendarModal(${JSON.stringify(i)})'><i class="fas fa-edit"></i></button>
+                    <button class="action-btn action-delete" onclick="deleteItem('calendar', ${i.id})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function openCalendarModal(i=null) {
+        currentSection = 'calendar';
+        setupModal(i, 'Evento', `
+            <div class="form-group"><label>Nombre del Evento</label><input class="form-control" name="event_name" value="${i?.event_name||''}" required></div>
+            <div style="display:flex; gap:10px;">
+                <div class="form-group" style="flex:1"><label>Fecha Inicio</label><input type="date" class="form-control" name="start_date" value="${i?.start_date||''}" required></div>
+                <div class="form-group" style="flex:1"><label>Fecha Fin</label><input type="date" class="form-control" name="end_date" value="${i?.end_date||''}"></div>
+            </div>
+            <div style="display:flex; gap:10px;">
+                <div class="form-group" style="flex:1"><label>Tipo</label>
+                    <select name="event_type" class="form-control">
+                        <option value="Académico" ${i?.event_type==='Académico'?'selected':''}>Académico</option>
+                        <option value="Administrativo" ${i?.event_type==='Administrativo'?'selected':''}>Administrativo</option>
+                        <option value="Feriado" ${i?.event_type==='Feriado'?'selected':''}>Feriado</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex:1"><label>Periodo Acad.</label><input class="form-control" name="academic_period" value="${i?.academic_period||''}" placeholder="Ej: I-2024"></div>
+            </div>
+            <div class="form-group"><label>Descripción</label><textarea class="form-control" name="description">${i?.description||''}</textarea></div>
+        `, i?.id);
+    }
+
+    // --- INSCRIPCIONES ---
+    async function loadInscriptions() {
+        const res = await apiFetch(`${API_URL}/inscriptions?active_only=false`);
+        if(!res) return;
+        const data = await res.json();
+        document.getElementById('inscriptionsTableBody').innerHTML = data.map(i => `
+            <tr>
+                <td><strong>${i.period}</strong></td>
+                <td>${i.start_date} al ${i.end_date}</td>
+                <td>${i.requirements.substring(0,50)}...</td>
+                <td class="actions">
+                    <button class="action-btn action-edit" onclick='openInscriptionModal(${JSON.stringify(i)})'><i class="fas fa-edit"></i></button>
+                    <button class="action-btn action-delete" onclick="deleteItem('inscriptions', ${i.id})"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    function openInscriptionModal(i=null) {
+        currentSection = 'inscriptions';
+        setupModal(i, 'Info Inscripción', `
+            <div class="form-group"><label>Periodo (Ej: I-2025)</label><input class="form-control" name="period" value="${i?.period||''}" required></div>
+            <div style="display:flex; gap:10px;">
+                <div class="form-group" style="flex:1"><label>Inicio Inscripciones</label><input type="date" class="form-control" name="start_date" value="${i?.start_date||''}" required></div>
+                <div class="form-group" style="flex:1"><label>Fin Inscripciones</label><input type="date" class="form-control" name="end_date" value="${i?.end_date||''}" required></div>
+            </div>
+            <div class="form-group"><label>Requisitos</label><textarea class="form-control" name="requirements" rows="3" required>${i?.requirements||''}</textarea></div>
+            <div class="form-group"><label>Costos</label><textarea class="form-control" name="costs" placeholder="Detalle de costos...">${i?.costs||''}</textarea></div>
+            <div class="form-group"><label>Pasos / Proceso</label><textarea class="form-control" name="process_steps">${i?.process_steps||''}</textarea></div>
+            <div class="form-group"><label>Documentos</label><textarea class="form-control" name="documents_required">${i?.documents_required||''}</textarea></div>
+            <div class="form-group"><label>Contacto</label><input class="form-control" name="contact_info" value="${i?.contact_info||''}"></div>
+        `, i?.id);
     }
 
     // --- MODALS ---

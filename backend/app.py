@@ -141,6 +141,27 @@ class PreUniversityCreate(BaseModel):
     contact_phone: Optional[str] = None
     is_active: bool = True
 
+# --- MODELOS NUEVOS ---
+class CalendarEventCreate(BaseModel):
+    event_name: str
+    event_type: Optional[str] = None
+    start_date: date
+    end_date: Optional[date] = None
+    description: Optional[str] = None
+    academic_period: Optional[str] = None
+    is_active: bool = True
+
+class InscriptionInfoCreate(BaseModel):
+    period: str
+    start_date: date
+    end_date: date
+    requirements: str
+    process_steps: Optional[str] = None
+    costs: Optional[str] = None
+    documents_required: Optional[str] = None
+    contact_info: Optional[str] = None
+    is_active: bool = True
+
 # ========== AUTENTICACIÓN ==========
 
 # Modelo para recibir los datos del formulario
@@ -367,7 +388,157 @@ async def delete_career(career_id: int, admin: dict = Depends(authenticate_admin
     finally:
         cur.close()
         conn.close()
+# ========== RUTAS CALENDARIO ACADÉMICO ==========
 
+@app.get("/api/calendar")
+async def get_calendar(active_only: bool = True):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        query = "SELECT * FROM academic_calendar"
+        if active_only:
+            query += " WHERE is_active = TRUE"
+        query += " ORDER BY start_date ASC"
+        cur.execute(query)
+        
+        # Convertir fechas a string
+        items = []
+        for row in cur.fetchall():
+            item = dict(row)
+            item['start_date'] = str(item['start_date'])
+            if item['end_date']: item['end_date'] = str(item['end_date'])
+            items.append(item)
+        return items
+    finally:
+        cur.close(); conn.close()
+
+@app.post("/api/calendar")
+async def create_calendar_event(item: CalendarEventCreate, admin: dict = Depends(authenticate_admin)):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            INSERT INTO academic_calendar (
+                event_name, event_type, start_date, end_date, 
+                description, academic_period, is_active
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id
+        """, (
+            item.event_name, item.event_type, item.start_date, item.end_date, 
+            item.description, item.academic_period, item.is_active
+        ))
+        conn.commit()
+        return {"message": "Evento creado"}
+    finally:
+        cur.close(); conn.close()
+
+@app.put("/api/calendar/{id}")
+async def update_calendar_event(id: int, item: CalendarEventCreate, admin: dict = Depends(authenticate_admin)):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            UPDATE academic_calendar SET 
+                event_name=%s, event_type=%s, start_date=%s, end_date=%s, 
+                description=%s, academic_period=%s, is_active=%s
+            WHERE id=%s
+        """, (
+            item.event_name, item.event_type, item.start_date, item.end_date, 
+            item.description, item.academic_period, item.is_active, id
+        ))
+        conn.commit()
+        return {"message": "Evento actualizado"}
+    finally:
+        cur.close(); conn.close()
+
+@app.delete("/api/calendar/{id}")
+async def delete_calendar_event(id: int, admin: dict = Depends(authenticate_admin)):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("DELETE FROM academic_calendar WHERE id = %s", (id,))
+        conn.commit()
+        return {"message": "Eliminado"}
+    finally:
+        cur.close(); conn.close()
+
+
+# ========== RUTAS INSCRIPCIONES ==========
+
+@app.get("/api/inscriptions")
+async def get_inscriptions(active_only: bool = True):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        query = "SELECT * FROM inscriptions"
+        if active_only:
+            query += " WHERE is_active = TRUE"
+        query += " ORDER BY start_date DESC" # Mostrar las más recientes primero
+        cur.execute(query)
+        
+        items = []
+        for row in cur.fetchall():
+            item = dict(row)
+            item['start_date'] = str(item['start_date'])
+            item['end_date'] = str(item['end_date'])
+            items.append(item)
+        return items
+    finally:
+        cur.close(); conn.close()
+
+@app.post("/api/inscriptions")
+async def create_inscription(item: InscriptionInfoCreate, admin: dict = Depends(authenticate_admin)):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            INSERT INTO inscriptions (
+                period, start_date, end_date, requirements, process_steps, 
+                costs, documents_required, contact_info, is_active
+            )
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id
+        """, (
+            item.period, item.start_date, item.end_date, item.requirements, 
+            item.process_steps, item.costs, item.documents_required, 
+            item.contact_info, item.is_active
+        ))
+        conn.commit()
+        return {"message": "Información creada"}
+    finally:
+        cur.close(); conn.close()
+
+@app.put("/api/inscriptions/{id}")
+async def update_inscription(id: int, item: InscriptionInfoCreate, admin: dict = Depends(authenticate_admin)):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            UPDATE inscriptions SET 
+                period=%s, start_date=%s, end_date=%s, requirements=%s, 
+                process_steps=%s, costs=%s, documents_required=%s, 
+                contact_info=%s, is_active=%s
+            WHERE id=%s
+        """, (
+            item.period, item.start_date, item.end_date, item.requirements, 
+            item.process_steps, item.costs, item.documents_required, 
+            item.contact_info, item.is_active, id
+        ))
+        conn.commit()
+        return {"message": "Actualizado"}
+    finally:
+        cur.close(); conn.close()
+
+@app.delete("/api/inscriptions/{id}")
+async def delete_inscription(id: int, admin: dict = Depends(authenticate_admin)):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("DELETE FROM inscriptions WHERE id = %s", (id,))
+        conn.commit()
+        return {"message": "Eliminado"}
+    finally:
+        cur.close(); conn.close()
+        
 # ========== RUTAS PARA PREUNIVERSITARIOS ==========
 
 @app.get("/api/preuniversity")

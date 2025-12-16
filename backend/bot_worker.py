@@ -162,6 +162,36 @@ def format_contact(item: dict) -> str:
 
 def format_faq(item: dict) -> str:
     return f"❓ <b>{item['question']}</b>\n💬 {item['answer']}\n"
+def format_calendar_event(item: dict) -> str:
+    text = f"🗓 <b>{item['event_name']}</b>\n"
+    
+    start = datetime.strptime(item['start_date'], '%Y-%m-%d').strftime('%d/%m/%Y')
+    text += f"📅 {start}"
+    
+    if item.get('end_date'):
+        end = datetime.strptime(item['end_date'], '%Y-%m-%d').strftime('%d/%m/%Y')
+        text += f" al {end}"
+    
+    text += "\n"
+    if item.get('event_type'): text += f"📌 Tipo: {item['event_type']}\n"
+    if item.get('description'): text += f"📝 {item['description']}\n"
+    
+    return text
+
+def format_inscription_info(item: dict) -> str:
+    text = f"📝 <b>INSCRIPCIONES GESTIÓN {item['period']}</b>\n\n"
+    
+    start = datetime.strptime(item['start_date'], '%Y-%m-%d').strftime('%d/%m/%Y')
+    end = datetime.strptime(item['end_date'], '%Y-%m-%d').strftime('%d/%m/%Y')
+    text += f"📅 <b>Fechas:</b> {start} al {end}\n\n"
+    
+    if item.get('requirements'): text += f"📋 <b>Requisitos:</b>\n{item['requirements']}\n\n"
+    if item.get('documents_required'): text += f"📂 <b>Documentos:</b>\n{item['documents_required']}\n\n"
+    if item.get('costs'): text += f"💰 <b>Costos:</b>\n{item['costs']}\n\n"
+    if item.get('process_steps'): text += f"👣 <b>Pasos:</b>\n{item['process_steps']}\n\n"
+    if item.get('contact_info'): text += f"📞 <b>Contacto:</b> {item['contact_info']}\n"
+    
+    return text
 
 # ========== HANDLERS DE COMANDOS ==========
 
@@ -427,64 +457,33 @@ def handle_contacts(message):
 
 @bot.message_handler(commands=['calendario', '📆 Calendario'])
 def handle_calendar(message):
-    """Manejador del comando /calendario"""
-    calendar_text = """
-<b>📆 CALENDARIO ACADÉMICO 2024</b>
-
-<u>Primer Semestre:</u>
-📅 Inscripciones: 15 - 30 Enero
-📅 Inicio de clases: 5 Febrero
-📅 Exámenes parciales: 25 - 29 Marzo
-📅 Vacaciones: 1 - 7 Abril
-📅 Exámenes finales: 3 - 14 Junio
-
-<u>Segundo Semestre:</u>
-📅 Inscripciones: 1 - 15 Julio
-📅 Inicio de clases: 22 Julio
-📅 Exámenes parciales: 9 - 13 Septiembre
-📅 Vacaciones: 16 - 20 Septiembre
-📅 Exámenes finales: 18 - 29 Noviembre
-
-<i>Las fechas están sujetas a cambios. Consulta la página oficial: emi.edu.bo .</i>
-"""
+    # 1. Obtener datos de API
+    data = get_api_data("api/calendar")
     
-    bot.send_message(message.chat.id, calendar_text, parse_mode="HTML")
+    if not data:
+        bot.send_message(message.chat.id, "📅 No hay eventos programados en el calendario académico.")
+        return
 
-@bot.message_handler(commands=['inscripciones'])
+    # 2. Enviar respuesta
+    bot.send_message(message.chat.id, "📆 <b>CALENDARIO ACADÉMICO</b>", parse_mode="HTML")
+    
+    # Filtrar eventos futuros o mostrar todos (aquí muestro los próximos 10)
+    for item in data[:10]:
+        text = format_calendar_event(item)
+        bot.send_message(message.chat.id, text, parse_mode="HTML")
+
+@bot.message_handler(commands=['inscripciones', 'matrícula'])
 def handle_inscriptions(message):
-    """Manejador del comando /inscripciones"""
-    inscription_text = """
-<b>📝 INFORMACIÓN DE INSCRIPCIONES</b>
-
-<u>Requisitos:</u>
-• Fotocopia de cédula de identidad
-• Título de bachiller (legalizado)
-• Certificado de nacimiento
-• 4 fotografías tamaño carnet
-• Formulario de inscripción completado
-
-<u>Proceso:</u>
-1. Recopilar documentos
-2. Completar formulario en línea
-3. Pagar matrícula en tesorería
-4. Entregar documentos en admisiones
-5. Asignación de horarios
-
-<u>Costos:</u>
-• Matrícula: $150
-• Derecho de inscripción: $50
-• Seguro estudiantil: $30
-
-<u>Contacto:</u>
-📱 Admisiones: 1234-5678
-📧 Email: admisiones@emi.edu
-🏢 Oficina: Edificio A, Piso 1
-
-<i>Horario de atención para inscripciones: 8:00 - 16:00</i>
-"""
+    # 1. Obtener datos de API
+    data = get_api_data("api/inscriptions")
     
-    bot.send_message(message.chat.id, inscription_text, parse_mode="HTML")
+    if not data:
+        bot.send_message(message.chat.id, "📝 No hay información de inscripciones activa por el momento.")
+        return
 
+    current_period = data[0]
+    text = format_inscription_info(current_period)
+    bot.send_message(message.chat.id, text, parse_mode="HTML")
 # ========== HANDLERS DE CALLBACK ==========
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('career_'))
