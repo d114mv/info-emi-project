@@ -477,7 +477,7 @@
                 </div>
                 <div class="table-responsive">
                     <table class="data-table">
-                        <thead><tr><th>Departamento</th><th>Teléfono</th><th>Email</th><th>Acciones</th></tr></thead>
+                        <thead><tr><th>Departamento</th><th>Teléfono</th><th>Acciones</th></tr></thead>
                         <tbody id="contactsTableBody"></tbody>
                     </table>
                 </div>
@@ -656,7 +656,6 @@
             <tr>
                 <td><strong>${i.department}</strong></td>
                 <td>${i.phone || '-'}</td>
-                <td>${i.email || '-'}</td>
                 <td class="actions">
                     <button class="action-btn action-edit" onclick='openContactModal(${JSON.stringify(i)})'><i class="fas fa-edit"></i></button>
                     <button class="action-btn action-delete" onclick="deleteItem('contacts', ${i.id})"><i class="fas fa-trash"></i></button>
@@ -773,8 +772,8 @@
         setupModal(i, 'Contacto', `
             <div class="form-group"><label>Departamento</label><input class="form-control" name="department" value="${i?.department||''}" required></div>
             <div class="form-group"><label>Teléfono</label><input class="form-control" name="phone" value="${i?.phone||''}"></div>
-            <div class="form-group"><label>Email</label><input class="form-control" name="email" value="${i?.email||''}"></div>
             <div class="form-group"><label>Oficina</label><input class="form-control" name="office" value="${i?.office||''}"></div>
+            <div class="form-group"><label>Horario</label><input class="form-control" name="schedule" value="${i?.schedule||''}" placeholder="Ej: Lun-Vie 08:00 - 16:00"></div>
         `, i?.id);
     }
 

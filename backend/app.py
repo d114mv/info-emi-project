@@ -800,29 +800,40 @@ async def get_contacts(active_only: bool = True):
 
 @app.post("/api/contacts")
 async def create_contact(contact: ContactCreate, admin: dict = Depends(authenticate_admin)):
-    conn = get_db_connection(); cur = conn.cursor()
+    conn = get_db_connection()
+    cur = conn.cursor()
     try:
         cur.execute("""
-            INSERT INTO contacts (department, phone, email, office, schedule, responsible, priority, is_active)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id
-        """, (contact.department, contact.phone, contact.email, contact.office, contact.schedule, contact.responsible, contact.priority, contact.is_active))
+            INSERT INTO contacts (department, phone, office, schedule, is_active)
+            VALUES (%s, %s, %s, %s, %s)
+            RETURNING id
+        """, (contact.department, contact.phone, contact.office, contact.schedule, contact.is_active))
+        
+        new_id = cur.fetchone()['id']
         conn.commit()
-        return {"message": "Contacto creado", "id": cur.fetchone()['id']}
+        log_action(admin['id'], "CREATE", "contacts", new_id)
+        return {"message": "Contacto creado", "id": new_id}
     finally:
-        cur.close(); conn.close()
+        cur.close()
+        conn.close()
 
 @app.put("/api/contacts/{contact_id}")
 async def update_contact(contact_id: int, contact: ContactCreate, admin: dict = Depends(authenticate_admin)):
-    conn = get_db_connection(); cur = conn.cursor()
+    conn = get_db_connection()
+    cur = conn.cursor()
     try:
         cur.execute("""
-            UPDATE contacts SET department=%s, phone=%s, email=%s, office=%s, schedule=%s, responsible=%s, priority=%s, is_active=%s
+            UPDATE contacts 
+            SET department=%s, phone=%s, office=%s, schedule=%s, is_active=%s
             WHERE id=%s
-        """, (contact.department, contact.phone, contact.email, contact.office, contact.schedule, contact.responsible, contact.priority, contact.is_active, contact_id))
+        """, (contact.department, contact.phone, contact.office, contact.schedule, contact.is_active, contact_id))
+        
         conn.commit()
+        log_action(admin['id'], "UPDATE", "contacts", contact_id)
         return {"message": "Contacto actualizado"}
     finally:
-        cur.close(); conn.close()
+        cur.close()
+        conn.close()
 
 @app.delete("/api/contacts/{contact_id}")
 async def delete_contact(contact_id: int, admin: dict = Depends(authenticate_admin)):
@@ -837,12 +848,28 @@ async def delete_contact(contact_id: int, admin: dict = Depends(authenticate_adm
 # --- RUTAS PARA BECAS ---
 @app.get("/api/scholarships")
 async def get_scholarships(active_only: bool = True):
-    conn = get_db_connection(); cur = conn.cursor()
+    conn = get_db_connection()
+    cur = conn.cursor()
     try:
-        cur.execute("SELECT * FROM scholarships ORDER BY name")
-        res = cur.fetchall()
+        query = "SELECT * FROM scholarships"
+        if active_only:
+            query += " WHERE is_active = TRUE"
+        query += " ORDER BY id DESC"
+        
+        cur.execute(query)
+        items = cur.fetchall()
+        
+        result = []
+        for item in items:
+            item_dict = dict(item)
+            if item_dict.get('deadline'):
+                item_dict['deadline'] = str(item_dict['deadline'])
+            result.append(item_dict)
+            
+        return result
     finally:
-        cur.close(); conn.close()
+        cur.close()
+        conn.close()
 
 @app.post("/api/scholarships")
 async def create_scholarship(sch: ScholarshipCreate, admin: dict = Depends(authenticate_admin)):
