@@ -49,7 +49,7 @@ def format_career(career: dict) -> str:
     text += f"<code>{career['code']}</code>\n\n"
     
     if career.get('faculty'):
-        text += f"🏛️ <b>Facultad:</b> {career['faculty']}\n"
+        text += f"🏛️ <b>Campus:</b> {career['faculty']}\n"
     if career.get('duration'):
         text += f"⏳ <b>Duración:</b> {career['duration']}\n"
     if career.get('modality'):

@@ -425,7 +425,7 @@
                 </div>
                 <div class="table-responsive">
                     <table class="data-table">
-                        <thead><tr><th>Código</th><th>Nombre</th><th>Facultad</th><th>Estado</th><th>Acciones</th></tr></thead>
+                        <thead><tr><th>Código</th><th>Nombre</th><th>Campus</th><th>Estado</th><th>Acciones</th></tr></thead>
                         <tbody id="careersTableBody"></tbody>
                     </table>
                 </div>
@@ -696,7 +696,7 @@
         setupModal(c, 'Carrera', `
             <div class="form-group"><label>Código</label><input class="form-control" name="code" value="${c?.code||''}" required></div>
             <div class="form-group"><label>Nombre</label><input class="form-control" name="name" value="${c?.name||''}" required></div>
-            <div class="form-group"><label>Facultad</label><input class="form-control" name="faculty" value="${c?.faculty||''}"></div>
+            <div class="form-group"><label>Campus</label><input class="form-control" name="faculty" value="${c?.faculty||''}"></div>
             <div class="form-group"><label>Duración</label><input class="form-control" name="duration" value="${c?.duration||''}"></div>
             <div class="form-group"><label>Descripción</label><textarea class="form-control" name="description">${c?.description||''}</textarea></div>
         `, c?.id);
