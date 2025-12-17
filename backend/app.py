@@ -2,7 +2,6 @@ import os
 import sys
 from pathlib import Path
 
-# Agregar directorio actual al path
 sys.path.append(str(Path(__file__).parent))
 
 from fastapi import FastAPI, HTTPException, Depends, status, Request
@@ -20,21 +19,17 @@ import json
 from dotenv import load_dotenv
 import logging
 
-# Configurar logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Cargar variables de entorno
 load_dotenv()
 
-# Crear aplicación FastAPI
 app = FastAPI(
     title="Info EMI API",
     description="API para el bot de información universitaria",
     version="1.0.0"
 )
 
-# Configurar CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -43,20 +38,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Seguridad
 security = HTTPBasic()
 
-# Obtener variables de entorno
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
     logger.error("DATABASE_URL no configurada")
     DATABASE_URL = "postgresql://localhost:5432/info_emi"
 
-# Conexión a base de datos
 def get_db_connection():
     """Establecer conexión a PostgreSQL"""
     try:
-        # Para Render, agregar sslmode
         if "render.com" in DATABASE_URL and "sslmode" not in DATABASE_URL:
             conn_string = DATABASE_URL + "?sslmode=require"
         else:
@@ -68,7 +59,6 @@ def get_db_connection():
         logger.error(f"Error conectando a DB: {e}")
         raise HTTPException(status_code=500, detail="Error de conexión a base de datos")
 
-# ========== MODELOS PYDANTIC ==========
 
 class CareerCreate(BaseModel):
     code: str
@@ -141,7 +131,6 @@ class PreUniversityCreate(BaseModel):
     contact_phone: Optional[str] = None
     is_active: bool = True
 
-# --- MODELOS NUEVOS ---
 class CalendarEventCreate(BaseModel):
     event_name: str
     event_type: Optional[str] = None
@@ -162,21 +151,17 @@ class InscriptionInfoCreate(BaseModel):
     contact_info: Optional[str] = None
     is_active: bool = True
 
-# ========== AUTENTICACIÓN ==========
 
-# Modelo para recibir los datos del formulario
 class LoginRequest(BaseModel):
     username: str
     password: str
 
-# Ruta que procesa el login
 @app.post("/api/login")
 async def login(request: LoginRequest):
     conn = get_db_connection()
     cur = conn.cursor()
     
     try:
-        # 1. Buscar usuario
         cur.execute("SELECT id, password_hash FROM admins WHERE username = %s", 
                    (request.username,))
         admin = cur.fetchone()
@@ -184,13 +169,11 @@ async def login(request: LoginRequest):
         if not admin:
             raise HTTPException(status_code=401, detail="Usuario no encontrado")
         
-        # 2. Verificar contraseña (usando SHA256)
         input_hash = hashlib.sha256(request.password.encode()).hexdigest()
         
         if input_hash != admin['password_hash']:
             raise HTTPException(status_code=401, detail="Contraseña incorrecta")
         
-        # 3. Éxito: Generar token simple
         import base64
         auth_string = f"{request.username}:{request.password}"
         token = base64.b64encode(auth_string.encode()).decode()
@@ -205,7 +188,6 @@ async def login(request: LoginRequest):
         conn.close()
 
 def authenticate_admin(credentials: HTTPBasicCredentials = Depends(security)):
-    """Autenticar administrador"""
     conn = get_db_connection()
     cur = conn.cursor()
     
@@ -230,7 +212,6 @@ def authenticate_admin(credentials: HTTPBasicCredentials = Depends(security)):
                 headers={"WWW-Authenticate": "Basic"},
             )
         
-        # Actualizar último login
         cur.execute("UPDATE admins SET last_login = CURRENT_TIMESTAMP WHERE id = %s", 
                    (admin['id'],))
         conn.commit()
@@ -242,7 +223,6 @@ def authenticate_admin(credentials: HTTPBasicCredentials = Depends(security)):
 
 def log_action(admin_id: int, action: str, table_name: str = None, 
                record_id: int = None, changes: dict = None):
-    """Registrar acción en logs de auditoría"""
     conn = get_db_connection()
     cur = conn.cursor()
     
@@ -259,7 +239,6 @@ def log_action(admin_id: int, action: str, table_name: str = None,
         cur.close()
         conn.close()
 
-# ========== RUTAS DE SALUD ==========
 
 @app.get("/")
 async def root():
@@ -267,7 +246,6 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    """Endpoint de salud para monitoreo"""
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -278,7 +256,6 @@ async def health_check():
     except Exception as e:
         return {"status": "unhealthy", "database": "disconnected", "error": str(e)}
 
-# ========== RUTAS PARA CARRERAS ==========
 
 @app.get("/api/careers")
 async def get_careers(active_only: bool = True):
@@ -294,7 +271,6 @@ async def get_careers(active_only: bool = True):
         
         careers = cur.fetchall()
         
-        # Convertir tipos de fecha para JSON
         for career in careers:
             for key in ['created_at', 'updated_at']:
                 if career.get(key):
@@ -307,7 +283,6 @@ async def get_careers(active_only: bool = True):
 
 @app.post("/api/careers")
 async def create_career(career: CareerCreate, admin: dict = Depends(authenticate_admin)):
-    """Crear nueva carrera"""
     conn = get_db_connection()
     cur = conn.cursor()
     
@@ -366,7 +341,6 @@ async def update_career(career_id: int, career: CareerCreate, admin: dict = Depe
 
 @app.delete("/api/careers/{career_id}")
 async def delete_career(career_id: int, admin: dict = Depends(authenticate_admin)):
-    """Desactivar carrera"""
     conn = get_db_connection()
     cur = conn.cursor()
     
@@ -388,7 +362,6 @@ async def delete_career(career_id: int, admin: dict = Depends(authenticate_admin
     finally:
         cur.close()
         conn.close()
-# ========== RUTAS CALENDARIO ACADÉMICO ==========
 
 @app.get("/api/calendar")
 async def get_calendar(active_only: bool = True):
@@ -401,7 +374,6 @@ async def get_calendar(active_only: bool = True):
         query += " ORDER BY start_date ASC"
         cur.execute(query)
         
-        # Convertir fechas a string
         items = []
         for row in cur.fetchall():
             item = dict(row)
@@ -463,8 +435,6 @@ async def delete_calendar_event(id: int, admin: dict = Depends(authenticate_admi
         cur.close(); conn.close()
 
 
-# ========== RUTAS INSCRIPCIONES ==========
-
 @app.get("/api/inscriptions")
 async def get_inscriptions(active_only: bool = True):
     conn = get_db_connection()
@@ -473,7 +443,7 @@ async def get_inscriptions(active_only: bool = True):
         query = "SELECT * FROM inscriptions"
         if active_only:
             query += " WHERE is_active = TRUE"
-        query += " ORDER BY start_date DESC" # Mostrar las más recientes primero
+        query += " ORDER BY start_date DESC" 
         cur.execute(query)
         
         items = []
@@ -539,8 +509,6 @@ async def delete_inscription(id: int, admin: dict = Depends(authenticate_admin))
     finally:
         cur.close(); conn.close()
         
-# ========== RUTAS PARA PREUNIVERSITARIOS ==========
-
 @app.get("/api/preuniversity")
 async def get_preuniversity(active_only: bool = True):
     """Obtener programas preuniversitarios"""
@@ -559,7 +527,6 @@ async def get_preuniversity(active_only: bool = True):
         
         programs = cur.fetchall()
         
-        # Formatear fechas
         for program in programs:
             for date_field in ['start_date', 'end_date', 'created_at', 'updated_at']:
                 if program.get(date_field):
@@ -614,19 +581,16 @@ async def update_preuniversity(
     program: PreUniversityCreate,
     admin: dict = Depends(authenticate_admin)
 ):
-    """Actualizar programa preuniversitario"""
     conn = get_db_connection()
     cur = conn.cursor()
     
     try:
-        # Verificar existencia
         cur.execute("SELECT * FROM pre_university WHERE id = %s", (program_id,))
         existing = cur.fetchone()
         
         if not existing:
             raise HTTPException(status_code=404, detail="Programa no encontrado")
         
-        # Actualizar
         cur.execute("""
             UPDATE pre_university 
             SET program_name = %s,
@@ -653,7 +617,6 @@ async def update_preuniversity(
         
         conn.commit()
         
-        # Registrar cambios
         changes = {}
         for key, new_value in program.dict().items():
             old_value = existing.get(key)
@@ -672,7 +635,6 @@ async def delete_preuniversity(
     program_id: int,
     admin: dict = Depends(authenticate_admin)
 ):
-    """Desactivar programa preuniversitario"""
     conn = get_db_connection()
     cur = conn.cursor()
     
@@ -695,11 +657,8 @@ async def delete_preuniversity(
         cur.close()
         conn.close()
 
-# ========== RUTAS PARA EVENTOS ==========
-
 @app.get("/api/events")
 async def get_events(upcoming_only: bool = True):
-    """Obtener eventos"""
     conn = get_db_connection()
     cur = conn.cursor()
     
@@ -728,11 +687,8 @@ async def get_events(upcoming_only: bool = True):
         cur.close()
         conn.close()
 
-# --- AGREGAR ESTO EN backend/app.py (Debajo de get_events) ---
-
 @app.post("/api/events")
 async def create_event(event: EventCreate, admin: dict = Depends(authenticate_admin)):
-    """Crear nuevo evento"""
     conn = get_db_connection()
     cur = conn.cursor()
     
@@ -764,12 +720,10 @@ async def create_event(event: EventCreate, admin: dict = Depends(authenticate_ad
 
 @app.put("/api/events/{event_id}")
 async def update_event(event_id: int, event: EventCreate, admin: dict = Depends(authenticate_admin)):
-    """Actualizar evento existente"""
     conn = get_db_connection()
     cur = conn.cursor()
     
     try:
-        # Verificar existencia
         cur.execute("SELECT * FROM events WHERE id = %s", (event_id,))
         existing = cur.fetchone()
         if not existing:
@@ -797,7 +751,6 @@ async def update_event(event_id: int, event: EventCreate, admin: dict = Depends(
 
 @app.delete("/api/events/{event_id}")
 async def delete_event(event_id: int, admin: dict = Depends(authenticate_admin)):
-    """Eliminar evento"""
     conn = get_db_connection()
     cur = conn.cursor()
     
@@ -813,11 +766,8 @@ async def delete_event(event_id: int, admin: dict = Depends(authenticate_admin))
         cur.close()
         conn.close()
 
-# ========== RUTAS PARA EL BOT ==========
-
 @app.get("/bot/careers")
 async def get_bot_careers():
-    """Obtener carreras para el bot"""
     conn = get_db_connection()
     cur = conn.cursor()
     
@@ -837,7 +787,6 @@ async def get_bot_careers():
 
 @app.get("/bot/preuniversity")
 async def get_bot_preuniversity(upcoming_only: bool = True):
-    """Obtener programas preuniversitarios para el bot"""
     conn = get_db_connection()
     cur = conn.cursor()
     
@@ -864,7 +813,6 @@ async def get_bot_preuniversity(upcoming_only: bool = True):
         
         programs = cur.fetchall()
         
-        # Formatear fechas
         for program in programs:
             for date_field in ['start_date', 'end_date']:
                 if program.get(date_field):
@@ -877,7 +825,6 @@ async def get_bot_preuniversity(upcoming_only: bool = True):
 
 @app.get("/bot/events")
 async def get_bot_events(limit: int = 10):
-    """Obtener eventos para el bot"""
     conn = get_db_connection()
     cur = conn.cursor()
     
@@ -905,7 +852,6 @@ async def get_bot_events(limit: int = 10):
         cur.close()
         conn.close()
 
-# --- RUTAS PARA FAQS ---
 @app.get("/api/faqs")
 async def get_faqs(active_only: bool = True):
     conn = get_db_connection()
@@ -956,7 +902,6 @@ async def delete_faq(faq_id: int, admin: dict = Depends(authenticate_admin)):
     finally:
         cur.close(); conn.close()
 
-# --- RUTAS PARA CONTACTOS ---
 @app.get("/api/contacts")
 async def get_contacts(active_only: bool = True):
     conn = get_db_connection(); cur = conn.cursor()
@@ -1016,7 +961,6 @@ async def delete_contact(contact_id: int, admin: dict = Depends(authenticate_adm
     finally:
         cur.close(); conn.close()
 
-# --- RUTAS PARA BECAS ---
 @app.get("/api/scholarships")
 async def get_scholarships(active_only: bool = True):
     conn = get_db_connection()
@@ -1078,8 +1022,6 @@ async def delete_scholarship(sch_id: int, admin: dict = Depends(authenticate_adm
     finally:
         cur.close(); conn.close()
 
-# ========== RUTAS PARA PANEL ADMIN ==========
-
 @app.get("/panel", response_class=HTMLResponse)
 async def get_panel():
     """Servir panel de administración"""
@@ -1094,11 +1036,8 @@ async def get_panel():
     except FileNotFoundError:
         return HTMLResponse(content="Error: No encuentro el archivo en: " + str(file_path)) # Útil para depurar
 
-# ========== RUTAS PARA ESTADÍSTICAS ==========
-
 @app.get("/api/stats")
 async def get_stats(admin: dict = Depends(authenticate_admin)):
-    """Obtener estadísticas del sistema"""
     conn = get_db_connection()
     cur = conn.cursor()
     
@@ -1117,7 +1056,6 @@ async def get_stats(admin: dict = Depends(authenticate_admin)):
             except:
                 stats[table] = 0
         
-        # Eventos próximos (7 días)
         cur.execute("""
             SELECT COUNT(*) as count FROM events 
             WHERE date BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '7 days'
@@ -1125,7 +1063,6 @@ async def get_stats(admin: dict = Depends(authenticate_admin)):
         """)
         stats['upcoming_events'] = cur.fetchone()['count']
         
-        # Actividad reciente
         cur.execute("""
             SELECT COUNT(*) as count FROM audit_logs 
             WHERE created_at >= CURRENT_DATE - INTERVAL '7 days'
@@ -1137,14 +1074,10 @@ async def get_stats(admin: dict = Depends(authenticate_admin)):
         cur.close()
         conn.close()
 
-# ========== INICIALIZACIÓN ==========
-
 @app.on_event("startup")
 async def startup_event():
-    """Evento al iniciar la aplicación"""
     logger.info("Iniciando API Info EMI...")
     
-    # Verificar conexión a BD
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -1156,9 +1089,7 @@ async def startup_event():
     except Exception as e:
         logger.error(f"Error conectando a BD: {e}")
 
-# Montar archivos estáticos
 try:
-    # Calculamos la ruta exacta a la carpeta frontend/static
     static_path = Path(__file__).parent.parent / "frontend" / "static"
     
     app.mount("/static", StaticFiles(directory=str(static_path)), name="static")

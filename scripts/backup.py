@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-"""
-Script para realizar backups automáticos de la base de datos
-"""
 import os
 import sys
 import subprocess
@@ -17,7 +14,6 @@ import zipfile
 import logging
 from dotenv import load_dotenv
 
-# Configurar logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -28,7 +24,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Cargar variables de entorno
 load_dotenv()
 
 class DatabaseBackup:
@@ -39,24 +34,18 @@ class DatabaseBackup:
         if not self.db_url:
             raise ValueError("DATABASE_URL no configurada")
         
-        # Parsear URL de conexión
         self.parse_db_url()
         
-        # Configuración de backup
         self.backup_dir = Path('backups')
         self.backup_dir.mkdir(exist_ok=True)
         
-        # Configuración de retención (días)
         self.retention_days = int(os.getenv('BACKUP_RETENTION_DAYS', '7'))
         
-        # Configuración de email
         self.email_enabled = os.getenv('EMAIL_NOTIFICATIONS', 'False').lower() == 'true'
         if self.email_enabled:
             self.setup_email_config()
     
     def parse_db_url(self):
-        """Parsear URL de conexión a PostgreSQL"""
-        # Formato: postgresql://user:password@host:port/database
         import re
         
         pattern = r'postgresql://([^:]+):([^@]+)@([^:]+):(\d+)/(.+)'
@@ -82,7 +71,6 @@ class DatabaseBackup:
         self.email_from = os.getenv('EMAIL_FROM')
         self.email_to = os.getenv('EMAIL_TO', '').split(',')
         
-        # Verificar configuración
         missing = []
         for var in ['SMTP_SERVER', 'SMTP_USER', 'SMTP_PASSWORD', 'EMAIL_FROM', 'EMAIL_TO']:
             if not os.getenv(var):
@@ -93,7 +81,6 @@ class DatabaseBackup:
             self.email_enabled = False
     
     def create_backup(self):
-        """Crear backup de la base de datos"""
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         backup_file = self.backup_dir / f"info_emi_backup_{timestamp}.sql"
         backup_zip = self.backup_dir / f"info_emi_backup_{timestamp}.zip"
@@ -101,22 +88,19 @@ class DatabaseBackup:
         logger.info(f"Creando backup: {backup_file}")
         
         try:
-            # Variables de entorno para pg_dump
             env = os.environ.copy()
             env['PGPASSWORD'] = self.db_password
             
-            # Comando pg_dump
             cmd = [
                 'pg_dump',
                 '-h', self.db_host,
                 '-p', self.db_port,
                 '-U', self.db_user,
                 '-d', self.db_name,
-                '-F', 'c',  # Formato custom (binario)
+                '-F', 'c',
                 '-f', str(backup_file)
             ]
             
-            # Ejecutar pg_dump
             logger.debug(f"Ejecutando: {' '.join(cmd)}")
             result = subprocess.run(
                 cmd,
@@ -131,10 +115,8 @@ class DatabaseBackup:
             
             logger.info(f"Backup creado exitosamente: {backup_file.stat().st_size / 1024:.1f} KB")
             
-            # Comprimir backup
             self.compress_backup(backup_file, backup_zip)
             
-            # Eliminar archivo SQL original
             backup_file.unlink()
             
             return backup_zip
@@ -144,7 +126,6 @@ class DatabaseBackup:
             return None
     
     def compress_backup(self, source_file, dest_zip):
-        """Comprimir archivo de backup"""
         try:
             with zipfile.ZipFile(dest_zip, 'w', zipfile.ZIP_DEFLATED) as zipf:
                 zipf.write(source_file, source_file.name)
@@ -156,14 +137,12 @@ class DatabaseBackup:
             raise
     
     def cleanup_old_backups(self):
-        """Eliminar backups antiguos"""
         cutoff_date = datetime.now() - timedelta(days=self.retention_days)
         deleted = 0
         
         logger.info(f"Limpiando backups más antiguos de {self.retention_days} días")
         
         for backup_file in self.backup_dir.glob('info_emi_backup_*.zip'):
-            # Extraer fecha del nombre del archivo
             try:
                 date_str = backup_file.stem.replace('info_emi_backup_', '')
                 file_date = datetime.strptime(date_str, '%Y%m%d_%H%M%S')
@@ -174,13 +153,11 @@ class DatabaseBackup:
                     deleted += 1
                     
             except ValueError:
-                # Si no se puede parsear la fecha, saltar
                 continue
         
         logger.info(f"Eliminados {deleted} backups antiguos")
     
     def send_email_notification(self, backup_file, success=True):
-        """Enviar notificación por email"""
         if not self.email_enabled:
             return
         
@@ -222,7 +199,6 @@ class DatabaseBackup:
             
             msg.attach(MIMEText(body, 'html'))
             
-            # Adjuntar archivo de backup si fue exitoso
             if success and backup_file:
                 with open(backup_file, 'rb') as f:
                     part = MIMEBase('application', 'zip')
@@ -234,7 +210,6 @@ class DatabaseBackup:
                     )
                     msg.attach(part)
             
-            # Enviar email
             with smtplib.SMTP(self.smtp_server, self.smtp_port) as server:
                 server.starttls()
                 server.login(self.smtp_user, self.smtp_password)
@@ -246,9 +221,7 @@ class DatabaseBackup:
             logger.error(f"Error enviando notificación por email: {e}")
     
     def verify_backup(self, backup_file):
-        """Verificar integridad del backup"""
         try:
-            # Verificar que el archivo existe y no está vacío
             if not backup_file.exists():
                 logger.error(f"Archivo de backup no encontrado: {backup_file}")
                 return False
@@ -257,10 +230,8 @@ class DatabaseBackup:
                 logger.error(f"Archivo de backup vacío: {backup_file}")
                 return False
             
-            # Verificar que es un archivo ZIP válido
             if zipfile.is_zipfile(backup_file):
                 with zipfile.ZipFile(backup_file, 'r') as zipf:
-                    # Verificar que no esté corrupto
                     if zipf.testzip() is None:
                         logger.info("Backup verificado exitosamente")
                         return True
@@ -276,7 +247,6 @@ class DatabaseBackup:
             return False
     
     def run_full_backup(self):
-        """Ejecutar proceso completo de backup"""
         logger.info("=" * 50)
         logger.info("INICIANDO PROCESO DE BACKUP")
         logger.info("=" * 50)
@@ -284,7 +254,6 @@ class DatabaseBackup:
         start_time = datetime.now()
         
         try:
-            # 1. Crear backup
             backup_file = self.create_backup()
             
             if not backup_file:
@@ -293,7 +262,6 @@ class DatabaseBackup:
                     self.send_email_notification(None, success=False)
                 return False
             
-            # 2. Verificar backup
             if not self.verify_backup(backup_file):
                 logger.error("Backup no verificado")
                 backup_file.unlink()
@@ -301,14 +269,11 @@ class DatabaseBackup:
                     self.send_email_notification(None, success=False)
                 return False
             
-            # 3. Limpiar backups antiguos
             self.cleanup_old_backups()
             
-            # 4. Enviar notificación
             if self.email_enabled:
                 self.send_email_notification(backup_file, success=True)
             
-            # 5. Mostrar resumen
             end_time = datetime.now()
             duration = (end_time - start_time).total_seconds()
             
@@ -329,7 +294,6 @@ class DatabaseBackup:
             return False
     
     def list_backups(self):
-        """Listar todos los backups disponibles"""
         backups = list(self.backup_dir.glob('info_emi_backup_*.zip'))
         
         if not backups:
@@ -355,7 +319,6 @@ class DatabaseBackup:
         print("-" * 80)
     
     def restore_backup(self, backup_number=None, backup_file=None):
-        """Restaurar base de datos desde backup"""
         if not backup_file:
             backups = list(self.backup_dir.glob('info_emi_backup_*.zip'))
             
@@ -391,7 +354,6 @@ class DatabaseBackup:
         logger.info(f"Iniciando restauración desde: {backup_file.name}")
         
         try:
-            # Extraer archivo SQL del ZIP
             temp_dir = Path('temp_restore')
             temp_dir.mkdir(exist_ok=True)
             
@@ -405,18 +367,16 @@ class DatabaseBackup:
                 zipf.extract(sql_file, temp_dir)
                 extracted_file = temp_dir / sql_file
             
-            # Variables de entorno para pg_restore
             env = os.environ.copy()
             env['PGPASSWORD'] = self.db_password
             
-            # Comando pg_restore
             cmd = [
                 'pg_restore',
                 '-h', self.db_host,
                 '-p', self.db_port,
                 '-U', self.db_user,
                 '-d', self.db_name,
-                '--clean',  # Limpiar objetos existentes
+                '--clean',
                 '--if-exists',
                 '--no-owner',
                 '--no-privileges',
@@ -431,7 +391,6 @@ class DatabaseBackup:
                 text=True
             )
             
-            # Limpiar archivos temporales
             shutil.rmtree(temp_dir)
             
             if result.returncode != 0:
@@ -446,7 +405,6 @@ class DatabaseBackup:
             return False
 
 def main():
-    """Función principal"""
     import argparse
     
     parser = argparse.ArgumentParser(description='Sistema de backup para Info EMI')

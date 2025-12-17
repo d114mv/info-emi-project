@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-"""
-Script para configurar la base de datos PostgreSQL local
-"""
 import os
 import sys
 import psycopg2
@@ -11,7 +8,6 @@ import getpass
 import hashlib
 
 def read_sql_file(filepath):
-    """Leer archivo SQL"""
     try:
         with open(filepath, 'r', encoding='utf-8') as f:
             return f.read()
@@ -23,8 +19,6 @@ def read_sql_file(filepath):
         sys.exit(1)
 
 def get_db_connection(dbname=None):
-    """Establecer conexión a PostgreSQL"""
-    # Parámetros de conexión por defecto
     params = {
         'host': 'localhost',
         'port': 5432,
@@ -33,7 +27,6 @@ def get_db_connection(dbname=None):
         'dbname': dbname
     }
     
-    # Intentar obtener de variables de entorno
     if not params['password']:
         params['password'] = os.getenv('PGPASSWORD')
     
@@ -46,7 +39,6 @@ def get_db_connection(dbname=None):
     if not params['port']:
         params['port'] = os.getenv('PGPORT', 5432)
     
-    # Solicitar contraseña si no está configurada
     if not params['password']:
         params['password'] = getpass.getpass(f"Contraseña para PostgreSQL ({params['user']}): ")
     
@@ -62,16 +54,13 @@ def get_db_connection(dbname=None):
         sys.exit(1)
 
 def create_database():
-    """Crear base de datos si no existe"""
     print("🔧 Creando base de datos 'info_emi'...")
     
-    # Conectar a postgres database
     conn = get_db_connection('postgres')
     conn.autocommit = True
     cur = conn.cursor()
     
     try:
-        # Verificar si la base de datos existe
         cur.execute("SELECT 1 FROM pg_database WHERE datname = 'info_emi'")
         exists = cur.fetchone()
         
@@ -89,26 +78,21 @@ def create_database():
         sys.exit(1)
 
 def execute_sql_script():
-    """Ejecutar script SQL de inicialización"""
     print("📄 Ejecutando script de inicialización...")
     
-    # Leer archivo SQL
     script_path = Path(__file__).parent / 'init.sql'
     sql_script = read_sql_file(script_path)
     
-    # Conectar a la base de datos creada
     conn = get_db_connection('info_emi')
     conn.autocommit = False
     cur = conn.cursor()
     
     try:
-        # Ejecutar script completo
         cur.execute(sql_script)
         conn.commit()
         
         print("✅ Script SQL ejecutado exitosamente")
         
-        # Mostrar resumen
         cur.execute("""
             SELECT 
                 (SELECT COUNT(*) FROM careers) as careers_count,
@@ -127,7 +111,6 @@ def execute_sql_script():
         print(f"   • FAQs: {stats[3]}")
         print(f"   • Administradores: {stats[4]}")
         
-        # Mostrar credenciales de administrador
         cur.execute("SELECT username FROM admins LIMIT 1")
         admin_user = cur.fetchone()
         
@@ -145,7 +128,6 @@ def execute_sql_script():
         sys.exit(1)
 
 def create_user():
-    """Crear usuario específico para la aplicación"""
     print("\n👤 Creando usuario de aplicación...")
     
     conn = get_db_connection('info_emi')
@@ -153,26 +135,22 @@ def create_user():
     cur = conn.cursor()
     
     try:
-        # Crear usuario si no existe
         app_user = 'info_emi_user'
-        app_password = 'SecurePass123!'  # Cambiar en producción
+        app_password = 'SecurePass123!'
         
         cur.execute("SELECT 1 FROM pg_roles WHERE rolname = %s", (app_user,))
         user_exists = cur.fetchone()
         
         if not user_exists:
-            # Crear usuario con contraseña
             cur.execute(sql.SQL("CREATE USER {} WITH PASSWORD %s").format(
                 sql.Identifier(app_user)
             ), (app_password,))
             
-            # Otorgar privilegios
             cur.execute(sql.SQL("GRANT ALL PRIVILEGES ON DATABASE {} TO {}").format(
                 sql.Identifier('info_emi'),
                 sql.Identifier(app_user)
             ))
             
-            # Otorgar permisos en esquema público
             cur.execute("GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO %s", (app_user,))
             cur.execute("GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO %s", (app_user,))
             
@@ -188,7 +166,6 @@ def create_user():
         print(f"❌ Error creando usuario: {e}")
 
 def update_env_file():
-    """Actualizar archivo .env con la configuración de la BD"""
     print("\n⚙️ Actualizando archivo .env...")
     
     env_path = Path(__file__).parent.parent / 'backend' / '.env'
@@ -197,7 +174,6 @@ def update_env_file():
         with open(env_path, 'r', encoding='utf-8') as f:
             content = f.read()
         
-        # Actualizar DATABASE_URL
         new_db_url = "DATABASE_URL=postgresql://info_emi_user:SecurePass123!@localhost:5432/info_emi"
         
         if 'DATABASE_URL=' in content:
@@ -222,11 +198,9 @@ def update_env_file():
         print("   DATABASE_URL=postgresql://info_emi_user:SecurePass123!@localhost:5432/info_emi")
 
 def generate_password_hash(password):
-    """Generar hash SHA256 para contraseña"""
     return hashlib.sha256(password.encode()).hexdigest()
 
 def change_admin_password():
-    """Cambiar contraseña del administrador"""
     print("\n🔐 ¿Deseas cambiar la contraseña del administrador? (s/n): ", end='')
     response = input().lower()
     
@@ -251,7 +225,6 @@ def change_admin_password():
             conn.commit()
             print("✅ Contraseña del administrador actualizada exitosamente")
             
-            # Mostrar nuevo hash para archivo .env
             print(f"\n🔧 Si usas Render, actualiza esta variable de entorno:")
             print(f"   ADMIN_PASSWORD_HASH={password_hash}")
             
@@ -263,12 +236,10 @@ def change_admin_password():
             conn.close()
 
 def main():
-    """Función principal"""
     print("=" * 50)
     print("CONFIGURADOR DE BASE DE DATOS - INFO EMI")
     print("=" * 50)
     
-    # Verificar que PostgreSQL esté instalado
     try:
         import psycopg2
     except ImportError:
@@ -276,7 +247,6 @@ def main():
         print("   Ejecuta: pip install psycopg2-binary")
         sys.exit(1)
     
-    # Verificar archivo init.sql
     init_file = Path(__file__).parent / 'init.sql'
     if not init_file.exists():
         print(f"❌ Archivo init.sql no encontrado en: {init_file}")
@@ -284,7 +254,6 @@ def main():
     
     print(f"\n📁 Script SQL encontrado: {init_file}")
     
-    # Ejecutar pasos
     try:
         create_database()
         execute_sql_script()

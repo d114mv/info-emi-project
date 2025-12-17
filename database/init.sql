@@ -1,8 +1,3 @@
--- ============================================
--- SCRIPT DE INICIALIZACIÓN DE BASE DE DATOS
--- Base de datos para Info_EMI Bot
--- ============================================
-
 -- 1. Tabla de administradores
 CREATE TABLE IF NOT EXISTS admins (
     id SERIAL PRIMARY KEY,

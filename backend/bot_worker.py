@@ -1,8 +1,4 @@
 #!/usr/bin/env python3
-"""
-Worker principal del bot de Telegram
-Ejecutar en segundo plano para mantener el bot activo
-"""
 import os
 import sys
 import time
@@ -10,7 +6,6 @@ import logging
 from datetime import datetime
 from pathlib import Path
 
-# Configurar logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -21,17 +16,14 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Agregar directorio al path
 sys.path.append(str(Path(__file__).parent))
 
-# Importar módulos después de configurar path
 import telebot
 from telebot import types
 import requests
 import threading
 from dotenv import load_dotenv
 
-# Cargar variables de entorno
 load_dotenv()
 
 TOKEN = os.getenv("BOT_TOKEN", "8577123738:AAEjeNx5cnErCWfm2f1dcpUzhm4Q1xa1qkE")
@@ -39,10 +31,8 @@ API_URL = os.getenv("API_URL", "http://localhost:8000")
 
 bot = telebot.TeleBot(TOKEN, parse_mode="HTML")
 
-# ========== FUNCIONES AUXILIARES ==========
 
 def format_career(career: dict) -> str:
-    """Formatear información de carrera para mostrar"""
     text = f"<b>🎓 {career['name']}</b>\n"
     text += f"<code>{career['code']}</code>\n\n"
     
@@ -62,7 +52,6 @@ def format_career(career: dict) -> str:
     return text
 
 def format_preuniversity(program: dict) -> str:
-    """Formatear información de programa preuniversitario"""
     text = f"<b>📚 {program['program_name']}</b>\n\n"
     
     if program.get('description'):
@@ -109,7 +98,6 @@ def format_preuniversity(program: dict) -> str:
     return text
 
 def get_api_data(endpoint: str, params: dict = None):
-    """Obtener datos de la API"""
     try:
         url = f"{API_URL}/{endpoint}"
         response = requests.get(url, params=params, timeout=10)
@@ -125,7 +113,6 @@ def get_api_data(endpoint: str, params: dict = None):
     except Exception as e:
         logger.error(f"Error inesperado en get_api_data: {e}")
         return None
-# --- FUNCIONES DE FORMATO NUEVAS ---
 
 def format_scholarship(item: dict) -> str:
     text = f"💰 <b>{item['name']}</b>\n"
@@ -193,17 +180,13 @@ def format_inscription_info(item: dict) -> str:
     
     return text
 
-# ========== HANDLERS DE COMANDOS ==========
 
 @bot.message_handler(commands=['start'])
 def handle_start(message):
-    """Manejador del comando /start"""
     logger.info(f"Comando /start de {message.chat.id}")
     
-    # --- 1. CREAR EL MENÚ DE BOTONES (FALTABA ESTO) ---
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
     
-    # Definir los botones (Coinciden con lo que espera handle_text_messages)
     btn_carreras = types.KeyboardButton("🎓 Carreras")
     btn_pre = types.KeyboardButton("📚 Preuniversitarios")
     btn_eventos = types.KeyboardButton("📅 Eventos")
@@ -213,10 +196,8 @@ def handle_start(message):
     btn_calendario = types.KeyboardButton("📆 Calendario")
     btn_ayuda = types.KeyboardButton("ℹ️ Ayuda")
     
-    # Agregar botones al markup
     markup.add(btn_carreras, btn_pre, btn_eventos, btn_becas, 
                btn_faq, btn_contactos, btn_calendario, btn_ayuda)
-    # --------------------------------------------------
 
     welcome_text = """
 <b>¡Hola! Soy Info_EMI 🤖</b>
@@ -248,7 +229,6 @@ Tu asistente virtual de la universidad.
 
 @bot.message_handler(commands=['help'])
 def handle_help(message):
-    """Manejador del comando /help"""
     help_text = """
 <b>📋 COMANDOS DISPONIBLES</b>
 
@@ -275,10 +255,8 @@ def handle_help(message):
 
 @bot.message_handler(commands=['carreras', 'carrera', '🎓 Carreras' ])
 def handle_careers(message):
-    """Manejador del comando /carreras"""
     logger.info(f"Comando /carreras de {message.chat.id}")
     
-    # Obtener datos de la API
     data = get_api_data("bot/careers")
     
     if not data or 'careers' not in data or not data['careers']:
@@ -292,15 +270,13 @@ def handle_careers(message):
     
     careers = data['careers']
     
-    # Crear botones inline para cada carrera
     markup = types.InlineKeyboardMarkup(row_width=1)
     
-    for career in careers[:10]:  # Máximo 10 para no sobrecargar
+    for career in careers[:10]:
         button_text = f"🎓 {career['code']} - {career['name'][:25]}..."
         callback_data = f"career_{career['code']}"
         markup.add(types.InlineKeyboardButton(button_text, callback_data=callback_data))
     
-    # Si hay más de 10 carreras, agregar paginación
     if len(careers) > 10:
         markup.add(types.InlineKeyboardButton("▶️ Ver más carreras", callback_data="careers_more"))
     
@@ -315,7 +291,6 @@ def handle_careers(message):
 
 @bot.message_handler(commands=['preuniversitario', 'preuniversitarios', 'pre', '📚 Preuniversitarios'])
 def handle_preuniversity(message):
-    """Manejador del comando /preuniversitario"""
     logger.info(f"Comando /preuniversitario de {message.chat.id}")
     
     data = get_api_data("bot/preuniversity")
@@ -332,17 +307,15 @@ def handle_preuniversity(message):
     
     programs = data['programs']
     
-    # Crear botones inline
     markup = types.InlineKeyboardMarkup(row_width=1)
     
-    for program in programs[:8]:  # Máximo 8 programas
+    for program in programs[:8]:
         button_text = f"📚 {program['program_name'][:30]}"
         if len(program['program_name']) > 30:
             button_text += "..."
         callback_data = f"preuni_{program['id']}"
         markup.add(types.InlineKeyboardButton(button_text, callback_data=callback_data))
     
-    # Botón para ver todos los detalles
     if len(programs) > 1:
         markup.add(types.InlineKeyboardButton("📋 Ver resumen de todos", callback_data="preuni_all"))
     
@@ -357,7 +330,6 @@ def handle_preuniversity(message):
 
 @bot.message_handler(commands=['eventos', 'evento', '📅 Eventos'])
 def handle_events(message):
-    """Manejador del comando /eventos"""
     data = get_api_data("bot/events", {"limit": 5})
     
     if not data or 'events' not in data or not data['events']:
@@ -400,19 +372,15 @@ def handle_events(message):
     
     bot.send_message(message.chat.id, response_text, parse_mode="HTML")
 
-# --- HANDLERS CONECTADOS A LA BD ---
 
 @bot.message_handler(commands=['becas', 'beca', '💰 Becas'])
 def handle_scholarships(message):
-    """Manejador dinámico de Becas"""
-    # 1. Pedir datos a tu API
     data = get_api_data("api/scholarships")
     
     if not data:
         bot.send_message(message.chat.id, "📭 No hay becas disponibles por ahora.")
         return
 
-    # 2. Enviar mensaje
     bot.send_message(message.chat.id, "🎓 <b>BECAS Y DESCUENTOS DISPONIBLES</b>", parse_mode="HTML")
     
     for item in data:
@@ -421,14 +389,12 @@ def handle_scholarships(message):
 
 @bot.message_handler(commands=['faq', 'preguntas'])
 def handle_faq(message):
-    """Muestra el menú de categorías de FAQs"""
     data = get_api_data("api/faqs")
     
     if not data:
         bot.send_message(message.chat.id, "📭 No hay preguntas frecuentes registradas.")
         return
 
-    # 1. Extraer categorías únicas (Si es None, poner 'General')
     categories = set()
     for item in data:
         cat = item.get('category')
@@ -436,13 +402,10 @@ def handle_faq(message):
             cat = "General"
         categories.add(cat)
     
-    # 2. Crear teclado con botones (Inline Keyboard)
     markup = types.InlineKeyboardMarkup(row_width=2)
     buttons = []
     
     for cat in sorted(list(categories)):
-        # El callback_data es el "ID oculto" que se envía cuando tocas el botón
-        # Usamos un prefijo 'faq:' para saber que es de esta sección
         buttons.append(types.InlineKeyboardButton(
             text=f"📂 {cat}", 
             callback_data=f"faq:{cat}" 
@@ -459,8 +422,6 @@ def handle_faq(message):
 
 @bot.message_handler(commands=['contacto', 'contactos', '📞 Contactos'])
 def handle_contacts(message):
-    """Manejador dinámico de Contactos"""
-    # 1. Pedir datos a tu API
     data = get_api_data("api/contacts")
     
     if not data:
@@ -475,24 +436,20 @@ def handle_contacts(message):
 
 @bot.message_handler(commands=['calendario', '📆 Calendario'])
 def handle_calendar(message):
-    # 1. Obtener datos de API
     data = get_api_data("api/calendar")
     
     if not data:
         bot.send_message(message.chat.id, "📅 No hay eventos programados en el calendario académico.")
         return
 
-    # 2. Enviar respuesta
     bot.send_message(message.chat.id, "📆 <b>CALENDARIO ACADÉMICO</b>", parse_mode="HTML")
     
-    # Filtrar eventos futuros o mostrar todos (aquí muestro los próximos 10)
     for item in data[:10]:
         text = format_calendar_event(item)
         bot.send_message(message.chat.id, text, parse_mode="HTML")
 
 @bot.message_handler(commands=['inscripciones', 'matrícula'])
 def handle_inscriptions(message):
-    # 1. Obtener datos de API
     data = get_api_data("api/inscriptions")
     
     if not data:
@@ -502,11 +459,9 @@ def handle_inscriptions(message):
     current_period = data[0]
     text = format_inscription_info(current_period)
     bot.send_message(message.chat.id, text, parse_mode="HTML")
-# ========== HANDLERS DE CALLBACK ==========
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('career_'))
 def handle_career_callback(call):
-    """Manejador para callback de carreras"""
     career_code = call.data.split('_')[1]
     
     if career_code == "more":
@@ -543,13 +498,11 @@ def handle_career_callback(call):
         bot.answer_callback_query(call.id)
     except Exception as e:
         logger.error(f"Error editando mensaje: {e}")
-        # Enviar como nuevo mensaje si falla la edición
         bot.send_message(call.message.chat.id, career_text, parse_mode="HTML")
         bot.answer_callback_query(call.id)
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('preuni_'))
 def handle_preuniversity_callback(call):
-    """Manejador para callback de preuniversitarios"""
     data_parts = call.data.split('_')
     
     if len(data_parts) < 2:
@@ -559,18 +512,15 @@ def handle_preuniversity_callback(call):
     program_id = data_parts[1]
     
     if program_id == "all":
-        # Mostrar resumen de todos los programas
         show_all_preuniversity(call)
         return
     
-    # Obtener datos de programas
     api_data = get_api_data("bot/preuniversity")
     
     if not api_data or 'programs' not in api_data:
         bot.answer_callback_query(call.id, "Error al obtener información")
         return
     
-    # Buscar programa específico
     try:
         program_id_int = int(program_id)
         program = next((p for p in api_data['programs'] if p['id'] == program_id_int), None)
@@ -581,10 +531,8 @@ def handle_preuniversity_callback(call):
         bot.answer_callback_query(call.id, "Programa no encontrado")
         return
     
-    # Formatear información
     program_text = format_preuniversity(program)
     
-    # Agregar botones de acción
     markup = types.InlineKeyboardMarkup()
     
     if program.get('registration_link'):
@@ -611,7 +559,6 @@ def handle_preuniversity_callback(call):
         bot.answer_callback_query(call.id)
 
 def show_all_preuniversity(call):
-    """Mostrar resumen de todos los programas preuniversitarios"""
     data = get_api_data("bot/preuniversity")
     
     if not data or 'programs' not in data or not data['programs']:
@@ -655,15 +602,12 @@ def show_all_preuniversity(call):
         bot.send_message(call.message.chat.id, summary_text, parse_mode="HTML")
         bot.answer_callback_query(call.id)
 
-# ========== HANDLER DE MENSAJES DE TEXTO ==========
 
 @bot.message_handler(func=lambda message: True)
 def handle_text_messages(message):
-    """Manejador de mensajes de texto"""
     text = message.text.lower().strip()
     logger.info(f"Mensaje de texto de {message.chat.id}: {text}")
     
-    # Mapeo de textos a comandos
     text_to_command = {
         'carreras': handle_careers,
         '🎓 Carreras': handle_careers,
@@ -692,13 +636,11 @@ def handle_text_messages(message):
         'hola': handle_start,
         'inicio': handle_start
     }    
-    # Buscar handler correspondiente
     handler = text_to_command.get(text)
     
     if handler:
         handler(message)
     else:
-        # Respuesta por defecto
         bot.send_message(
             message.chat.id,
             "🤖 <b>Info_EMI</b>\n\n"
@@ -710,10 +652,8 @@ def handle_text_messages(message):
             parse_mode="HTML"
         )
 
-# ========== FUNCIONES DE MONITOREO ==========
 
 def check_api_health():
-    """Verificar salud de la API periódicamente"""
     while True:
         try:
             response = requests.get(f"{API_URL}/health", timeout=5)
@@ -724,12 +664,10 @@ def check_api_health():
         except Exception as e:
             logger.error(f"Error verificando API: {e}")
         
-        time.sleep(300)  # Verificar cada 5 minutos
+        time.sleep(300)
 
-# ========== INICIALIZACIÓN ==========
 
 def start_bot():
-    """Iniciar el bot con manejo de errores"""
     logger.info("=" * 50)
     logger.info("INICIANDO BOT INFO_EMI")
     logger.info(f"Token: {TOKEN[:10]}...")
@@ -742,11 +680,9 @@ def start_bot():
     except Exception as e:
         logger.warning(f"No se pudo eliminar webhook: {e}")
 
-    # Iniciar thread para monitoreo de API
     health_thread = threading.Thread(target=check_api_health, daemon=True)
     health_thread.start()
     
-    # Intentar conexión con reintentos
     max_retries = 5
     retry_delay = 10
     
@@ -754,15 +690,12 @@ def start_bot():
         try:
             logger.info(f"Intento {attempt + 1} de {max_retries}...")
             
-            # Obtener información del bot
             bot_info = bot.get_me()
             logger.info(f"Bot conectado: @{bot_info.username} ({bot_info.first_name})")
             
-            # Iniciar polling
             logger.info("Iniciando polling...")
             bot.polling(none_stop=True, interval=1, timeout=30)
             
-            # Si llega aquí, polling se detuvo
             logger.warning("Polling detenido, reiniciando...")
             
         except telebot.apihelper.ApiException as e:
@@ -787,18 +720,14 @@ def start_bot():
 def handle_faq_click(call):
     """Maneja el clic en una categoría de FAQ"""
     try:
-        # 1. Obtener la categoría seleccionada del callback_data
-        # call.data viene como "faq:Académico", así que separamos por ':'
         category_selected = call.data.split(':', 1)[1]
         
-        # 2. Volver a pedir los datos (para filtrar)
         data = get_api_data("api/faqs")
         
         if not data:
             bot.answer_callback_query(call.id, "No se pudo cargar la información.")
             return
 
-        # 3. Filtrar preguntas de esa categoría
         filtered_questions = []
         for item in data:
             item_cat = item.get('category')
@@ -808,17 +737,14 @@ def handle_faq_click(call):
             if item_cat == category_selected:
                 filtered_questions.append(item)
         
-        # 4. Construir el mensaje de respuesta
         text = f"📂 <b>CATEGORÍA: {category_selected.upper()}</b>\n\n"
         
-        # Ordenar por prioridad (si existe)
         filtered_questions.sort(key=lambda x: x.get('priority', 99))
         
         for item in filtered_questions:
             text += f"🔹 <b>{item['question']}</b>\n"
             text += f"💡 <i>{item['answer']}</i>\n\n"
             
-        # 5. Editar el mensaje original o enviar uno nuevo
         bot.send_message(call.message.chat.id, text, parse_mode="HTML")
         
         bot.answer_callback_query(call.id)

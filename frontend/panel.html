@@ -26,7 +26,6 @@
         
         body { background-color: var(--bg-light); color: var(--text-dark); height: 100vh; overflow: hidden; }
 
-        /* ================= LOGIN STYLES (MANTENIDOS) ================= */
         .login-wrapper {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; justify-content: center; align-items: center;
@@ -61,14 +60,12 @@
         }
         .btn-login:hover { background: var(--primary-dark); transform: translateY(-2px); }
 
-        /* ================= DASHBOARD LAYOUT (NUEVO) ================= */
         .dashboard-layout {
             display: flex;
             height: 100vh;
             width: 100vw;
         }
 
-        /* SIDEBAR (MENÚ IZQUIERDO) */
         .sidebar {
             width: var(--sidebar-width);
             background: var(--primary);
@@ -131,7 +128,7 @@
         .nav-item:hover {
             background: rgba(255,255,255,0.1);
             color: white;
-            padding-left: 20px; /* Efecto de movimiento */
+            padding-left: 20px;
         }
 
         .nav-item.active {
@@ -157,7 +154,6 @@
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
         }
 
-        /* MAIN CONTENT (CONTENIDO DERECHA) */
         .main-content {
             flex: 1;
             overflow-y: auto;
@@ -178,14 +174,13 @@
             font-weight: 600;
         }
 
-        /* TARJETAS Y CONTENIDO */
         .content-card {
             background: white;
             border-radius: 15px;
             padding: 2rem;
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
             animation: fadeIn 0.3s ease-out;
-            display: none; /* Ocultos por defecto */
+            display: none;
         }
 
         .content-card.active {
@@ -203,7 +198,6 @@
         
         .card-header h3 { color: var(--primary); font-size: 1.2rem; }
 
-        /* TABLAS (CORREGIDAS) */
         .table-responsive {
             overflow-x: auto;
             border-radius: 10px;
@@ -291,7 +285,6 @@
         .btn-danger { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
         .btn-danger:hover { background: var(--danger); color: white; }
 
-        /* MODAL */
         .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5); z-index: 2000;
@@ -310,7 +303,6 @@
             border-radius: 8px; font-size: 0.95rem;
         }
         
-        /* ESTADO BADGES */
         .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
         .badge-active { background: #dcfce7; color: #15803d; }
         .badge-inactive { background: #fee2e2; color: #991b1b; }
@@ -589,7 +581,6 @@
         if (tabId === 'inscriptions') loadInscriptions();
     }
 
-    // --- API & AUTH ---
     async function apiFetch(endpoint, options = {}) {
         const token = localStorage.getItem('auth_token');
         if (!token) { logout(); return; }
@@ -610,7 +601,6 @@
         }
     }
 
-    // --- LOAD FUNCTIONS ---
     async function loadCareers() {
         const res = await apiFetch(`${API_URL}/careers?active_only=false`);
         if(!res) return;
@@ -714,7 +704,6 @@
         `).join('');
     }
 
-    // --- CALENDARIO ---
    async function loadCalendar() {
         try {
             const res = await apiFetch(`${API_URL}/calendar?active_only=false`);
@@ -728,7 +717,6 @@
             }
 
             tbody.innerHTML = data.map(i => {
-                // Usamos || '' para evitar que salga "undefined"
                 const fecha = i.start_date || '-';
                 const nombre = i.event_name || i.activity || 'Sin Título';
                 const tipo = i.event_type || 'General';
@@ -773,7 +761,6 @@
         `, i?.id);
     }
 
-    // --- INSCRIPCIONES ---
     async function loadInscriptions() {
         try {
             const res = await apiFetch(`${API_URL}/inscriptions?active_only=false`);
@@ -788,7 +775,6 @@
 
             tbody.innerHTML = data.map(i => {
                 const periodo = i.period || 'Sin Periodo';
-                // Protección para fechas
                 const fechaInicio = i.start_date || '?';
                 const fechaFin = i.end_date || '?';
                 const reqTexto = (i.requirements || '').substring(0, 50) + '...';
@@ -825,7 +811,6 @@
         `, i?.id);
     }
 
-    // --- MODALS ---
     function setupModal(item, title, html, id) {
         document.getElementById('modalTitle').innerText = item ? `Editar ${title}` : `Nueva ${title}`;
         document.getElementById('modalFields').innerHTML = html;
@@ -931,7 +916,6 @@
         `, i?.id);
     }
 
-    // --- CRUD ACTIONS ---
     document.getElementById('crudForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const data = Object.fromEntries(new FormData(e.target));
@@ -945,7 +929,6 @@
         const res = await apiFetch(url, { method, body: JSON.stringify(data) });
         if(res && res.ok) {
             closeModal();
-            // Recargar automáticamente la sección actual
             window['load'+currentSection.charAt(0).toUpperCase()+currentSection.slice(1)]();
             alert('Guardado exitosamente');
         } else {
@@ -957,7 +940,6 @@
         if(!confirm('¿Eliminar registro?')) return;
         const res = await apiFetch(`${API_URL}/${section}/${id}`, { method: 'DELETE' });
         if(res && res.ok) {
-            // Recargar automáticamente
             window['load'+section.charAt(0).toUpperCase()+section.slice(1)]();
         } else {
             alert('Error al eliminar');
@@ -967,15 +949,12 @@
     function closeModal() { document.getElementById('crudModal').style.display = 'none'; }
     function logout() { localStorage.removeItem('auth_token'); location.reload(); }
 
-    // --- INIT ---
     
-    // 1. Conectar botón de Cerrar Sesión (ESTO FALTABA)
     const logoutBtn = document.getElementById('logoutBtn');
     if(logoutBtn) {
         logoutBtn.addEventListener('click', logout);
     }
 
-    // 2. Conectar botón de Login
     const passwordInput = document.getElementById('password');
     const usernameInput = document.getElementById('username');
 
@@ -1032,7 +1011,6 @@
         });
     }
 
-    // 3. Verificar sesión al cargar
     window.addEventListener('DOMContentLoaded', () => {
         if(localStorage.getItem('auth_token')) {
             document.getElementById('loginContainer').style.display = 'none';
@@ -1041,7 +1019,6 @@
             const userDisplay = document.getElementById('userWelcome');
             if(userDisplay) userDisplay.innerText = localStorage.getItem('username');
             
-            // Cargar dashboard por defecto
             switchTab('dashboard');
         }
     });
