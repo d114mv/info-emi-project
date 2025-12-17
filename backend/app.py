@@ -82,7 +82,17 @@ def get_university_context():
         cur.execute("SELECT question, answer FROM faqs WHERE is_active = TRUE")
         faqs = cur.fetchall()
         context += "❓ Preguntas Frecuentes:\n" + "\n".join([f"P: {f['question']} R: {f['answer']}" for f in faqs]) + "\n\n"
+
+        cur.execute("SELECT config_key, config_value FROM system_config WHERE is_public = TRUE")
+        configs = cur.fetchall()
         
+        if configs:
+            context += "📍 Datos Generales y Contacto:\n"
+            for item in configs:
+                key_readable = item['config_key'].replace('university_', '').replace('_', ' ').capitalize()
+                context += f"- {key_readable}: {item['config_value']}\n"
+            context += "\n"
+
         return context
     except Exception as e:
         logger.error(f"Error construyendo contexto IA: {e}")
