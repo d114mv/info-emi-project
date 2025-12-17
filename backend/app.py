@@ -1116,7 +1116,7 @@ async def ask_bot_ai(request: AskRequest):
     try:
         context_data = get_university_context()
         
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        model = genai.GenerativeModel('gemini-pro')
         
         prompt = f"""
         Actúa como 'Info_EMI', un asistente universitario amable y útil.
