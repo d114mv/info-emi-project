@@ -114,6 +114,21 @@ def get_api_data(endpoint: str, params: dict = None):
         logger.error(f"Error inesperado en get_api_data: {e}")
         return None
 
+def post_api_data(endpoint: str, data: dict):
+    try:
+        url = f"{API_URL}/{endpoint}"
+        response = requests.post(url, json=data, timeout=20)
+        
+        if response.status_code == 200:
+            return response.json()
+        else:
+            logger.error(f"API Error {response.status_code}: {response.text}")
+            return None
+    except Exception as e:
+        logger.error(f"Error conectando a API (POST): {e}")
+        return None
+    
+
 def format_scholarship(item: dict) -> str:
     text = f"💰 <b>{item['name']}</b>\n"
     if item.get('coverage'):
@@ -636,22 +651,24 @@ def handle_text_messages(message):
         'hola': handle_start,
         'inicio': handle_start
     }    
+    
     handler = text_to_command.get(text)
     
     if handler:
         handler(message)
     else:
-        bot.send_message(
-            message.chat.id,
-            "🤖 <b>Info_EMI</b>\n\n"
-            "No entiendo ese mensaje. Puedes usar:\n"
-            "• Los comandos (ej: /carreras)\n"
-            "• Los botones del teclado\n"
-            "• Escribir: 'carreras', 'eventos', 'faq', etc.\n\n"
-            "<i>Escribe /help para ver todos los comandos disponibles.</i>",
-            parse_mode="HTML"
-        )
 
+        bot.send_chat_action(message.chat.id, 'typing')
+        
+        response = post_api_data("bot/ask", {"question": message.text})
+        
+        if response and 'answer' in response:
+            bot.reply_to(message, response['answer'], parse_mode="Markdown")
+        else:
+            bot.send_message(
+                message.chat.id,
+                "🤖 Estoy teniendo problemas para pensar ahora mismo. Intenta usar los comandos /help."
+            )
 
 def check_api_health():
     while True:

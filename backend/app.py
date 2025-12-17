@@ -1,6 +1,7 @@
 import os
 import sys
 from pathlib import Path
+import google.generativeai as genai
 
 sys.path.append(str(Path(__file__).parent))
 
@@ -23,6 +24,10 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 load_dotenv()
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+if GEMINI_API_KEY:
+    genai.configure(api_key=GEMINI_API_KEY)
 
 app = FastAPI(
     title="Info EMI API",
@@ -59,6 +64,32 @@ def get_db_connection():
         logger.error(f"Error conectando a DB: {e}")
         raise HTTPException(status_code=500, detail="Error de conexión a base de datos")
 
+def get_university_context():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    context = "Información oficial de la Universidad:\n\n"
+    
+    try:
+        cur.execute("SELECT name, code FROM careers WHERE is_active = TRUE")
+        careers = cur.fetchall()
+        context += "🎓 Carreras ofertadas:\n" + "\n".join([f"- {c['name']} ({c['code']})" for c in careers]) + "\n\n"
+
+        cur.execute("SELECT title, date, start_time FROM events WHERE date >= CURRENT_DATE AND is_active = TRUE LIMIT 5")
+        events = cur.fetchall()
+        if events:
+            context += "📅 Próximos eventos:\n" + "\n".join([f"- {e['title']} el {e['date']} a las {e['start_time']}" for e in events]) + "\n\n"
+
+        cur.execute("SELECT question, answer FROM faqs WHERE is_active = TRUE")
+        faqs = cur.fetchall()
+        context += "❓ Preguntas Frecuentes:\n" + "\n".join([f"P: {f['question']} R: {f['answer']}" for f in faqs]) + "\n\n"
+        
+        return context
+    except Exception as e:
+        logger.error(f"Error construyendo contexto IA: {e}")
+        return "Información no disponible temporalmente."
+    finally:
+        cur.close()
+        conn.close()
 
 class CareerCreate(BaseModel):
     code: str
@@ -155,6 +186,9 @@ class InscriptionInfoCreate(BaseModel):
 class LoginRequest(BaseModel):
     username: str
     password: str
+
+class AskRequest(BaseModel):
+    question: str
 
 @app.post("/api/login")
 async def login(request: LoginRequest):
@@ -1073,6 +1107,35 @@ async def get_stats(admin: dict = Depends(authenticate_admin)):
     finally:
         cur.close()
         conn.close()
+
+@app.post("/bot/ask")
+async def ask_bot_ai(request: AskRequest):
+    if not GEMINI_API_KEY:
+        return {"answer": "Lo siento, mi cerebro de IA no está configurado (Falta API Key)."}
+
+    try:
+        context_data = get_university_context()
+        
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        
+        prompt = f"""
+        Actúa como 'Info_EMI', un asistente universitario amable y útil.
+        
+        Usa EXCLUSIVAMENTE la siguiente información para responder (si no está aquí, di que no sabes y sugiere contactar a admisiones):
+        
+        {context_data}
+        
+        Usuario pregunta: {request.question}
+        
+        Respuesta (breve, concisa y con emojis si aplica):
+        """
+        
+        response = model.generate_content(prompt)
+        return {"answer": response.text}
+        
+    except Exception as e:
+        logger.error(f"Error IA: {e}")
+        return {"answer": "Tuve un error procesando tu pregunta. Intenta más tarde."}
 
 @app.on_event("startup")
 async def startup_event():
