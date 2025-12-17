@@ -419,25 +419,43 @@ def handle_scholarships(message):
         text = format_scholarship(item)
         bot.send_message(message.chat.id, text, parse_mode="HTML", disable_web_page_preview=True)
 
-@bot.message_handler(commands=['faq', 'preguntas', '❓ FAQ'])
+@bot.message_handler(commands=['faq', 'preguntas'])
 def handle_faq(message):
-    """Manejador dinámico de FAQs"""
-    # 1. Pedir datos a tu API
+    """Muestra el menú de categorías de FAQs"""
     data = get_api_data("api/faqs")
     
     if not data:
-        bot.send_message(message.chat.id, "📭 No hay preguntas frecuentes cargadas.")
+        bot.send_message(message.chat.id, "📭 No hay preguntas frecuentes registradas.")
         return
 
-    response = "❓ <b>PREGUNTAS FRECUENTES</b>\n\n"
+    # 1. Extraer categorías únicas (Si es None, poner 'General')
+    categories = set()
     for item in data:
-        response += format_faq(item) + "\n"
+        cat = item.get('category')
+        if not cat or cat.strip() == "":
+            cat = "General"
+        categories.add(cat)
     
-    # Telegram tiene límite de 4096 caracteres, si es muy largo cortamos
-    if len(response) > 4000:
-        response = response[:4000] + "\n... (hay más preguntas)"
-        
-    bot.send_message(message.chat.id, response, parse_mode="HTML")
+    # 2. Crear teclado con botones (Inline Keyboard)
+    markup = types.InlineKeyboardMarkup(row_width=2)
+    buttons = []
+    
+    for cat in sorted(list(categories)):
+        # El callback_data es el "ID oculto" que se envía cuando tocas el botón
+        # Usamos un prefijo 'faq:' para saber que es de esta sección
+        buttons.append(types.InlineKeyboardButton(
+            text=f"📂 {cat}", 
+            callback_data=f"faq:{cat}" 
+        ))
+    
+    markup.add(*buttons)
+
+    bot.send_message(
+        message.chat.id, 
+        "❓ <b>PREGUNTAS FRECUENTES</b>\n\nSelecciona una categoría para ver las preguntas:", 
+        reply_markup=markup,
+        parse_mode="HTML"
+    )
 
 @bot.message_handler(commands=['contacto', 'contactos', '📞 Contactos'])
 def handle_contacts(message):
@@ -764,6 +782,50 @@ def start_bot():
             time.sleep(retry_delay)
     
     logger.error("Máximo de reintentos alcanzado. Deteniendo bot.")
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith('faq:'))
+def handle_faq_click(call):
+    """Maneja el clic en una categoría de FAQ"""
+    try:
+        # 1. Obtener la categoría seleccionada del callback_data
+        # call.data viene como "faq:Académico", así que separamos por ':'
+        category_selected = call.data.split(':', 1)[1]
+        
+        # 2. Volver a pedir los datos (para filtrar)
+        data = get_api_data("api/faqs")
+        
+        if not data:
+            bot.answer_callback_query(call.id, "No se pudo cargar la información.")
+            return
+
+        # 3. Filtrar preguntas de esa categoría
+        filtered_questions = []
+        for item in data:
+            item_cat = item.get('category')
+            if not item_cat or item_cat.strip() == "":
+                item_cat = "General"
+            
+            if item_cat == category_selected:
+                filtered_questions.append(item)
+        
+        # 4. Construir el mensaje de respuesta
+        text = f"📂 <b>CATEGORÍA: {category_selected.upper()}</b>\n\n"
+        
+        # Ordenar por prioridad (si existe)
+        filtered_questions.sort(key=lambda x: x.get('priority', 99))
+        
+        for item in filtered_questions:
+            text += f"🔹 <b>{item['question']}</b>\n"
+            text += f"💡 <i>{item['answer']}</i>\n\n"
+            
+        # 5. Editar el mensaje original o enviar uno nuevo
+        bot.send_message(call.message.chat.id, text, parse_mode="HTML")
+        
+        bot.answer_callback_query(call.id)
+        
+    except Exception as e:
+        logger.error(f"Error en callback FAQ: {e}")
+        bot.answer_callback_query(call.id, "Ocurrió un error al cargar.")
 
 if __name__ == "__main__":
     try:
