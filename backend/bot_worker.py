@@ -26,7 +26,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-TOKEN = os.getenv("BOT_TOKEN", "8577123738:AAEg7p1DMvr4zMsv6wYQrOOAVbkuibB3sw8")
+TOKEN = os.getenv("BOT_TOKEN", "8577123738:AAHWh5DKVXoCimUNkm_0e9mkiGdOf8DyGuA")
 API_URL = os.getenv("API_URL", "https://info-emi-backend.onrender.com")
 
 bot = telebot.TeleBot(TOKEN, parse_mode="HTML")
@@ -663,7 +663,7 @@ def handle_text_messages(message):
         response = post_api_data("bot/ask", {"question": message.text})
         
         if response and 'answer' in response:
-            bot.reply_to(message, response['answer'], parse_mode="Markdown")
+            bot.reply_to(message, response['answer'])
         else:
             bot.send_message(
                 message.chat.id,
