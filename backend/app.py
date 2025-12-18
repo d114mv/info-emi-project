@@ -90,7 +90,7 @@ def get_university_context():
             if c['modality']: 
                 context += f"Modalidad: {c['modality']}\n"
             if c['campus']: 
-                context += f"Sedes: {c['campus']}\n"
+                context += f"Campus: {c['campus']}\n"
             context += "\n"
 
         cur.execute("SELECT title, date, start_time, location FROM events WHERE date >= CURRENT_DATE AND is_active = TRUE LIMIT 5")
