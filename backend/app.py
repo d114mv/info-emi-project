@@ -70,7 +70,7 @@ def get_university_context():
     conn = get_db_connection()
     cur = conn.cursor(cursor_factory=RealDictCursor)
     
-    context = "Información oficial y detallada de la Universidad:\n\n"
+    context = "Información oficial y actualizada de la Universidad (EMI):\n\n"
     
     try:
         cur.execute("""
@@ -79,51 +79,71 @@ def get_university_context():
             WHERE is_active = TRUE
         """)
         careers = cur.fetchall()
+        if careers:
+            context += "🎓 OFERTA ACADÉMICA (CARRERAS):\n"
+            for c in careers:
+                context += f"--- {c['name']} ({c['code']}) ---\n"
+                if c['description']: context += f"Descripción: {c['description']}\n"
+                if c['duration']: context += f"Duración: {c['duration']}\n"
+                if c['modality']: context += f"Modalidad: {c['modality']}\n"
+                if c['campus']: context += f"Sede: {c['campus']}\n"
+                context += "\n"
+
+        cur.execute("""
+            SELECT event_name, event_type, start_date, end_date, description 
+            FROM academic_calendar 
+            WHERE is_active = TRUE 
+            ORDER BY start_date ASC
+        """)
+        calendar = cur.fetchall()
         
-        context += "🎓 INFORMACIÓN DETALLADA DE CARRERAS:\n"
-        for c in careers:
-            context += f"--- Carrera: {c['name']} ({c['code']}) ---\n"
-            if c['description']: 
-                context += f"Descripción: {c['description']}\n"
-            if c['duration']: 
-                context += f"Duración: {c['duration']}\n"
-            if c['modality']: 
-                context += f"Modalidad: {c['modality']}\n"
-            if c['campus']: 
-                context += f"Campus: {c['campus']}\n"
+        if calendar:
+            context += "🗓 CALENDARIO ACADÉMICO Y FECHAS IMPORTANTES:\n"
+            for e in calendar:
+                date_str = str(e['start_date'])
+                if e['end_date'] and e['end_date'] != e['start_date']:
+                    date_str += f" al {e['end_date']}"
+                
+                context += f"- {e['event_name']} ({e['event_type']}): {date_str}\n"
+                if e['description']:
+                    context += f"  Detalle: {e['description']}\n"
             context += "\n"
 
-        cur.execute("SELECT title, date, start_time, location FROM events WHERE date >= CURRENT_DATE AND is_active = TRUE LIMIT 5")
+        cur.execute("""
+            SELECT title, date, start_time, location 
+            FROM events 
+            WHERE date >= CURRENT_DATE AND is_active = TRUE 
+            ORDER BY date ASC LIMIT 5
+        """)
         events = cur.fetchall()
         if events:
-            context += "📅 PRÓXIMOS EVENTOS:\n"
+            context += "📅 PRÓXIMOS EVENTOS Y ACTIVIDADES:\n"
             for e in events:
-                context += f"- {e['title']}: Fecha {e['date']} a las {e['start_time']}. Lugar: {e['location']}\n"
+                context += f"- {e['title']}: {e['date']} a las {e['start_time']}. Lugar: {e['location']}\n"
             context += "\n"
 
         cur.execute("SELECT question, answer FROM faqs WHERE is_active = TRUE")
         faqs = cur.fetchall()
-        context += "❓ PREGUNTAS FRECUENTES (Banco de respuestas):\n"
-        for f in faqs:
-            context += f"P: {f['question']} -> R: {f['answer']}\n"
-        context += "\n"
+        if faqs:
+            context += "❓ BANCO DE PREGUNTAS FRECUENTES:\n"
+            for f in faqs:
+                context += f"P: {f['question']} R: {f['answer']}\n"
+            context += "\n"
 
         cur.execute("SELECT config_key, config_value FROM system_config WHERE is_public = TRUE")
         configs = cur.fetchall()
-        
         if configs:
-            context += "📍 DATOS DE CONTACTO Y UBICACIÓN:\n"
+            context += "📍 UBICACIONES Y CONTACTOS OFICIALES:\n"
             for item in configs:
-                raw_key = item['config_key']
-                key_readable = raw_key.replace('university_', '').replace('_', ' ').capitalize()
-                context += f"- {key_readable}: {item['config_value']}\n"
+                key_clean = item['config_key'].replace('university_', '').replace('_', ' ').capitalize()
+                context += f"- {key_clean}: {item['config_value']}\n"
             context += "\n"
 
         return context
 
     except Exception as e:
-        print(f"Error construyendo contexto IA: {e}") 
-        return "Información no disponible temporalmente."
+        print(f"Error generando contexto IA: {e}")
+        return "Información temporalmente no disponible."
     finally:
         cur.close()
         conn.close()
