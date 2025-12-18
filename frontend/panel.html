@@ -452,8 +452,6 @@
                     <i class="fas fa-file-signature" style="width:20px;"></i> Inscripciones
                 </button>
             </nav>
-            </nav>
-
             <div class="sidebar-footer">
                 <div class="user-info">
                     <div class="user-avatar"><i class="fas fa-user"></i></div>
@@ -504,131 +502,125 @@
 </div>
 
             <div id="events" class="content-card">
-                <div class="card-header">
-    <h3>Gestión de Eventos</h3>
-    <div class="header-tools">
-        <div class="search-wrapper">
-            <i class="fas fa-search"></i>
-            <input type="text" class="search-input" placeholder="Buscar evento..." onkeyup="filterTable(this, 'eventsTableBody')">
-        </div>
-        <button class="btn btn-success" onclick="openEventModal()"><i class="fas fa-plus"></i> Nuevo Evento</button>
-    </div>
-                <div class="table-responsive">
-                    <table class="data-table">
-                        <thead><tr><th>Fecha</th><th>Título</th><th>Lugar</th><th>Acciones</th></tr></thead>
-                        <tbody id="eventsTableBody"></tbody>
-                    </table>
-                </div>
+    <div class="card-header">
+        <h3>Gestión de Eventos</h3>
+        <div class="header-tools">
+            <div class="search-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" class="search-input" placeholder="Buscar evento..." onkeyup="filterTable(this, 'eventsTableBody')">
             </div>
+            <button class="btn btn-success" onclick="openEventModal()"><i class="fas fa-plus"></i> Nuevo Evento</button>
+        </div>
+    </div> <div class="table-responsive">
+        <table class="data-table">
+            <thead><tr><th>Fecha</th><th>Título</th><th>Lugar</th><th>Acciones</th></tr></thead>
+            <tbody id="eventsTableBody"></tbody>
+        </table>
+    </div>
+</div>
 
             <div id="preuniversity" class="content-card">
-                <div class="card-header">
-    <h3>Gestión de Preuniversitarios</h3>
-    <div class="header-tools">
-        <div class="search-wrapper">
-            <i class="fas fa-search"></i>
-            <input type="text" class="search-input" placeholder="Buscar programa..." onkeyup="filterTable(this, 'preuTableBody')">
-        </div>
-        <button class="btn btn-success" onclick="openPreuModal()"><i class="fas fa-plus"></i> Nuevo Curso</button>
-    </div>
-                <div class="table-responsive">
-                    <table class="data-table">
-                        <thead><tr><th>Programa</th><th>Duración</th><th>Costo</th><th>Inicio</th><th>Acciones</th></tr></thead>
-                        <tbody id="preuTableBody"></tbody>
-                    </table>
-                </div>
+    <div class="card-header">
+        <h3>Gestión de Preuniversitarios</h3>
+        <div class="header-tools">
+            <div class="search-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" class="search-input" placeholder="Buscar programa..." onkeyup="filterTable(this, 'preuTableBody')">
             </div>
-
+            <button class="btn btn-success" onclick="openPreuModal()"><i class="fas fa-plus"></i> Nuevo Curso</button>
+        </div>
+    </div> <div class="table-responsive">
+        <table class="data-table">
+            <thead><tr><th>Programa</th><th>Duración</th><th>Costo</th><th>Inicio</th><th>Acciones</th></tr></thead>
+            <tbody id="preuTableBody"></tbody>
+        </table>
+    </div>
+</div>
             <div id="faqs" class="content-card">
-                <div class="card-header">
-    <h3>Preguntas Frecuentes</h3>
-    <div class="header-tools">
-        <div class="search-wrapper">
-            <i class="fas fa-search"></i>
-            <input type="text" class="search-input" placeholder="Buscar pregunta..." onkeyup="filterTable(this, 'faqsTableBody')">
-        </div>
-        <button class="btn btn-success" onclick="openFaqModal()"><i class="fas fa-plus"></i> Nueva Pregunta</button>
-    </div>
-                <div class="table-responsive">
-                    <table class="data-table">
-                        <thead><tr><th>Pregunta</th><th>Categoría</th><th>Prioridad</th><th>Acciones</th></tr></thead>
-                        <tbody id="faqsTableBody"></tbody>
-                    </table>
-                </div>
+    <div class="card-header">
+        <h3>Preguntas Frecuentes</h3>
+        <div class="header-tools">
+            <div class="search-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" class="search-input" placeholder="Buscar pregunta..." onkeyup="filterTable(this, 'faqsTableBody')">
             </div>
-
+            <button class="btn btn-success" onclick="openFaqModal()"><i class="fas fa-plus"></i> Nueva Pregunta</button>
+        </div>
+    </div> <div class="table-responsive">
+        <table class="data-table">
+            <thead><tr><th>Pregunta</th><th>Categoría</th><th>Prioridad</th><th>Acciones</th></tr></thead>
+            <tbody id="faqsTableBody"></tbody>
+        </table>
+    </div>
+</div>
             <div id="contacts" class="content-card">
-                <div class="card-header">
-    <h3>Directorio de Contactos</h3>
-    <div class="header-tools">
-        <div class="search-wrapper">
-            <i class="fas fa-search"></i>
-            <input type="text" class="search-input" placeholder="Buscar contacto..." onkeyup="filterTable(this, 'contactsTableBody')">
-        </div>
-        <button class="btn btn-success" onclick="openContactModal()"><i class="fas fa-plus"></i> Nuevo Contacto</button>
-    </div>
-                <div class="table-responsive">
-                    <table class="data-table">
-                        <thead><tr><th>Dirección</th><th>Teléfono</th><th>Acciones</th></tr></thead>
-                        <tbody id="contactsTableBody"></tbody>
-                    </table>
-                </div>
+    <div class="card-header">
+        <h3>Directorio de Contactos</h3>
+        <div class="header-tools">
+            <div class="search-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" class="search-input" placeholder="Buscar contacto..." onkeyup="filterTable(this, 'contactsTableBody')">
             </div>
-
+            <button class="btn btn-success" onclick="openContactModal()"><i class="fas fa-plus"></i> Nuevo Contacto</button>
+        </div>
+    </div> <div class="table-responsive">
+        <table class="data-table">
+            <thead><tr><th>Dirección</th><th>Teléfono</th><th>Acciones</th></tr></thead>
+            <tbody id="contactsTableBody"></tbody>
+        </table>
+    </div>
+</div>
             <div id="scholarships" class="content-card">
-                <div class="card-header">
-    <h3>Gestión de Becas</h3>
-    <div class="header-tools">
-        <div class="search-wrapper">
-            <i class="fas fa-search"></i>
-            <input type="text" class="search-input" placeholder="Buscar beca..." onkeyup="filterTable(this, 'scholarshipsTableBody')">
-        </div>
-        <button class="btn btn-success" onclick="openScholarshipModal()"><i class="fas fa-plus"></i> Nueva Beca</button>
-    </div>
-                <div class="table-responsive">
-                    <table class="data-table">
-                        <thead><tr><th>Nombre</th><th>Cobertura</th><th>Acciones</th></tr></thead>
-                        <tbody id="scholarshipsTableBody"></tbody>
-                    </table>
-                </div>
+    <div class="card-header">
+        <h3>Gestión de Becas</h3>
+        <div class="header-tools">
+            <div class="search-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" class="search-input" placeholder="Buscar beca..." onkeyup="filterTable(this, 'scholarshipsTableBody')">
             </div>
-
+            <button class="btn btn-success" onclick="openScholarshipModal()"><i class="fas fa-plus"></i> Nueva Beca</button>
+        </div>
+    </div> <div class="table-responsive">
+        <table class="data-table">
+            <thead><tr><th>Nombre</th><th>Cobertura</th><th>Acciones</th></tr></thead>
+            <tbody id="scholarshipsTableBody"></tbody>
+        </table>
+    </div>
+</div>
             <div id="calendar" class="content-card">
     <div class="card-header">
-    <h3>Calendario Académico</h3>
-    <div class="header-tools">
-        <div class="search-wrapper">
-            <i class="fas fa-search"></i>
-            <input type="text" class="search-input" placeholder="Buscar fecha o evento..." onkeyup="filterTable(this, 'calendarTableBody')">
+        <h3>Calendario Académico</h3>
+        <div class="header-tools">
+            <div class="search-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" class="search-input" placeholder="Buscar fecha o evento..." onkeyup="filterTable(this, 'calendarTableBody')">
+            </div>
+            <button class="btn btn-success" onclick="openCalendarModal()"><i class="fas fa-plus"></i> Nuevo Evento</button>
         </div>
-        <button class="btn btn-success" onclick="openCalendarModal()"><i class="fas fa-plus"></i> Nuevo Evento</button>
-    </div>
-    <div class="table-responsive">
+    </div> <div class="table-responsive">
         <table class="data-table">
             <thead><tr><th>Fecha</th><th>Evento</th><th>Tipo</th><th>Periodo</th><th>Acciones</th></tr></thead>
             <tbody id="calendarTableBody"></tbody>
         </table>
     </div>
 </div>
-
 <div id="inscriptions" class="content-card">
     <div class="card-header">
-    <h3>Periodos de Inscripción</h3>
-    <div class="header-tools">
-        <div class="search-wrapper">
-            <i class="fas fa-search"></i>
-            <input type="text" class="search-input" placeholder="Buscar periodo..." onkeyup="filterTable(this, 'inscriptionsTableBody')">
+        <h3>Periodos de Inscripción</h3>
+        <div class="header-tools">
+            <div class="search-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" class="search-input" placeholder="Buscar periodo..." onkeyup="filterTable(this, 'inscriptionsTableBody')">
+            </div>
+            <button class="btn btn-success" onclick="openInscriptionModal()"><i class="fas fa-plus"></i> Nueva Inscripción</button>
         </div>
-        <button class="btn btn-success" onclick="openInscriptionModal()"><i class="fas fa-plus"></i> Nueva Inscripción</button>
-    </div>
-    <div class="table-responsive">
+    </div> <div class="table-responsive">
         <table class="data-table">
             <thead><tr><th>Periodo</th><th>Fechas</th><th>Requisitos (Resumen)</th><th>Acciones</th></tr></thead>
             <tbody id="inscriptionsTableBody"></tbody>
         </table>
     </div>
 </div>
-
         </main>
     </div>
 
