@@ -486,22 +486,22 @@
             </div>
 
             <div id="careers" class="content-card">
-                <div class="card-header">
-    <h3>Gestión de Carreras</h3>
-    <div class="header-tools">
-        <div class="search-wrapper">
-            <i class="fas fa-search"></i>
-            <input type="text" class="search-input" placeholder="Buscar carrera..." onkeyup="filterTable(this, 'careersTableBody')">
+    <div class="card-header">
+        <h3>Gestión de Carreras</h3>
+        <div class="header-tools">
+            <div class="search-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" class="search-input" placeholder="Buscar carrera..." onkeyup="filterTable(this, 'careersTableBody')">
+            </div>
+            <button class="btn btn-success" onclick="openCareerModal()"><i class="fas fa-plus"></i> Nueva Carrera</button>
         </div>
-        <button class="btn btn-success" onclick="openCareerModal()"><i class="fas fa-plus"></i> Nueva Carrera</button>
+    </div> <div class="table-responsive">
+        <table class="data-table">
+            <thead><tr><th>Código</th><th>Nombre</th><th>Campus</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody id="careersTableBody"></tbody>
+        </table>
     </div>
 </div>
-                    <table class="data-table">
-                        <thead><tr><th>Código</th><th>Nombre</th><th>Campus</th><th>Estado</th><th>Acciones</th></tr></thead>
-                        <tbody id="careersTableBody"></tbody>
-                    </table>
-                </div>
-            </div>
 
             <div id="events" class="content-card">
                 <div class="card-header">
@@ -513,7 +513,6 @@
         </div>
         <button class="btn btn-success" onclick="openEventModal()"><i class="fas fa-plus"></i> Nuevo Evento</button>
     </div>
-</div>
                 <div class="table-responsive">
                     <table class="data-table">
                         <thead><tr><th>Fecha</th><th>Título</th><th>Lugar</th><th>Acciones</th></tr></thead>
@@ -532,7 +531,6 @@
         </div>
         <button class="btn btn-success" onclick="openPreuModal()"><i class="fas fa-plus"></i> Nuevo Curso</button>
     </div>
-</div>
                 <div class="table-responsive">
                     <table class="data-table">
                         <thead><tr><th>Programa</th><th>Duración</th><th>Costo</th><th>Inicio</th><th>Acciones</th></tr></thead>
@@ -551,7 +549,6 @@
         </div>
         <button class="btn btn-success" onclick="openFaqModal()"><i class="fas fa-plus"></i> Nueva Pregunta</button>
     </div>
-</div>
                 <div class="table-responsive">
                     <table class="data-table">
                         <thead><tr><th>Pregunta</th><th>Categoría</th><th>Prioridad</th><th>Acciones</th></tr></thead>
@@ -570,7 +567,6 @@
         </div>
         <button class="btn btn-success" onclick="openContactModal()"><i class="fas fa-plus"></i> Nuevo Contacto</button>
     </div>
-</div>
                 <div class="table-responsive">
                     <table class="data-table">
                         <thead><tr><th>Dirección</th><th>Teléfono</th><th>Acciones</th></tr></thead>
@@ -589,7 +585,6 @@
         </div>
         <button class="btn btn-success" onclick="openScholarshipModal()"><i class="fas fa-plus"></i> Nueva Beca</button>
     </div>
-</div>
                 <div class="table-responsive">
                     <table class="data-table">
                         <thead><tr><th>Nombre</th><th>Cobertura</th><th>Acciones</th></tr></thead>
@@ -608,7 +603,6 @@
         </div>
         <button class="btn btn-success" onclick="openCalendarModal()"><i class="fas fa-plus"></i> Nuevo Evento</button>
     </div>
-</div>
     <div class="table-responsive">
         <table class="data-table">
             <thead><tr><th>Fecha</th><th>Evento</th><th>Tipo</th><th>Periodo</th><th>Acciones</th></tr></thead>
@@ -627,7 +621,6 @@
         </div>
         <button class="btn btn-success" onclick="openInscriptionModal()"><i class="fas fa-plus"></i> Nueva Inscripción</button>
     </div>
-</div>
     <div class="table-responsive">
         <table class="data-table">
             <thead><tr><th>Periodo</th><th>Fechas</th><th>Requisitos (Resumen)</th><th>Acciones</th></tr></thead>
