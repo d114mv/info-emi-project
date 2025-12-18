@@ -65,8 +65,11 @@ def get_db_connection():
         raise HTTPException(status_code=500, detail="Error de conexión a base de datos")
 
 def get_university_context():
+    from psycopg2.extras import RealDictCursor 
+    
     conn = get_db_connection()
-    cur = conn.cursor()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
     context = "Información oficial de la Universidad:\n\n"
     
     try:
@@ -87,15 +90,19 @@ def get_university_context():
         configs = cur.fetchall()
         
         if configs:
-            context += "📍 Datos Generales y Contacto:\n"
+            context += "📍 Ubicaciones y Contactos Oficiales:\n"
             for item in configs:
-                key_readable = item['config_key'].replace('university_', '').replace('_', ' ').capitalize()
+                raw_key = item['config_key']
+                
+                key_readable = raw_key.replace('university_', '').replace('_', ' ').capitalize()
+                
                 context += f"- {key_readable}: {item['config_value']}\n"
             context += "\n"
 
         return context
+
     except Exception as e:
-        logger.error(f"Error construyendo contexto IA: {e}")
+        print(f"Error construyendo contexto IA: {e}") 
         return "Información no disponible temporalmente."
     finally:
         cur.close()
