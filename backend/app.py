@@ -29,6 +29,18 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
 
+
+def formatear_fecha_es(fecha):
+    if not fecha:
+        return ""
+    
+    meses = {
+        1: "enero", 2: "febrero", 3: "marzo", 4: "abril", 5: "mayo", 6: "junio",
+        7: "julio", 8: "agosto", 9: "septiembre", 10: "octubre", 11: "noviembre", 12: "diciembre"
+    }
+    
+    return f"{fecha.day} de {meses[fecha.month]} del {fecha.year}"
+
 app = FastAPI(
     title="Info EMI API",
     description="API para el bot de información universitaria",
@@ -100,11 +112,13 @@ def get_university_context():
         if calendar:
             context += "🗓 CALENDARIO ACADÉMICO Y FECHAS IMPORTANTES:\n"
             for e in calendar:
-                date_str = str(e['start_date'])
-                if e['end_date'] and e['end_date'] != e['start_date']:
-                    date_str += f" al {e['end_date']}"
+                fecha_texto = formatear_fecha_es(e['start_date'])
                 
-                context += f"- {e['event_name']} ({e['event_type']}): {date_str}\n"
+                if e['end_date'] and e['end_date'] != e['start_date']:
+                    fecha_fin = formatear_fecha_es(e['end_date'])
+                    fecha_texto += f" al {fecha_fin}"
+                
+                context += f"- {e['event_name']} ({e['event_type']}): {fecha_texto}\n"
                 if e['description']:
                     context += f"  Detalle: {e['description']}\n"
             context += "\n"
@@ -119,7 +133,8 @@ def get_university_context():
         if events:
             context += "📅 PRÓXIMOS EVENTOS Y ACTIVIDADES:\n"
             for e in events:
-                context += f"- {e['title']}: {e['date']} a las {e['start_time']}. Lugar: {e['location']}\n"
+                fecha_bonita = formatear_fecha_es(e['date'])
+                context += f"- {e['title']}: {fecha_bonita} a las {e['start_time']}. Lugar: {e['location']}\n"
             context += "\n"
 
         cur.execute("SELECT question, answer FROM faqs WHERE is_active = TRUE")
