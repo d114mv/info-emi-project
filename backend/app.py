@@ -70,32 +70,52 @@ def get_university_context():
     conn = get_db_connection()
     cur = conn.cursor(cursor_factory=RealDictCursor)
     
-    context = "Información oficial de la Universidad:\n\n"
+    context = "Información oficial y detallada de la Universidad:\n\n"
     
     try:
-        cur.execute("SELECT name, code FROM careers WHERE is_active = TRUE")
+        cur.execute("""
+            SELECT name, code, description, duration, modality, campus 
+            FROM careers 
+            WHERE is_active = TRUE
+        """)
         careers = cur.fetchall()
-        context += "🎓 Carreras ofertadas:\n" + "\n".join([f"- {c['name']} ({c['code']})" for c in careers]) + "\n\n"
+        
+        context += "🎓 INFORMACIÓN DETALLADA DE CARRERAS:\n"
+        for c in careers:
+            context += f"--- Carrera: {c['name']} ({c['code']}) ---\n"
+            if c['description']: 
+                context += f"Descripción: {c['description']}\n"
+            if c['duration']: 
+                context += f"Duración: {c['duration']}\n"
+            if c['modality']: 
+                context += f"Modalidad: {c['modality']}\n"
+            if c['campus']: 
+                context += f"Sedes: {c['campus']}\n"
+            context += "\n"
 
-        cur.execute("SELECT title, date, start_time FROM events WHERE date >= CURRENT_DATE AND is_active = TRUE LIMIT 5")
+        cur.execute("SELECT title, date, start_time, location FROM events WHERE date >= CURRENT_DATE AND is_active = TRUE LIMIT 5")
         events = cur.fetchall()
         if events:
-            context += "📅 Próximos eventos:\n" + "\n".join([f"- {e['title']} el {e['date']} a las {e['start_time']}" for e in events]) + "\n\n"
+            context += "📅 PRÓXIMOS EVENTOS:\n"
+            for e in events:
+                context += f"- {e['title']}: Fecha {e['date']} a las {e['start_time']}. Lugar: {e['location']}\n"
+            context += "\n"
 
         cur.execute("SELECT question, answer FROM faqs WHERE is_active = TRUE")
         faqs = cur.fetchall()
-        context += "❓ Preguntas Frecuentes:\n" + "\n".join([f"P: {f['question']} R: {f['answer']}" for f in faqs]) + "\n\n"
+        context += "❓ PREGUNTAS FRECUENTES (Banco de respuestas):\n"
+        for f in faqs:
+            context += f"P: {f['question']} -> R: {f['answer']}\n"
+        context += "\n"
 
         cur.execute("SELECT config_key, config_value FROM system_config WHERE is_public = TRUE")
         configs = cur.fetchall()
         
         if configs:
-            context += "📍 Ubicaciones y Contactos Oficiales:\n"
+            context += "📍 DATOS DE CONTACTO Y UBICACIÓN:\n"
             for item in configs:
                 raw_key = item['config_key']
-                
                 key_readable = raw_key.replace('university_', '').replace('_', ' ').capitalize()
-                
                 context += f"- {key_readable}: {item['config_value']}\n"
             context += "\n"
 
