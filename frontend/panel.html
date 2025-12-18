@@ -753,6 +753,8 @@
                         <option value="Académico" ${i?.event_type==='Académico'?'selected':''}>Académico</option>
                         <option value="Administrativo" ${i?.event_type==='Administrativo'?'selected':''}>Administrativo</option>
                         <option value="Feriado" ${i?.event_type==='Feriado'?'selected':''}>Feriado</option>
+                        <option value="Examen" ${i?.event_type==='Examen'?'selected':''}>Examen</option>
+                        <option value="Otro" ${i?.event_type==='Otro'?'selected':''}>Otro</option>
                     </select>
                 </div>
                 <div class="form-group" style="flex:1"><label>Periodo Acad.</label><input class="form-control" name="academic_period" value="${i?.academic_period||''}" placeholder="Ej: I-2024"></div>
