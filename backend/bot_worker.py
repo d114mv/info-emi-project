@@ -449,19 +449,31 @@ def handle_contacts(message):
         text = format_contact(item)
         bot.send_message(message.chat.id, text, parse_mode="HTML")
 
+
 @bot.message_handler(commands=['calendario', '📆 Calendario'])
 def handle_calendar(message):
-    data = get_api_data("api/calendar")
+    logger.info(f"Comando /calendario de {message.chat.id}")
     
-    if not data:
-        bot.send_message(message.chat.id, "📅 No hay eventos programados en el calendario académico.")
-        return
-
-    bot.send_message(message.chat.id, "📆 <b>CALENDARIO ACADÉMICO</b>", parse_mode="HTML")
+    img_path = Path(__file__).parent.parent / "frontend" / "static" / "calendario.png"
     
-    for item in data[:10]:
-        text = format_calendar_event(item)
-        bot.send_message(message.chat.id, text, parse_mode="HTML")
+    try:
+        if img_path.exists():
+            bot.send_chat_action(message.chat.id, 'upload_photo')
+            
+            with open(img_path, 'rb') as photo:
+                bot.send_photo(
+                    message.chat.id, 
+                    photo, 
+                    caption="📆 <b>Calendario Académico Oficial</b>\nConsulta aquí todas las fechas importantes.",
+                    parse_mode="HTML"
+                )
+        else:
+            bot.send_message(message.chat.id, "⚠️ El calendario aún no ha sido cargado en el sistema.")
+            logger.error(f"No se encontró la imagen en: {img_path}")
+            
+    except Exception as e:
+        logger.error(f"Error enviando calendario: {e}")
+        bot.send_message(message.chat.id, "Tuve un problema al buscar la imagen. Intenta más tarde.")
 
 @bot.message_handler(commands=['inscripciones', 'matrícula'])
 def handle_inscriptions(message):
