@@ -26,7 +26,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-TOKEN = os.getenv("BOT_TOKEN", "8577123738:AAEe3FUyMaLoExrarVGk3E9ktjOzQv5QQ8c")
+TOKEN = os.getenv("BOT_TOKEN", "8577123738:AAEr2X1UGjTNZcWOW_Np5Ptl9okFlx0M9j4")
 API_URL = os.getenv("API_URL", "https://info-emi-backend.onrender.com")
 
 bot = telebot.TeleBot(TOKEN, parse_mode="HTML")

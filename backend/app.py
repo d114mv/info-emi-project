@@ -1,7 +1,7 @@
 import os
 import sys
 from pathlib import Path
-import google.generativeai as genai
+from groq import Groq
 
 sys.path.append(str(Path(__file__).parent))
 
@@ -25,9 +25,8 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-if GEMINI_API_KEY:
-    genai.configure(api_key=GEMINI_API_KEY)
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+groq_client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
 
 
 def formatear_fecha_es(fecha):
@@ -1182,32 +1181,49 @@ async def get_stats(admin: dict = Depends(authenticate_admin)):
 
 @app.post("/bot/ask")
 async def ask_bot_ai(request: AskRequest):
-    if not GEMINI_API_KEY:
-        return {"answer": "Lo siento, mi cerebro de IA no está configurado (Falta API Key)."}
+    if not groq_client:
+        return {"answer": "Lo siento, mi cerebro de IA no está configurado (Falta GROQ API Key)."}
 
     try:
         context_data = get_university_context()
         
-        model = genai.GenerativeModel('models/gemini-flash-latest')
+        system_prompt = f"""
+        Actúa como 'Info_EMI', un asistente de la Escuela Militar de Ingeniería (EMI) Unidad Académica Cochabamba
+        en la ciudad de Cochabamba.
+        Eres amable, profesional y usas emojis para dar vida a la conversación.
         
-        prompt = f"""
-        Actúa como 'Info_EMI', un asistente universitario amable y útil.
+        TU REGLA DE ORO:
+        Usa EXCLUSIVAMENTE la siguiente información de contexto para responder. 
+        Si la respuesta no está en el texto de abajo, di cortésmente que no tienes esa información y sugiere contactar a admisiones.
+        NO inventes fechas ni datos.
         
-        Usa EXCLUSIVAMENTE la siguiente información para responder (si no está aquí, di que no sabes y sugiere contactar a admisiones):
-        
+        --- INFORMACIÓN DE CONTEXTO (BASE DE DATOS) ---
         {context_data}
-        
-        Usuario pregunta: {request.question}
-        
-        Respuesta (breve, concisa y con emojis si aplica):
+        -----------------------------------------------
         """
-        
-        response = model.generate_content(prompt)
-        return {"answer": response.text}
+
+        chat_completion = groq_client.chat.completions.create(
+            messages=[
+                {
+                    "role": "system",
+                    "content": system_prompt,
+                },
+                {
+                    "role": "user",
+                    "content": request.question,
+                }
+            ],
+            model="llama-3.3-70b-versatile", 
+            temperature=0.3,
+            max_tokens=300,
+        )
+
+        answer = chat_completion.choices[0].message.content
+        return {"answer": answer}
         
     except Exception as e:
-        logger.error(f"Error IA: {e}")
-        return {"answer": "Tuve un error procesando tu pregunta. Intenta más tarde."}
+        logger.error(f"Error IA (Groq): {e}")
+        return {"answer": "Tuve un pequeño error procesando tu pregunta. Intenta más tarde."}
 
 @app.on_event("startup")
 async def startup_event():
