@@ -26,7 +26,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-TOKEN = os.getenv("BOT_TOKEN", "8577123738:AAEr2X1UGjTNZcWOW_Np5Ptl9okFlx0M9j4")
+TOKEN = os.getenv("BOT_TOKEN", "8577123738:AAE6t1ffJ_f15OjJsg3T7Rks394L-QFpZW0")
 API_URL = os.getenv("API_URL", "https://info-emi-backend.onrender.com")
 
 bot = telebot.TeleBot(TOKEN, parse_mode="HTML")
@@ -285,24 +285,41 @@ def handle_careers(message):
     
     careers = data['careers']
     
-    markup = types.InlineKeyboardMarkup(row_width=1)
-    
-    for career in careers[:10]:
-        button_text = f"🎓 {career['code']} - {career['name'][:25]}..."
-        callback_data = f"career_{career['code']}"
-        markup.add(types.InlineKeyboardButton(button_text, callback_data=callback_data))
-    
-    if len(careers) > 10:
-        markup.add(types.InlineKeyboardButton("▶️ Ver más carreras", callback_data="careers_more"))
+    # --- CAMBIO AQUÍ: Función auxiliar para generar el teclado ---
+    markup = generate_careers_markup(careers, offset=0)
     
     bot.send_message(
         message.chat.id,
         f"<b>🎓 OFERTA ACADÉMICA</b>\n\n"
-        f"Selecciona una carrera para ver detalles:\n"
-        f"<i>(Mostrando {min(len(careers), 10)} de {len(careers)} carreras)</i>",
+        f"Selecciona una carrera para ver detalles:\n",
         reply_markup=markup,
         parse_mode="HTML"
     )
+
+def generate_careers_markup(careers, offset=0, limit=10):
+    markup = types.InlineKeyboardMarkup(row_width=1)
+    
+    current_page_careers = careers[offset : offset + limit]
+    
+    for career in current_page_careers:
+        button_text = f"🎓 {career['code']} - {career['name'][:25]}..."
+        callback_data = f"career_{career['code']}"
+        markup.add(types.InlineKeyboardButton(button_text, callback_data=callback_data))
+    
+    nav_buttons = []
+    
+    if offset > 0:
+        prev_offset = max(0, offset - limit)
+        nav_buttons.append(types.InlineKeyboardButton("⬅️ Anterior", callback_data=f"list_careers_{prev_offset}"))
+        
+    if offset + limit < len(careers):
+        next_offset = offset + limit
+        nav_buttons.append(types.InlineKeyboardButton("▶️ Ver más", callback_data=f"list_careers_{next_offset}"))
+    
+    if nav_buttons:
+        markup.row(*nav_buttons)
+        
+    return markup
 
 @bot.message_handler(commands=['preuniversitario', 'preuniversitarios', 'pre', '📚 Preuniversitarios'])
 def handle_preuniversity(message):
@@ -487,13 +504,39 @@ def handle_inscriptions(message):
     text = format_inscription_info(current_period)
     bot.send_message(message.chat.id, text, parse_mode="HTML")
 
+@bot.callback_query_handler(func=lambda call: call.data.startswith('list_careers_'))
+def handle_career_pagination(call):
+    try:
+        offset = int(call.data.split('_')[2])
+        
+        data = get_api_data("bot/careers")
+        
+        if not data or 'careers' not in data:
+            bot.answer_callback_query(call.id, "Error al actualizar lista")
+            return
+            
+        careers = data['careers']
+        
+        markup = generate_careers_markup(careers, offset=offset)
+        
+        bot.edit_message_text(
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+            text=f"<b>🎓 OFERTA ACADÉMICA</b>\n\n"
+                 f"Mostrando carreras {offset + 1} a {min(offset + 10, len(careers))} de {len(careers)}:",
+            reply_markup=markup,
+            parse_mode="HTML"
+        )
+        bot.answer_callback_query(call.id)
+        
+    except Exception as e:
+        logger.error(f"Error en paginación de carreras: {e}")
+        bot.answer_callback_query(call.id, "Ocurrió un error")
+
+
 @bot.callback_query_handler(func=lambda call: call.data.startswith('career_'))
 def handle_career_callback(call):
     career_code = call.data.split('_')[1]
-    
-    if career_code == "more":
-        bot.answer_callback_query(call.id, "Función en desarrollo")
-        return
     
     data = get_api_data("bot/careers")
     
