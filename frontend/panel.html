@@ -1146,24 +1146,27 @@ function filterTable(input, tableBodyId) {
         const method = currentMode==='edit' ? 'PUT' : 'POST';
 
         const res = await apiFetch(url, { method, body: JSON.stringify(data) });
-        if(res && res.ok) {
-            closeModal();
-            window['load'+currentSection.charAt(0).toUpperCase()+currentSection.slice(1)]();
-            alert('Guardado exitosamente');
+        if (currentSection === 'system_config') {
+        loadConfig();
         } else {
-            alert('Error al guardar');
+            window['load'+currentSection.charAt(0).toUpperCase()+currentSection.slice(1)]();
         }
     });
 
     async function deleteItem(section, id) {
-        if(!confirm('¿Eliminar registro?')) return;
-        const res = await apiFetch(`${API_URL}/${section}/${id}`, { method: 'DELETE' });
-        if(res && res.ok) {
-            window['load'+section.charAt(0).toUpperCase()+section.slice(1)]();
+    if(!confirm('¿Eliminar registro?')) return;
+    const res = await apiFetch(`${API_URL}/${section}/${id}`, { method: 'DELETE' });
+    
+    if(res && res.ok) {
+        if (section === 'system_config') {
+            loadConfig();
         } else {
-            alert('Error al eliminar');
+            window['load'+section.charAt(0).toUpperCase()+section.slice(1)]();
         }
+    } else {
+        alert('Error al eliminar');
     }
+}
 
     function closeModal() { document.getElementById('crudModal').style.display = 'none'; }
     function logout() { localStorage.removeItem('auth_token'); location.reload(); }
