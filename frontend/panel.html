@@ -451,6 +451,9 @@
                 <button class="nav-item" onclick="switchTab('inscriptions')">
                     <i class="fas fa-file-signature" style="width:20px;"></i> Inscripciones
                 </button>
+                <button class="nav-item" onclick="switchTab('config')">
+                    <i class="fas fa-cogs" style="width:20px;"></i> Configuración IA
+                </button>
             </nav>
             <div class="sidebar-footer">
                 <div class="user-info">
@@ -621,6 +624,32 @@
         </table>
     </div>
 </div>
+<div id="config" class="content-card">
+    <div class="card-header">
+        <h3>Configuración del Sistema (Contexto IA)</h3>
+        <div class="header-tools">
+            <div class="search-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" class="search-input" placeholder="Buscar configuración..." onkeyup="filterTable(this, 'configTableBody')">
+            </div>
+            <button class="btn btn-success" onclick="openConfigModal()"><i class="fas fa-plus"></i> Nueva Configuración</button>
+        </div>
+    </div> 
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th style="width: 20%">Clave (Key)</th>
+                    <th style="width: 40%">Valor</th>
+                    <th style="width: 25%">Descripción</th>
+                    <th style="width: 5%">Público</th>
+                    <th style="width: 10%">Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="configTableBody"></tbody>
+        </table>
+    </div>
+</div>
         </main>
     </div>
 
@@ -677,7 +706,8 @@ function filterTable(input, tableBodyId) {
             'contacts': 'Contactos',
             'scholarships': 'Gestión de Becas',
             'calendar': 'Calendario Académico',
-            'inscriptions': 'Periodos de Inscripción'
+            'inscriptions': 'Periodos de Inscripción',
+            'config': 'Configuración del Sistema'
         };
 
         document.getElementById('pageTitle').innerText = titles[tabId] || 'Gestión Info EMI';
@@ -691,6 +721,7 @@ function filterTable(input, tableBodyId) {
         if (tabId === 'scholarships') loadScholarships();
         if (tabId === 'calendar') loadCalendar();
         if (tabId === 'inscriptions') loadInscriptions();
+        if (tabId === 'config') loadConfig();
     }
 
     async function apiFetch(endpoint, options = {}) {

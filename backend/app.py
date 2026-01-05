@@ -172,6 +172,13 @@ class CareerCreate(BaseModel):
     requirements: Optional[str] = None
     is_active: bool = True
 
+class SystemConfigCreate(BaseModel):
+    config_key: str
+    config_value: str
+    description: Optional[str] = None
+    is_public: bool = True
+
+
 class EventCreate(BaseModel):
     title: str
     event_type: str
@@ -467,6 +474,53 @@ async def delete_career(career_id: int, admin: dict = Depends(authenticate_admin
     finally:
         cur.close()
         conn.close()
+
+@app.get("/api/system_config")
+async def get_system_config(active_only: bool = True):
+    conn = get_db_connection(); cur = conn.cursor()
+    try:
+        query = "SELECT * FROM system_config ORDER BY config_key"
+        cur.execute(query)
+        return cur.fetchall()
+    finally:
+        cur.close(); conn.close()
+
+@app.post("/api/system_config")
+async def create_system_config(item: SystemConfigCreate, admin: dict = Depends(authenticate_admin)):
+    conn = get_db_connection(); cur = conn.cursor()
+    try:
+        cur.execute("""
+            INSERT INTO system_config (config_key, config_value, description, is_public)
+            VALUES (%s, %s, %s, %s) RETURNING id
+        """, (item.config_key, item.config_value, item.description, item.is_public))
+        conn.commit()
+        return {"message": "Configuración creada", "id": cur.fetchone()['id']}
+    finally:
+        cur.close(); conn.close()
+
+@app.put("/api/system_config/{id}")
+async def update_system_config(id: int, item: SystemConfigCreate, admin: dict = Depends(authenticate_admin)):
+    conn = get_db_connection(); cur = conn.cursor()
+    try:
+        cur.execute("""
+            UPDATE system_config SET config_key=%s, config_value=%s, description=%s, is_public=%s
+            WHERE id=%s
+        """, (item.config_key, item.config_value, item.description, item.is_public, id))
+        conn.commit()
+        return {"message": "Configuración actualizada"}
+    finally:
+        cur.close(); conn.close()
+
+@app.delete("/api/system_config/{id}")
+async def delete_system_config(id: int, admin: dict = Depends(authenticate_admin)):
+    conn = get_db_connection(); cur = conn.cursor()
+    try:
+        cur.execute("DELETE FROM system_config WHERE id=%s", (id,))
+        conn.commit()
+        return {"message": "Eliminado"}
+    finally:
+        cur.close(); conn.close()
+
 
 @app.get("/api/calendar")
 async def get_calendar(active_only: bool = True):
