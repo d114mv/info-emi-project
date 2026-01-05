@@ -476,17 +476,16 @@ async def delete_career(career_id: int, admin: dict = Depends(authenticate_admin
         conn.close()
 
 @app.get("/api/system_config")
-async def get_system_config(active_only: bool = True):
+async def get_system_config():
     conn = get_db_connection(); cur = conn.cursor()
     try:
-        query = "SELECT * FROM system_config ORDER BY config_key"
-        cur.execute(query)
+        cur.execute("SELECT * FROM system_config ORDER BY config_key")
         return cur.fetchall()
     finally:
         cur.close(); conn.close()
 
 @app.post("/api/system_config")
-async def create_system_config(item: SystemConfigCreate, admin: dict = Depends(authenticate_admin)):
+async def create_config(item: SystemConfigCreate, admin: dict = Depends(authenticate_admin)):
     conn = get_db_connection(); cur = conn.cursor()
     try:
         cur.execute("""
@@ -494,12 +493,12 @@ async def create_system_config(item: SystemConfigCreate, admin: dict = Depends(a
             VALUES (%s, %s, %s, %s) RETURNING id
         """, (item.config_key, item.config_value, item.description, item.is_public))
         conn.commit()
-        return {"message": "Configuración creada", "id": cur.fetchone()['id']}
+        return {"message": "Creado", "id": cur.fetchone()['id']}
     finally:
         cur.close(); conn.close()
 
 @app.put("/api/system_config/{id}")
-async def update_system_config(id: int, item: SystemConfigCreate, admin: dict = Depends(authenticate_admin)):
+async def update_config(id: int, item: SystemConfigCreate, admin: dict = Depends(authenticate_admin)):
     conn = get_db_connection(); cur = conn.cursor()
     try:
         cur.execute("""
@@ -507,12 +506,12 @@ async def update_system_config(id: int, item: SystemConfigCreate, admin: dict = 
             WHERE id=%s
         """, (item.config_key, item.config_value, item.description, item.is_public, id))
         conn.commit()
-        return {"message": "Configuración actualizada"}
+        return {"message": "Actualizado"}
     finally:
         cur.close(); conn.close()
 
 @app.delete("/api/system_config/{id}")
-async def delete_system_config(id: int, admin: dict = Depends(authenticate_admin)):
+async def delete_config(id: int, admin: dict = Depends(authenticate_admin)):
     conn = get_db_connection(); cur = conn.cursor()
     try:
         cur.execute("DELETE FROM system_config WHERE id=%s", (id,))
@@ -520,7 +519,6 @@ async def delete_system_config(id: int, admin: dict = Depends(authenticate_admin
         return {"message": "Eliminado"}
     finally:
         cur.close(); conn.close()
-
 
 @app.get("/api/calendar")
 async def get_calendar(active_only: bool = True):
