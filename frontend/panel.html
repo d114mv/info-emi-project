@@ -744,6 +744,73 @@ function filterTable(input, tableBodyId) {
         }
     }
 
+    async function loadConfig() {
+        try {
+            const res = await apiFetch(`${API_URL}/system_config`);
+            if(!res) return;
+            const data = await res.json();
+            
+            const tbody = document.getElementById('configTableBody');
+            
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">No hay configuraciones registradas</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(i => {
+                const valorCorto = i.config_value.length > 60 ? i.config_value.substring(0, 60) + '...' : i.config_value;
+                
+                const badge = i.is_public 
+                    ? '<span class="badge badge-active">Público</span>' 
+                    : '<span class="badge badge-inactive">Privado</span>';
+
+                return `
+                <tr>
+                    <td><strong style="color:var(--primary)">${i.config_key}</strong></td>
+                    <td title="${i.config_value}">${valorCorto}</td>
+                    <td><small>${i.description || '-'}</small></td>
+                    <td>${badge}</td>
+                    <td class="actions">
+                        <button class="action-btn action-edit" onclick='openConfigModal(${JSON.stringify(i)})'><i class="fas fa-edit"></i></button>
+                        <button class="action-btn action-delete" onclick="deleteItem('system_config', ${i.id})"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`;
+            }).join('');
+        } catch (error) {
+            console.error("Error cargando config:", error);
+        }
+    }
+
+    function openConfigModal(i=null) {
+        currentSection = 'system_config';
+        
+        setupModal(i, 'Configuración IA', `
+            <div class="form-group">
+                <label>Clave (Key)</label>
+                <input class="form-control" name="config_key" value="${i?.config_key||''}" required placeholder="Ej: ubicacion_campus">
+                <small style="color:var(--text-light); font-size:0.8rem;">Nombre único para identificar este dato.</small>
+            </div>
+            
+            <div class="form-group">
+                <label>Valor (Contenido)</label>
+                <textarea class="form-control" name="config_value" rows="4" required placeholder="Ej: La dirección es Av. 23 de Marzo...">${i?.config_value||''}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Descripción (Interna)</label>
+                <input class="form-control" name="description" value="${i?.description||''}" placeholder="Para qué sirve este dato">
+            </div>
+
+            <div class="form-group">
+                <label>Visibilidad</label>
+                <select name="is_public" class="form-control">
+                    <option value="true" ${i?.is_public !== false ? 'selected' : ''}>Público (La IA lo usará)</option>
+                    <option value="false" ${i?.is_public === false ? 'selected' : ''}>Privado (Solo sistema)</option>
+                </select>
+            </div>
+        `, i?.id);
+    }
+
     async function loadCareers() {
         const res = await apiFetch(`${API_URL}/careers?active_only=false`);
         if(!res) return;
