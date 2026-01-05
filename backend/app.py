@@ -478,7 +478,7 @@ async def delete_career(career_id: int, admin: dict = Depends(authenticate_admin
 async def get_system_config():
     conn = get_db_connection(); cur = conn.cursor()
     try:
-        cur.execute("SELECT * FROM system_config ORDER BY config_key")
+        cur.execute("SELECT * FROM system_config ORDER BY id")
         return cur.fetchall()
     finally:
         cur.close(); conn.close()
