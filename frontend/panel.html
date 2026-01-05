@@ -707,7 +707,7 @@ function filterTable(input, tableBodyId) {
             'scholarships': 'Gestión de Becas',
             'calendar': 'Calendario Académico',
             'inscriptions': 'Periodos de Inscripción',
-            'config': 'Configuración del Sistema'
+            'system_config': 'Configuración del Sistema'
         };
 
         document.getElementById('pageTitle').innerText = titles[tabId] || 'Gestión Info EMI';
@@ -811,6 +811,7 @@ function filterTable(input, tableBodyId) {
             </div>
         `, i?.id);
     }
+
     async function loadCareers() {
         const res = await apiFetch(`${API_URL}/careers?active_only=false`);
         if(!res) return;
