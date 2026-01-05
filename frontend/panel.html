@@ -451,7 +451,7 @@
                 <button class="nav-item" onclick="switchTab('inscriptions')">
                     <i class="fas fa-file-signature" style="width:20px;"></i> Inscripciones
                 </button>
-                <button class="nav-item" onclick="switchTab('config')">
+                <button class="nav-item" onclick="switchTab('system_config')">
                     <i class="fas fa-cogs" style="width:20px;"></i> Configuración IA
                 </button>
             </nav>
@@ -721,7 +721,7 @@ function filterTable(input, tableBodyId) {
         if (tabId === 'scholarships') loadScholarships();
         if (tabId === 'calendar') loadCalendar();
         if (tabId === 'inscriptions') loadInscriptions();
-        if (tabId === 'config') loadConfig();
+        if (tabId === 'system_config') loadConfig();
     }
 
     async function apiFetch(endpoint, options = {}) {
