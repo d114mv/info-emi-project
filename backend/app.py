@@ -483,31 +483,61 @@ async def get_system_config():
     finally:
         cur.close(); conn.close()
 
+# --- REEMPLAZAR EN APP.PY ---
+
 @app.post("/api/system_config")
 async def create_config(item: SystemConfigCreate, admin: dict = Depends(authenticate_admin)):
-    conn = get_db_connection(); cur = conn.cursor()
+    conn = get_db_connection()
+    cur = conn.cursor()
     try:
+        # Intentamos insertar
         cur.execute("""
             INSERT INTO system_config (config_key, config_value, description, is_public)
             VALUES (%s, %s, %s, %s) RETURNING id
         """, (item.config_key, item.config_value, item.description, item.is_public))
+        
+        new_id = cur.fetchone()['id']
         conn.commit()
-        return {"message": "Creado", "id": cur.fetchone()['id']}
+        
+        # Opcional: Si creas la tabla audit_logs, descomenta esto:
+        # log_action(admin['id'], "CREATE", "system_config", new_id)
+        
+        return {"message": "Configuración creada", "id": new_id}
+        
+    except psycopg2.IntegrityError:
+        conn.rollback()
+        # Este error salta si la CLAVE ya existe
+        raise HTTPException(status_code=400, detail=f"La clave '{item.config_key}' ya existe. Usa otra o edita la existente.")
+    except Exception as e:
+        conn.rollback()
+        logger.error(f"Error creando config: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
-        cur.close(); conn.close()
+        cur.close()
+        conn.close()
 
 @app.put("/api/system_config/{id}")
 async def update_config(id: int, item: SystemConfigCreate, admin: dict = Depends(authenticate_admin)):
-    conn = get_db_connection(); cur = conn.cursor()
+    conn = get_db_connection()
+    cur = conn.cursor()
     try:
         cur.execute("""
             UPDATE system_config SET config_key=%s, config_value=%s, description=%s, is_public=%s
             WHERE id=%s
         """, (item.config_key, item.config_value, item.description, item.is_public, id))
         conn.commit()
-        return {"message": "Actualizado"}
+                
+        return {"message": "Actualizado correctamente"}
+    except psycopg2.IntegrityError:
+        conn.rollback()
+        raise HTTPException(status_code=400, detail=f"Ya existe otra configuración con la clave '{item.config_key}'")
+    except Exception as e:
+        conn.rollback()
+        logger.error(f"Error actualizando config: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
-        cur.close(); conn.close()
+        cur.close()
+        conn.close()
 
 @app.delete("/api/system_config/{id}")
 async def delete_config(id: int, admin: dict = Depends(authenticate_admin)):
