@@ -759,8 +759,11 @@ function filterTable(input, tableBodyId) {
             }
 
             tbody.innerHTML = data.map(i => {
-                const valorCorto = i.config_value.length > 60 ? i.config_value.substring(0, 60) + '...' : i.config_value;
+                const valorCorto = i.config_value.length > 50 ? i.config_value.substring(0, 50) + '...' : i.config_value;
                 
+                const descFull = i.description || '';
+                const descCorto = descFull.length > 25 ? descFull.substring(0, 40) + '...' : (descFull || '-');
+
                 const badge = i.is_public 
                     ? '<span class="badge badge-active">Público</span>' 
                     : '<span class="badge badge-inactive">Privado</span>';
@@ -768,8 +771,11 @@ function filterTable(input, tableBodyId) {
                 return `
                 <tr>
                     <td><strong style="color:var(--primary)">${i.config_key}</strong></td>
+                    
                     <td title="${i.config_value}">${valorCorto}</td>
-                    <td><small>${i.description || '-'}</small></td>
+                    
+                    <td title="${descFull}"><small>${descCorto}</small></td>
+                    
                     <td>${badge}</td>
                     <td class="actions">
                         <button class="action-btn action-edit" onclick='openConfigModal(${JSON.stringify(i)})'><i class="fas fa-edit"></i></button>
