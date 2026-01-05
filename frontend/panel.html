@@ -1138,6 +1138,7 @@ function filterTable(input, tableBodyId) {
     document.getElementById('crudForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const data = Object.fromEntries(new FormData(e.target));
+        
         if(data.cost) data.cost = parseFloat(data.cost);
         if(data.priority) data.priority = parseInt(data.priority);
         data.is_active = true;
@@ -1146,27 +1147,52 @@ function filterTable(input, tableBodyId) {
         const method = currentMode==='edit' ? 'PUT' : 'POST';
 
         const res = await apiFetch(url, { method, body: JSON.stringify(data) });
-        if (currentSection === 'system_config') {
-        loadConfig();
+        
+        if(res && res.ok) {
+            closeModal();
+            
+            if (currentSection === 'system_config') {
+                loadConfig();
+            } else {
+                try {
+                    window['load'+currentSection.charAt(0).toUpperCase()+currentSection.slice(1)]();
+                } catch(err) {
+                    console.error("No se encontró función de recarga para: " + currentSection);
+                }
+            }
+            
+            alert('¡Guardado exitosamente!'); 
+            
         } else {
-            window['load'+currentSection.charAt(0).toUpperCase()+currentSection.slice(1)]();
+            try {
+                const errData = await res.json();
+                alert('Error: ' + (errData.detail || 'No se pudo guardar'));
+            } catch(e) {
+                alert('Error al guardar (revise la conexión o los datos)');
+            }
         }
     });
 
     async function deleteItem(section, id) {
-    if(!confirm('¿Eliminar registro?')) return;
-    const res = await apiFetch(`${API_URL}/${section}/${id}`, { method: 'DELETE' });
-    
-    if(res && res.ok) {
-        if (section === 'system_config') {
-            loadConfig();
+        if(!confirm('¿Estás seguro de eliminar este registro?')) return;
+        
+        const res = await apiFetch(`${API_URL}/${section}/${id}`, { method: 'DELETE' });
+        
+        if(res && res.ok) {
+            if (section === 'system_config') {
+                loadConfig();
+            } else {
+                try {
+                    window['load'+section.charAt(0).toUpperCase()+section.slice(1)]();
+                } catch(err) {
+                    console.log("Error refrescando tabla: " + err);
+                }
+            }
         } else {
-            window['load'+section.charAt(0).toUpperCase()+section.slice(1)]();
+            alert('Error al eliminar. Puede que el registro no exista.');
         }
-    } else {
-        alert('Error al eliminar');
     }
-}
+
 
     function closeModal() { document.getElementById('crudModal').style.display = 'none'; }
     function logout() { localStorage.removeItem('auth_token'); location.reload(); }
