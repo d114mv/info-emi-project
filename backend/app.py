@@ -178,7 +178,6 @@ class SystemConfigCreate(BaseModel):
     description: Optional[str] = None
     is_public: bool = True
 
-
 class EventCreate(BaseModel):
     title: str
     event_type: str
@@ -1191,7 +1190,7 @@ async def get_panel():
             html_content = f.read()
         return HTMLResponse(content=html_content)
     except FileNotFoundError:
-        return HTMLResponse(content="Error: No encuentro el archivo en: " + str(file_path)) # Útil para depurar
+        return HTMLResponse(content="Error: No encuentro el archivo en: " + str(file_path))
 
 @app.get("/api/stats")
 async def get_stats(admin: dict = Depends(authenticate_admin)):
