@@ -1321,7 +1321,7 @@ async def ask_bot_ai(request: AskRequest):
             ],
             model="llama-3.3-70b-versatile", 
             temperature=0.3,
-            max_tokens=300,
+            max_tokens=1200,
         )
 
         answer = chat_completion.choices[0].message.content

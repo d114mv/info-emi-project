@@ -195,6 +195,35 @@ def format_inscription_info(item: dict) -> str:
     
     return text
 
+def send_long_message(chat_id, text, reply_to_message_id=None):
+    max_length = 4096
+    
+    if len(text) <= max_length:
+        try:
+            bot.send_message(chat_id, text, parse_mode="HTML", reply_to_message_id=reply_to_message_id)
+        except Exception:
+            bot.send_message(chat_id, text, reply_to_message_id=reply_to_message_id)
+        return
+
+    parts = []
+    while len(text) > 0:
+        if len(text) > max_length:
+            split_pos = text[:max_length].rfind('\n')
+            if split_pos == -1:
+                split_pos = max_length
+            
+            parts.append(text[:split_pos])
+            text = text[split_pos:]
+        else:
+            parts.append(text)
+            text = ""
+
+    for part in parts:
+        try:
+            bot.send_message(chat_id, part, parse_mode="HTML")
+            time.sleep(0.5)
+        except Exception:
+            bot.send_message(chat_id, part)
 
 @bot.message_handler(commands=['start'])
 def handle_start(message):
@@ -718,7 +747,7 @@ def handle_text_messages(message):
         response = post_api_data("bot/ask", {"question": message.text})
         
         if response and 'answer' in response:
-            bot.reply_to(message, response['answer'])
+            send_long_message(message.chat.id, response['answer'], reply_to_message_id=message.message_id)
         else:
             bot.send_message(
                 message.chat.id,
