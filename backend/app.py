@@ -153,6 +153,33 @@ def get_university_context():
                 context += f"- {key_clean}: {item['config_value']}\n"
             context += "\n"
 
+        cur.execute("""
+            SELECT name, description, coverage, requirements 
+            FROM scholarships 
+            WHERE is_active = TRUE
+        """)
+        becas = cur.fetchall()
+        if becas:
+            context += "💰 BECAS Y DESCUENTOS DISPONIBLES:\n"
+            for b in becas:
+                context += f"- {b['name']}: Cobertura del {b['coverage']}\n"
+                if b['description']: context += f"  Descripción: {b['description']}\n"
+                if b['requirements']: context += f"  Requisitos: {b['requirements']}\n"
+            context += "\n"
+
+        cur.execute("""
+            SELECT program_name, cost, start_date 
+            FROM pre_university 
+            WHERE is_active = TRUE
+        """)
+        preus = cur.fetchall()
+        if preus:
+            context += "📚 CURSOS PREUNIVERSITARIOS:\n"
+            for p in preus:
+                context += f"- {p['program_name']}: Costo {p['cost']} Bs.\n"
+                if p['start_date']: context += f"  Inicia: {p['start_date']}\n"
+            context += "\n"
+
         return context
 
     except Exception as e:
@@ -499,14 +526,12 @@ async def create_config(item: SystemConfigCreate, admin: dict = Depends(authenti
         new_id = cur.fetchone()['id']
         conn.commit()
         
-        # Opcional: Si creas la tabla audit_logs, descomenta esto:
-        # log_action(admin['id'], "CREATE", "system_config", new_id)
+        log_action(admin['id'], "CREATE", "system_config", new_id)
         
         return {"message": "Configuración creada", "id": new_id}
         
     except psycopg2.IntegrityError:
         conn.rollback()
-        # Este error salta si la CLAVE ya existe
         raise HTTPException(status_code=400, detail=f"La clave '{item.config_key}' ya existe. Usa otra o edita la existente.")
     except Exception as e:
         conn.rollback()
