@@ -239,8 +239,8 @@ def handle_start(message):
     btn_contactos = types.KeyboardButton("📞 Contactos")
     btn_ayuda = types.KeyboardButton("ℹ️ Ayuda")
     
-    markup.add(btn_carreras, btn_pre, btn_eventos, btn_becas, 
-               btn_faq, btn_contactos, btn_calendario, btn_ayuda)
+    markup.add(btn_carreras, btn_pre, btn_becas, 
+               btn_faq, btn_contactos, btn_ayuda)
 
     welcome_text = """
 <b>¡Hola! Soy Info_EMI 🤖</b>
