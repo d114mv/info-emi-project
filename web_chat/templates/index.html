@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistente EMI Web</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; height: 100vh; margin: 0; }
+        .chat-container { width: 100%; max-width: 450px; background: white; display: flex; flex-direction: column; box-shadow: 0 4px 10px rgba(0,0,0,0.1); height: 100%; }
+        .header { background-color: #003366; color: white; padding: 15px; text-align: center; font-weight: bold; border-bottom: 4px solid #E6B012; }
+        .messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        .message { max-width: 80%; padding: 10px 15px; border-radius: 15px; font-size: 14px; line-height: 1.4; }
+        .user { align-self: flex-end; background-color: #E6B012; color: #003366; font-weight: 500; }
+        .bot { align-self: flex-start; background-color: #f1f1f1; color: #333; }
+        .input-area { padding: 15px; border-top: 1px solid #ddd; display: flex; gap: 10px; background: white; }
+        input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 20px; outline: none; }
+        button { background-color: #003366; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; }
+        
+        .chat-image { width: 100%; border-radius: 10px; margin-top: 10px; border: 2px solid #E6B012; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="header">
+        🤖 Asistente Virtual EMI
+    </div>
+    <div class="messages" id="messages">
+        <div class="message bot">¡Hola! Soy la IA de la EMI. Pregúntame sobre carreras o inscripciones.</div>
+    </div>
+    <div class="input-area">
+        <input type="text" id="userInput" placeholder="Escribe tu duda..." onkeypress="handleEnter(event)">
+        <button onclick="sendMessage()">Enviar</button>
+    </div>
+</div>
+
+<script>
+    const messagesDiv = document.getElementById('messages');
+    
+    function handleEnter(e) {
+        if (e.key === 'Enter') sendMessage();
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById('userInput');
+        const text = input.value.trim();
+        if (!text) return;
+
+        addMessage(text, 'user');
+        input.value = '';
+
+        const loadingId = addMessage("Thinking...", 'bot');
+
+        try {
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: text })
+            });
+            const data = await response.json();
+
+            document.getElementById(loadingId).innerText = data.response;
+
+            if (data.image) {
+                addImage(data.image, loadingId);
+            }
+
+        } catch (error) {
+            document.getElementById(loadingId).innerText = "Error de conexión.";
+        }
+    }
+
+    function addMessage(text, sender) {
+        const div = document.createElement('div');
+        div.className = `message ${sender}`;
+        div.innerText = text;
+        div.id = Math.random().toString(36).substr(2, 9);
+        messagesDiv.appendChild(div);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        return div.id;
+    }
+
+    function addImage(url, messageId) {
+        const img = document.createElement('img');
+        img.src = url;
+        img.className = 'chat-image';
+        img.onclick = () => window.open(url, '_blank');
+        
+        const msgDiv = document.getElementById(messageId);
+        msgDiv.appendChild(img);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+</script>
+
+</body>
+</html>
