@@ -2,35 +2,239 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asistente EMI Web</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Asistente Virtual EMI</title>
+    <link rel="icon" type="image/png" href="/static/favicon.png">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; height: 100vh; margin: 0; }
-        .chat-container { width: 100%; max-width: 450px; background: white; display: flex; flex-direction: column; box-shadow: 0 4px 10px rgba(0,0,0,0.1); height: 100%; }
-        .header { background-color: #003366; color: white; padding: 15px; text-align: center; font-weight: bold; border-bottom: 4px solid #E6B012; }
-        .messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
-        .message { max-width: 80%; padding: 10px 15px; border-radius: 15px; font-size: 14px; line-height: 1.4; }
-        .user { align-self: flex-end; background-color: #E6B012; color: #003366; font-weight: 500; }
-        .bot { align-self: flex-start; background-color: #f1f1f1; color: #333; }
-        .input-area { padding: 15px; border-top: 1px solid #ddd; display: flex; gap: 10px; background: white; }
-        input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 20px; outline: none; }
-        button { background-color: #003366; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; }
-        
-        .chat-image { width: 100%; border-radius: 10px; margin-top: 10px; border: 2px solid #E6B012; cursor: pointer; }
+        :root {
+            --emi-blue: #003366;
+            --emi-gold: #E6B012;
+            --bg-chat: #e5ddd5;
+            --user-msg-bg: #E6B012;
+            --bot-msg-bg: #ffffff;
+            --text-color: #333;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+
+        body {
+            background: linear-gradient(135deg, #001f3f 0%, #003366 100%);
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .main-wrapper {
+            width: 100%;
+            height: 100%;
+            max-width: 1200px;
+            max-height: 90vh;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        @media (max-width: 768px) {
+            .main-wrapper {
+                max-width: 100%;
+                max-height: 100%;
+                border-radius: 0;
+            }
+        }
+
+        .chat-header {
+            background-color: var(--emi-blue);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 4px solid var(--emi-gold);
+            z-index: 10;
+        }
+
+        .avatar-container {
+            position: relative;
+            width: 45px;
+            height: 45px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--emi-blue);
+            font-size: 24px;
+        }
+
+        .status-dot {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 12px;
+            height: 12px;
+            background-color: #10b981;
+            border-radius: 50%;
+            border: 2px solid var(--emi-blue);
+        }
+
+        .header-info h2 { font-size: 1rem; font-weight: 600; margin: 0; }
+        .header-info p { font-size: 0.8rem; margin: 0; opacity: 0.8; }
+
+        .messages-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-image: url('https://www.transparenttextures.com/patterns/cubes.png');
+            background-color: #f2f5f8;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            scroll-behavior: smooth;
+        }
+
+        .message {
+            max-width: 75%;
+            padding: 12px 16px;
+            border-radius: 15px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            position: relative;
+            animation: fadeIn 0.3s ease;
+            word-wrap: break-word;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .bot {
+            align-self: flex-start;
+            background-color: var(--bot-msg-bg);
+            color: var(--text-color);
+            border-top-left-radius: 0;
+        }
+
+        .user {
+            align-self: flex-end;
+            background-color: var(--user-msg-bg);
+            color: #002244;
+            border-top-right-radius: 0;
+            font-weight: 500;
+        }
+
+        .timestamp {
+            font-size: 0.7rem;
+            text-align: right;
+            margin-top: 4px;
+            opacity: 0.7;
+        }
+
+        .chat-image {
+            width: 100%;
+            max-width: 300px;
+            border-radius: 10px;
+            margin-top: 10px;
+            border: 3px solid var(--emi-gold);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .chat-image:hover { transform: scale(1.02); }
+
+        .input-area {
+            background: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            outline: none;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+            background-color: #f9f9f9;
+        }
+
+        input:focus {
+            border-color: var(--emi-blue);
+            background-color: white;
+        }
+
+        button {
+            background-color: var(--emi-blue);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: transform 0.2s, background-color 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        button:hover {
+            background-color: #002244;
+            transform: scale(1.1);
+        }
+
+        button:active { transform: scale(0.95); }
+
     </style>
 </head>
 <body>
 
-<div class="chat-container">
-    <div class="header">
-        🤖 Asistente Virtual EMI
+<div class="main-wrapper">
+    <div class="chat-header">
+        <div class="avatar-container">
+            <i class="fas fa-robot"></i>
+            <div class="status-dot"></div>
+        </div>
+        <div class="header-info">
+            <h2>Info_EMI AI</h2>
+            <p>En línea | Responde al instante</p>
+        </div>
     </div>
-    <div class="messages" id="messages">
-        <div class="message bot">¡Hola! Soy la IA de la EMI. Pregúntame sobre carreras o inscripciones.</div>
+
+    <div class="messages-area" id="messages">
+        <div class="message bot">
+            ¡Hola! 👋 Soy el Asistente Virtual de la EMI.<br><br>
+            Estoy aquí para ayudarte con:<br>
+            🎓 Información de Carreras<br>
+            📝 Fechas de Inscripción<br>
+            💰 Becas y Costos<br>
+            <div class="timestamp">Ahora</div>
+        </div>
     </div>
+
     <div class="input-area">
-        <input type="text" id="userInput" placeholder="Escribe tu duda..." onkeypress="handleEnter(event)">
-        <button onclick="sendMessage()">Enviar</button>
+        <div class="input-wrapper">
+            <input type="text" id="userInput" placeholder="Escribe tu consulta aquí..." autocomplete="off" onkeypress="handleEnter(event)">
+        </div>
+        <button onclick="sendMessage()">
+            <i class="fas fa-paper-plane"></i>
+        </button>
     </div>
 </div>
 
@@ -41,6 +245,11 @@
         if (e.key === 'Enter') sendMessage();
     }
 
+    function getTime() {
+        const now = new Date();
+        return now.getHours() + ':' + String(now.getMinutes()).padStart(2, '0');
+    }
+
     async function sendMessage() {
         const input = document.getElementById('userInput');
         const text = input.value.trim();
@@ -48,8 +257,8 @@
 
         addMessage(text, 'user');
         input.value = '';
-
-        const loadingId = addMessage("Thinking...", 'bot');
+        input.focus();
+        const loadingId = addMessage("Escribiendo...", 'bot', true);
 
         try {
             const response = await fetch('/api/chat', {
@@ -59,24 +268,36 @@
             });
             const data = await response.json();
 
-            document.getElementById(loadingId).innerText = data.response;
+            const botMsgDiv = document.getElementById(loadingId);
+            botMsgDiv.innerHTML = formatText(data.response) + `<div class="timestamp">${getTime()}</div>`;
+            botMsgDiv.classList.remove('loading-msg');
 
             if (data.image) {
                 addImage(data.image, loadingId);
             }
 
         } catch (error) {
-            document.getElementById(loadingId).innerText = "Error de conexión.";
+            document.getElementById(loadingId).innerText = "⚠️ Error de conexión. Intenta de nuevo.";
         }
     }
 
-    function addMessage(text, sender) {
+    function formatText(text) {
+        return text.replace(/\n/g, '<br>');
+    }
+
+    function addMessage(text, sender, isLoading=false) {
         const div = document.createElement('div');
-        div.className = `message ${sender}`;
-        div.innerText = text;
+        div.className = `message ${sender} ${isLoading ? 'loading-msg' : ''}`;
+        
+        if (isLoading) {
+            div.innerHTML = `<i>${text}</i> <i class="fas fa-circle-notch fa-spin"></i>`;
+        } else {
+            div.innerHTML = formatText(text) + `<div class="timestamp">${getTime()}</div>`;
+        }
+        
         div.id = Math.random().toString(36).substr(2, 9);
         messagesDiv.appendChild(div);
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        scrollToBottom();
         return div.id;
     }
 
@@ -88,6 +309,10 @@
         
         const msgDiv = document.getElementById(messageId);
         msgDiv.appendChild(img);
+        scrollToBottom();
+    }
+
+    function scrollToBottom() {
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
 </script>
