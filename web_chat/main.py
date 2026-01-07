@@ -6,6 +6,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 import groq
+import psycopg2
+from psycopg2.extras import RealDictCursor
 
 app = FastAPI()
 
