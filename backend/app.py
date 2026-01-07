@@ -62,7 +62,6 @@ if not DATABASE_URL:
     DATABASE_URL = "postgresql://localhost:5432/info_emi"
 
 def get_db_connection():
-    """Establecer conexión a PostgreSQL"""
     try:
         if "render.com" in DATABASE_URL and "sslmode" not in DATABASE_URL:
             conn_string = DATABASE_URL + "?sslmode=require"

@@ -311,7 +311,6 @@ def handle_careers(message):
     
     careers = data['careers']
     
-    # --- CAMBIO AQUÍ: Función auxiliar para generar el teclado ---
     markup = generate_careers_markup(careers, offset=0)
     
     bot.send_message(
