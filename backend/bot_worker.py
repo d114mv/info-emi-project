@@ -595,6 +595,18 @@ def handle_career_callback(call):
         bot.send_message(call.message.chat.id, career_text, parse_mode="HTML")
         bot.answer_callback_query(call.id)
 
+@bot.callback_query_handler(func=lambda call: call.data.startswith('contact_adm_'))
+def handle_contact_adm_click(call):
+    try:
+        bot.answer_callback_query(call.id, "Cargando directorio...")
+
+        handle_contacts(call.message)
+        
+    except Exception as e:
+        logger.error(f"Error en botón contacto admisiones: {e}")
+        bot.answer_callback_query(call.id, "Error al cargar contactos")     
+
+
 @bot.callback_query_handler(func=lambda call: call.data.startswith('preuni_'))
 def handle_preuniversity_callback(call):
     data_parts = call.data.split('_')
