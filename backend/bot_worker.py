@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import re
 import os
 import sys
 import time
@@ -708,9 +709,6 @@ def handle_text_messages(message):
         'preuniversitario': handle_preuniversity,
         '📚 Preuniversitarios': handle_preuniversity,
         'pre': handle_preuniversity,
-        'eventos': handle_events,
-        'evento': handle_events,
-        '📅 Eventos': handle_events,
         'becas': handle_scholarships,
         'beca': handle_scholarships,
         '💰 Becas': handle_scholarships,
@@ -720,8 +718,6 @@ def handle_text_messages(message):
         'contactos': handle_contacts,
         'contacto': handle_contacts,
         '📞 Contactos': handle_contacts,
-        'calendario': handle_calendar,
-        '📆 Calendario': handle_calendar,
         'inscripciones': handle_inscriptions,
         'matrícula': handle_inscriptions,
         'ℹ️ Ayuda': handle_help,
@@ -735,13 +731,45 @@ def handle_text_messages(message):
     if handler:
         handler(message)
     else:
-
         bot.send_chat_action(message.chat.id, 'typing')
         
         response = post_api_data("bot/ask", {"question": message.text})
         
         if response and 'answer' in response:
-            send_long_message(message.chat.id, response['answer'], reply_to_message_id=message.message_id)
+            texto_respuesta = response['answer']
+            
+            patron = r"\[\[SEND_IMAGE: (\w+)\]\]"
+            match = re.search(patron, texto_respuesta)
+            
+            codigo_imagen = None
+            texto_final = texto_respuesta
+
+            if match:
+                codigo_imagen = match.group(1)
+                texto_final = texto_respuesta.replace(match.group(0), "").strip()
+            
+            send_long_message(message.chat.id, texto_final, reply_to_message_id=message.message_id)
+            
+            if codigo_imagen:
+                try:
+                    base_path = Path(__file__).parent.parent / "frontend" / "static" / "mallas"
+                    ruta_img = base_path / f"{codigo_imagen}.jpg"
+                    
+                    if ruta_img.exists():
+                        bot.send_chat_action(message.chat.id, 'upload_photo')
+                        with open(ruta_img, 'rb') as photo:
+                            bot.send_photo(
+                                message.chat.id, 
+                                photo, 
+                                caption=f"📄 <b>Malla Curricular: {codigo_imagen}</b>",
+                                parse_mode="HTML"
+                            )
+                    else:
+                        logger.warning(f"⚠️ Se solicitó imagen {codigo_imagen} pero no existe en {ruta_img}")
+                        
+                except Exception as e:
+                    logger.error(f"Error enviando malla curricular: {e}")
+
         else:
             bot.send_message(
                 message.chat.id,
