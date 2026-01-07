@@ -122,22 +122,44 @@
             bottom: 0;
         }
 
+        .input-wrapper {
+            flex: 1;
+            display: flex; 
+            position: relative;
+        }
+
         input {
             flex: 1;
+            width: 100%;
             padding: 12px 20px;
             border: 1px solid #ddd;
             border-radius: 25px;
             outline: none;
             font-size: 1rem;
             background: #f0f2f5;
+            transition: all 0.3s;
         }
         input:focus { background: white; border-color: var(--emi-blue); }
 
         button {
-            background: var(--emi-blue); color: white; border: none;
-            width: 45px; height: 45px; border-radius: 50%;
-            cursor: pointer; display: flex; align-items: center; justify-content: center;
-            font-size: 1.2rem; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            background: var(--emi-blue);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            flex-shrink: 0;
+        }
+        
+        button:hover {
+            transform: scale(1.05);
+            background-color: #002244;
         }
         
         .chat-image { width: 100%; max-width: 250px; border-radius: 10px; margin-top: 8px; border: 3px solid var(--emi-gold); cursor: pointer; }
@@ -267,7 +289,7 @@
     userInput.addEventListener('focus', () => {
         setTimeout(scrollToBottom, 300);
     });
-    
+
 </script>
 
 </body>
