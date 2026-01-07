@@ -139,15 +139,25 @@ async def chat_endpoint(chat: ChatMessage):
         INSTRUCCIÓN DE CONTROL DE INTERFAZ (IMPORTANTE):
         Si el usuario está preguntando específicamente por información detallada de una carrera (malla, plan de estudios, materias, o detalles generales de la carrera),
         DEBES incluir al final de tu respuesta una etiqueta oculta con el CÓDIGO de la carrera.
+
+        INSTRUCCIÓN DE CONTROL DE IMÁGENES (ESTRICTO):
+        Solo debes generar la etiqueta [[SEND_IMAGE: CODIGO]] cuando el usuario pregunte DETALLES ESPECÍFICOS de UNA sola carrera (ej: "malla de sistemas", "que materias tiene civil").
         
-        El formato es: [[SEND_IMAGE: CODIGO]]
+        ⛔ PROHIBIDO usar la etiqueta si:
+        - El usuario pide una lista de carreras (ej: "¿qué carreras hay?").
+        - El usuario solo saluda.
+        - Estás mencionando varias carreras a la vez.
+
+        Formato: [[SEND_IMAGE: CODIGO]]
+        Códigos válidos extraídos del contexto: SIS, CIV, MCT, COM, PET, etc.
         
-        Extrae el CODIGO de los paréntesis en la sección de "OFERTA ACADÉMICA" del contexto (ej: SIS, CIV, MCT, COM).
-        
-        Ejemplo:
-        Usuario: "Háblame de Sistemas"
-        Tú: "La carrera de Ingeniería de Sistemas... (toda la info)...
-        [[SEND_IMAGE: SIS]]"
+        Ejemplo CORRECTO:
+        User: "Muestrame el plan de Sistemas"
+        AI: "Claro, la carrera de Ingeniería de Sistemas tiene 9 semestres... [[SEND_IMAGE: SIS]]"
+
+        Ejemplo INCORRECTO (NO HACER):
+        User: "¿Qué carreras tienen?"
+        AI: "Tenemos Sistemas, Civil y Comercial. [[SEND_IMAGE: SIS]] [[SEND_IMAGE: CIV]]"  <-- ESTO ESTÁ MAL.
         
         --- INFORMACIÓN DE CONTEXTO (BASE DE DATOS) ---
         {context_data}

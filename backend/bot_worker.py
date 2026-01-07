@@ -751,37 +751,35 @@ def handle_text_messages(message):
         if response and 'answer' in response:
             texto_respuesta = response['answer']
             
-            patron = r"\[\[SEND_IMAGE: (\w+)\]\]"
-            match = re.search(patron, texto_respuesta)
             
-            codigo_imagen = None
-            texto_final = texto_respuesta
-
-            if match:
-                codigo_imagen = match.group(1)
-                texto_final = texto_respuesta.replace(match.group(0), "").strip()
+            texto_limpio = re.sub(r"\[\[SEND_IMAGE: \w+\]\]", "", texto_respuesta).strip()
             
-            send_long_message(message.chat.id, texto_final, reply_to_message_id=message.message_id)
+            matches = re.findall(r"\[\[SEND_IMAGE: (\w+)\]\]", texto_respuesta)
             
-            if codigo_imagen:
-                try:
-                    base_path = Path(__file__).parent.parent / "frontend" / "static" / "mallas"
-                    ruta_img = base_path / f"{codigo_imagen}.jpg"
-                    
-                    if ruta_img.exists():
-                        bot.send_chat_action(message.chat.id, 'upload_photo')
-                        with open(ruta_img, 'rb') as photo:
-                            bot.send_photo(
-                                message.chat.id, 
-                                photo, 
-                                caption=f"📄 <b>Malla Curricular: {codigo_imagen}</b>",
-                                parse_mode="HTML"
-                            )
-                    else:
-                        logger.warning(f"⚠️ Se solicitó imagen {codigo_imagen} pero no existe en {ruta_img}")
+            send_long_message(message.chat.id, texto_limpio, reply_to_message_id=message.message_id)
+            
+            if matches and len(matches) <= 2:
+                for codigo_imagen in matches:
+                    try:
+                        base_path = Path(__file__).parent.parent / "frontend" / "static" / "mallas"
+                        ruta_img = base_path / f"{codigo_imagen}.jpg"
                         
-                except Exception as e:
-                    logger.error(f"Error enviando malla curricular: {e}")
+                        if ruta_img.exists():
+                            bot.send_chat_action(message.chat.id, 'upload_photo')
+                            with open(ruta_img, 'rb') as photo:
+                                bot.send_photo(
+                                    message.chat.id, 
+                                    photo, 
+                                    caption=f"📄 <b>Malla Curricular: {codigo_imagen}</b>",
+                                    parse_mode="HTML"
+                                )
+                        else:
+                            logger.warning(f"⚠️ Se solicitó imagen {codigo_imagen} pero no existe en {ruta_img}")
+                            
+                    except Exception as e:
+                        logger.error(f"Error enviando imagen {codigo_imagen}: {e}")
+            elif len(matches) > 2:
+                logger.info(f"Se omitieron imágenes porque la IA intentó enviar demasiadas ({len(matches)}) - Posible alucinación.")
 
         else:
             bot.send_message(
