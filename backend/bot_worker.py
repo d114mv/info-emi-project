@@ -255,7 +255,9 @@ Tu asistente virtual de la universidad.
 /inscripciones - Info de matrícula
 /help - Mostrar todos los comandos
 
-<i>Selecciona una opción para comenzar:</i>
+También puedes hacerme cualquier pregunta y despejaré tus dudas.
+
+<i>Selecciona una opción para comenzar o escribe una pregunta:</i>
 """
     
     try:
