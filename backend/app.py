@@ -1063,7 +1063,7 @@ async def ask_bot_ai(request: AskRequest):
                     "content": request.question,
                 }
             ],
-            model="llama-3.3-70b-versatile", 
+            model="llama-3.1-8b-instant", 
             temperature=0.3,
             max_tokens=1200,
         )

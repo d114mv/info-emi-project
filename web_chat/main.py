@@ -169,7 +169,7 @@ async def chat_endpoint(chat: ChatMessage):
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_input}
             ],
-            model="llama-3.3-70b-versatile",
+            model="llama-3.1-8b-instant",
         )
         
         ai_response = chat_completion.choices[0].message.content
