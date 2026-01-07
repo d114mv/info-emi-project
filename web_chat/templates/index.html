@@ -12,10 +12,9 @@
         :root {
             --emi-blue: #003366;
             --emi-gold: #E6B012;
-            --bg-chat: #e5ddd5;
+            --bg-chat: #f0f2f5;
             --user-msg-bg: #E6B012;
             --bot-msg-bg: #ffffff;
-            --text-color: #333;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
@@ -23,6 +22,7 @@
         body {
             background: linear-gradient(135deg, #001f3f 0%, #003366 100%);
             height: 100vh;
+            height: 100dvh;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -31,10 +31,10 @@
 
         .main-wrapper {
             width: 100%;
-            height: 100%;
-            max-width: 1200px;
-            max-height: 90vh;
-            background-color: #f0f2f5;
+            max-width: 1000px;   
+            height: 90vh;        
+            height: 90dvh;
+            background-color: var(--bg-chat);
             display: flex;
             flex-direction: column;
             position: relative;
@@ -46,8 +46,14 @@
         @media (max-width: 768px) {
             .main-wrapper {
                 max-width: 100%;
-                max-height: 100%;
+                height: 100%;
+                height: 100dvh;
                 border-radius: 0;
+                box-shadow: none;
+            }
+            
+            body {
+                background: var(--bg-chat);
             }
         }
 
@@ -59,148 +65,82 @@
             align-items: center;
             gap: 15px;
             border-bottom: 4px solid var(--emi-gold);
-            z-index: 10;
+            flex-shrink: 0;
         }
 
         .avatar-container {
             position: relative;
-            width: 45px;
-            height: 45px;
-            background: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--emi-blue);
-            font-size: 24px;
+            width: 40px; height: 40px;
+            background: white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--emi-blue); font-size: 20px;
         }
-
         .status-dot {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 12px;
-            height: 12px;
-            background-color: #10b981;
-            border-radius: 50%;
-            border: 2px solid var(--emi-blue);
+            position: absolute; bottom: 0; right: 0; width: 10px; height: 10px;
+            background-color: #10b981; border-radius: 50%; border: 2px solid var(--emi-blue);
         }
-
-        .header-info h2 { font-size: 1rem; font-weight: 600; margin: 0; }
-        .header-info p { font-size: 0.8rem; margin: 0; opacity: 0.8; }
+        .header-info h2 { font-size: 1rem; margin: 0; }
+        .header-info p { font-size: 0.75rem; margin: 0; opacity: 0.9; }
 
         .messages-area {
             flex: 1;
+            min-height: 0;
             padding: 20px;
             overflow-y: auto;
-            background-image: url('https://www.transparenttextures.com/patterns/cubes.png');
-            background-color: #f2f5f8;
             display: flex;
             flex-direction: column;
             gap: 15px;
-            scroll-behavior: smooth;
+            background-color: #e5ddd5;
+            background-image: radial-gradient(#003366 0.5px, transparent 0.5px);
+            background-size: 20px 20px;
+            opacity: 1;
         }
 
         .message {
-            max-width: 75%;
+            max-width: 80%;
             padding: 12px 16px;
             border-radius: 15px;
             font-size: 0.95rem;
-            line-height: 1.5;
+            line-height: 1.4;
             position: relative;
-            animation: fadeIn 0.3s ease;
             word-wrap: break-word;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 1px rgba(0,0,0,0.1);
         }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .bot {
-            align-self: flex-start;
-            background-color: var(--bot-msg-bg);
-            color: var(--text-color);
-            border-top-left-radius: 0;
-        }
-
-        .user {
-            align-self: flex-end;
-            background-color: var(--user-msg-bg);
-            color: #002244;
-            border-top-right-radius: 0;
-            font-weight: 500;
-        }
-
-        .timestamp {
-            font-size: 0.7rem;
-            text-align: right;
-            margin-top: 4px;
-            opacity: 0.7;
-        }
-
-        .chat-image {
-            width: 100%;
-            max-width: 300px;
-            border-radius: 10px;
-            margin-top: 10px;
-            border: 3px solid var(--emi-gold);
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .chat-image:hover { transform: scale(1.02); }
+        .bot { align-self: flex-start; background: var(--bot-msg-bg); border-top-left-radius: 2px; }
+        .user { align-self: flex-end; background: var(--user-msg-bg); color: #001a33; border-top-right-radius: 2px; }
+        .timestamp { font-size: 0.65rem; text-align: right; margin-top: 5px; opacity: 0.6; }
 
         .input-area {
             background: white;
-            padding: 15px 20px;
+            padding: 10px 15px;
             display: flex;
             align-items: center;
             gap: 10px;
-            border-top: 1px solid #e0e0e0;
-        }
-
-        .input-wrapper {
-            flex: 1;
-            position: relative;
+            border-top: 1px solid #ddd;
+            flex-shrink: 0;
+            position: sticky; 
+            bottom: 0;
         }
 
         input {
-            width: 100%;
+            flex: 1;
             padding: 12px 20px;
-            border: 2px solid #e0e0e0;
+            border: 1px solid #ddd;
             border-radius: 25px;
             outline: none;
             font-size: 1rem;
-            transition: border-color 0.3s;
-            background-color: #f9f9f9;
+            background: #f0f2f5;
         }
-
-        input:focus {
-            border-color: var(--emi-blue);
-            background-color: white;
-        }
+        input:focus { background: white; border-color: var(--emi-blue); }
 
         button {
-            background-color: var(--emi-blue);
-            color: white;
-            border: none;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            transition: transform 0.2s, background-color 0.3s;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            background: var(--emi-blue); color: white; border: none;
+            width: 45px; height: 45px; border-radius: 50%;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
-
-        button:hover {
-            background-color: #002244;
-            transform: scale(1.1);
-        }
-
-        button:active { transform: scale(0.95); }
-
+        
+        .chat-image { width: 100%; max-width: 250px; border-radius: 10px; margin-top: 8px; border: 3px solid var(--emi-gold); cursor: pointer; }
     </style>
 </head>
 <body>
@@ -315,6 +255,19 @@
     function scrollToBottom() {
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
+
+    function setAppHeight() {
+        const doc = document.documentElement;
+        doc.style.setProperty('--app-height', `${window.innerHeight}px`);
+    }
+    window.addEventListener('resize', setAppHeight);
+    setAppHeight();
+
+    const userInput = document.getElementById('userInput');
+    userInput.addEventListener('focus', () => {
+        setTimeout(scrollToBottom, 300);
+    });
+    
 </script>
 
 </body>
