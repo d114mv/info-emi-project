@@ -14,6 +14,24 @@ app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+def get_db_connection():
+    if not DATABASE_URL:
+        return None 
+        
+    try:
+        if "render.com" in DATABASE_URL and "sslmode" not in DATABASE_URL:
+            conn_string = DATABASE_URL + "?sslmode=require"
+        else:
+            conn_string = DATABASE_URL
+            
+        conn = psycopg2.connect(conn_string, cursor_factory=RealDictCursor)
+        return conn
+    except Exception as e:
+        print(f"Error conectando a DB: {e}")
+        return None
+
 class ChatMessage(BaseModel):
     message: str
     history: list = []
