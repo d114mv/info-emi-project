@@ -100,42 +100,6 @@ def get_university_context():
                 if c['campus']: context += f"Sede: {c['campus']}\n"
                 context += "\n"
 
-        cur.execute("""
-            SELECT event_name, event_type, start_date, end_date, description 
-            FROM academic_calendar 
-            WHERE is_active = TRUE 
-            ORDER BY start_date ASC
-        """)
-        calendar = cur.fetchall()
-        
-        if calendar:
-            context += "🗓 CALENDARIO ACADÉMICO Y FECHAS IMPORTANTES:\n"
-            for e in calendar:
-                fecha_texto = formatear_fecha_es(e['start_date'])
-                
-                if e['end_date'] and e['end_date'] != e['start_date']:
-                    fecha_fin = formatear_fecha_es(e['end_date'])
-                    fecha_texto += f" al {fecha_fin}"
-                
-                context += f"- {e['event_name']} ({e['event_type']}): {fecha_texto}\n"
-                if e['description']:
-                    context += f"  Detalle: {e['description']}\n"
-            context += "\n"
-
-        cur.execute("""
-            SELECT title, date, start_time, location 
-            FROM events 
-            WHERE date >= CURRENT_DATE AND is_active = TRUE 
-            ORDER BY date ASC LIMIT 5
-        """)
-        events = cur.fetchall()
-        if events:
-            context += "📅 PRÓXIMOS EVENTOS Y ACTIVIDADES:\n"
-            for e in events:
-                fecha_bonita = formatear_fecha_es(e['date'])
-                context += f"- {e['title']}: {fecha_bonita} a las {e['start_time']}. Lugar: {e['location']}\n"
-            context += "\n"
-
         cur.execute("SELECT question, answer FROM faqs WHERE is_active = TRUE")
         faqs = cur.fetchall()
         if faqs:
@@ -205,18 +169,6 @@ class SystemConfigCreate(BaseModel):
     description: Optional[str] = None
     is_public: bool = True
 
-class EventCreate(BaseModel):
-    title: str
-    event_type: str
-    description: Optional[str] = None
-    date: date
-    start_time: Optional[time] = None
-    end_time: Optional[time] = None
-    location: Optional[str] = None
-    organizer: Optional[str] = None
-    registration_link: Optional[str] = None
-    is_active: bool = True
-
 class FAQCreate(BaseModel):
     question: str
     answer: str
@@ -243,14 +195,6 @@ class ScholarshipCreate(BaseModel):
     application_link: Optional[str] = None
     is_active: bool = True
 
-class AcademicCalendarCreate(BaseModel):
-    event_name: str
-    event_type: str
-    start_date: date
-    end_date: Optional[date] = None
-    description: Optional[str] = None
-    academic_period: Optional[str] = None
-    is_active: bool = True
 
 class PreUniversityCreate(BaseModel):
     program_name: str
@@ -264,15 +208,6 @@ class PreUniversityCreate(BaseModel):
     registration_link: Optional[str] = None
     contact_email: Optional[str] = None
     contact_phone: Optional[str] = None
-    is_active: bool = True
-
-class CalendarEventCreate(BaseModel):
-    event_name: str
-    event_type: Optional[str] = None
-    start_date: date
-    end_date: Optional[date] = None
-    description: Optional[str] = None
-    academic_period: Optional[str] = None
     is_active: bool = True
 
 class InscriptionInfoCreate(BaseModel):
@@ -510,14 +445,12 @@ async def get_system_config():
     finally:
         cur.close(); conn.close()
 
-# --- REEMPLAZAR EN APP.PY ---
 
 @app.post("/api/system_config")
 async def create_config(item: SystemConfigCreate, admin: dict = Depends(authenticate_admin)):
     conn = get_db_connection()
     cur = conn.cursor()
     try:
-        # Intentamos insertar
         cur.execute("""
             INSERT INTO system_config (config_key, config_value, description, is_public)
             VALUES (%s, %s, %s, %s) RETURNING id
@@ -573,78 +506,6 @@ async def delete_config(id: int, admin: dict = Depends(authenticate_admin)):
         return {"message": "Eliminado"}
     finally:
         cur.close(); conn.close()
-
-@app.get("/api/calendar")
-async def get_calendar(active_only: bool = True):
-    conn = get_db_connection()
-    cur = conn.cursor()
-    try:
-        query = "SELECT * FROM academic_calendar"
-        if active_only:
-            query += " WHERE is_active = TRUE"
-        query += " ORDER BY start_date ASC"
-        cur.execute(query)
-        
-        items = []
-        for row in cur.fetchall():
-            item = dict(row)
-            item['start_date'] = str(item['start_date'])
-            if item['end_date']: item['end_date'] = str(item['end_date'])
-            items.append(item)
-        return items
-    finally:
-        cur.close(); conn.close()
-
-@app.post("/api/calendar")
-async def create_calendar_event(item: CalendarEventCreate, admin: dict = Depends(authenticate_admin)):
-    conn = get_db_connection()
-    cur = conn.cursor()
-    try:
-        cur.execute("""
-            INSERT INTO academic_calendar (
-                event_name, event_type, start_date, end_date, 
-                description, academic_period, is_active
-            )
-            VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id
-        """, (
-            item.event_name, item.event_type, item.start_date, item.end_date, 
-            item.description, item.academic_period, item.is_active
-        ))
-        conn.commit()
-        return {"message": "Evento creado"}
-    finally:
-        cur.close(); conn.close()
-
-@app.put("/api/calendar/{id}")
-async def update_calendar_event(id: int, item: CalendarEventCreate, admin: dict = Depends(authenticate_admin)):
-    conn = get_db_connection()
-    cur = conn.cursor()
-    try:
-        cur.execute("""
-            UPDATE academic_calendar SET 
-                event_name=%s, event_type=%s, start_date=%s, end_date=%s, 
-                description=%s, academic_period=%s, is_active=%s
-            WHERE id=%s
-        """, (
-            item.event_name, item.event_type, item.start_date, item.end_date, 
-            item.description, item.academic_period, item.is_active, id
-        ))
-        conn.commit()
-        return {"message": "Evento actualizado"}
-    finally:
-        cur.close(); conn.close()
-
-@app.delete("/api/calendar/{id}")
-async def delete_calendar_event(id: int, admin: dict = Depends(authenticate_admin)):
-    conn = get_db_connection()
-    cur = conn.cursor()
-    try:
-        cur.execute("DELETE FROM academic_calendar WHERE id = %s", (id,))
-        conn.commit()
-        return {"message": "Eliminado"}
-    finally:
-        cur.close(); conn.close()
-
 
 @app.get("/api/inscriptions")
 async def get_inscriptions(active_only: bool = True):
@@ -868,115 +729,6 @@ async def delete_preuniversity(
         cur.close()
         conn.close()
 
-@app.get("/api/events")
-async def get_events(upcoming_only: bool = True):
-    conn = get_db_connection()
-    cur = conn.cursor()
-    
-    try:
-        if upcoming_only:
-            cur.execute("""
-                SELECT * FROM events 
-                WHERE date >= CURRENT_DATE AND is_active = TRUE
-                ORDER BY date, start_time
-            """)
-        else:
-            cur.execute("SELECT * FROM events ORDER BY date DESC")
-        
-        events = cur.fetchall()
-        
-        for event in events:
-            for date_field in ['date', 'created_at']:
-                if event.get(date_field):
-                    event[date_field] = event[date_field].isoformat()
-            for time_field in ['start_time', 'end_time']:
-                if event.get(time_field):
-                    event[time_field] = str(event[time_field])
-        
-        return events
-    finally:
-        cur.close()
-        conn.close()
-
-@app.post("/api/events")
-async def create_event(event: EventCreate, admin: dict = Depends(authenticate_admin)):
-    conn = get_db_connection()
-    cur = conn.cursor()
-    
-    try:
-        cur.execute("""
-            INSERT INTO events (
-                title, event_type, description, date, start_time, 
-                end_time, location, organizer, registration_link, is_active
-            )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            RETURNING id
-        """, (
-            event.title, event.event_type, event.description, event.date, 
-            event.start_time, event.end_time, event.location, 
-            event.organizer, event.registration_link, event.is_active
-        ))
-        
-        event_id = cur.fetchone()['id']
-        conn.commit()
-        
-        log_action(admin['id'], "CREATE", "events", event_id, event.dict())
-        return {"message": "Evento creado exitosamente", "id": event_id}
-    except Exception as e:
-        logger.error(f"Error creando evento: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-    finally:
-        cur.close()
-        conn.close()
-
-@app.put("/api/events/{event_id}")
-async def update_event(event_id: int, event: EventCreate, admin: dict = Depends(authenticate_admin)):
-    conn = get_db_connection()
-    cur = conn.cursor()
-    
-    try:
-        cur.execute("SELECT * FROM events WHERE id = %s", (event_id,))
-        existing = cur.fetchone()
-        if not existing:
-            raise HTTPException(status_code=404, detail="Evento no encontrado")
-
-        cur.execute("""
-            UPDATE events 
-            SET title = %s, event_type = %s, description = %s, date = %s, 
-                start_time = %s, end_time = %s, location = %s, 
-                organizer = %s, registration_link = %s, is_active = %s
-            WHERE id = %s
-        """, (
-            event.title, event.event_type, event.description, event.date, 
-            event.start_time, event.end_time, event.location, 
-            event.organizer, event.registration_link, event.is_active, 
-            event_id
-        ))
-        
-        conn.commit()
-        log_action(admin['id'], "UPDATE", "events", event_id)
-        return {"message": "Evento actualizado exitosamente"}
-    finally:
-        cur.close()
-        conn.close()
-
-@app.delete("/api/events/{event_id}")
-async def delete_event(event_id: int, admin: dict = Depends(authenticate_admin)):
-    conn = get_db_connection()
-    cur = conn.cursor()
-    
-    try:
-        cur.execute("DELETE FROM events WHERE id = %s", (event_id,))
-        if cur.rowcount == 0:
-            raise HTTPException(status_code=404, detail="Evento no encontrado")
-            
-        conn.commit()
-        log_action(admin['id'], "DELETE", "events", event_id)
-        return {"message": "Evento eliminado exitosamente"}
-    finally:
-        cur.close()
-        conn.close()
-
 @app.get("/bot/careers")
 async def get_bot_careers():
     conn = get_db_connection()
@@ -1030,35 +782,6 @@ async def get_bot_preuniversity(upcoming_only: bool = True):
                     program[date_field] = program[date_field].isoformat()
         
         return {"programs": programs}
-    finally:
-        cur.close()
-        conn.close()
-
-@app.get("/bot/events")
-async def get_bot_events(limit: int = 10):
-    conn = get_db_connection()
-    cur = conn.cursor()
-    
-    try:
-        cur.execute("""
-            SELECT title, event_type, description, date, start_time, 
-                   end_time, location, organizer
-            FROM events 
-            WHERE date >= CURRENT_DATE AND is_active = TRUE
-            ORDER BY date, start_time
-            LIMIT %s
-        """, (limit,))
-        
-        events = cur.fetchall()
-        
-        for event in events:
-            if event['date']:
-                event['date'] = event['date'].isoformat()
-            for time_field in ['start_time', 'end_time']:
-                if event.get(time_field):
-                    event[time_field] = str(event[time_field])
-        
-        return {"events": events}
     finally:
         cur.close()
         conn.close()

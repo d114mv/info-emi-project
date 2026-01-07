@@ -433,9 +433,6 @@
                 <button class="nav-item" onclick="switchTab('preuniversity')">
                     <i class="fas fa-book-open" style="width:20px;"></i> Preuniversitarios
                 </button>
-                <button class="nav-item" onclick="switchTab('events')">
-                    <i class="fas fa-calendar-alt" style="width:20px;"></i> Eventos
-                </button>
                 <button class="nav-item" onclick="switchTab('faqs')">
                     <i class="fas fa-question-circle" style="width:20px;"></i> FAQs
                 </button>
@@ -444,9 +441,6 @@
                 </button>
                 <button class="nav-item" onclick="switchTab('scholarships')">
                     <i class="fas fa-hand-holding-usd" style="width:20px;"></i> Becas
-                </button>
-                <button class="nav-item" onclick="switchTab('calendar')">
-                    <i class="fas fa-calendar-alt" style="width:20px;"></i> Calendario
                 </button>
                 <button class="nav-item" onclick="switchTab('inscriptions')">
                     <i class="fas fa-file-signature" style="width:20px;"></i> Inscripciones
@@ -503,25 +497,6 @@
         </table>
     </div>
 </div>
-
-            <div id="events" class="content-card">
-    <div class="card-header">
-        <h3>Gestión de Eventos</h3>
-        <div class="header-tools">
-            <div class="search-wrapper">
-                <i class="fas fa-search"></i>
-                <input type="text" class="search-input" placeholder="Buscar evento..." onkeyup="filterTable(this, 'eventsTableBody')">
-            </div>
-            <button class="btn btn-success" onclick="openEventModal()"><i class="fas fa-plus"></i> Nuevo Evento</button>
-        </div>
-    </div> <div class="table-responsive">
-        <table class="data-table">
-            <thead><tr><th>Fecha</th><th>Título</th><th>Lugar</th><th>Acciones</th></tr></thead>
-            <tbody id="eventsTableBody"></tbody>
-        </table>
-    </div>
-</div>
-
             <div id="preuniversity" class="content-card">
     <div class="card-header">
         <h3>Gestión de Preuniversitarios</h3>
@@ -587,23 +562,6 @@
         <table class="data-table">
             <thead><tr><th>Nombre</th><th>Cobertura</th><th>Acciones</th></tr></thead>
             <tbody id="scholarshipsTableBody"></tbody>
-        </table>
-    </div>
-</div>
-            <div id="calendar" class="content-card">
-    <div class="card-header">
-        <h3>Calendario Académico</h3>
-        <div class="header-tools">
-            <div class="search-wrapper">
-                <i class="fas fa-search"></i>
-                <input type="text" class="search-input" placeholder="Buscar fecha o evento..." onkeyup="filterTable(this, 'calendarTableBody')">
-            </div>
-            <button class="btn btn-success" onclick="openCalendarModal()"><i class="fas fa-plus"></i> Nuevo Evento</button>
-        </div>
-    </div> <div class="table-responsive">
-        <table class="data-table">
-            <thead><tr><th>Fecha</th><th>Evento</th><th>Tipo</th><th>Periodo</th><th>Acciones</th></tr></thead>
-            <tbody id="calendarTableBody"></tbody>
         </table>
     </div>
 </div>
@@ -701,11 +659,9 @@ function filterTable(input, tableBodyId) {
             'dashboard': 'Dashboard',
             'careers': 'Gestión de Carreras',
             'preuniversity': 'Preuniversitarios',
-            'events': 'Eventos',
             'faqs': 'Preguntas Frecuentes',
             'contacts': 'Contactos',
             'scholarships': 'Gestión de Becas',
-            'calendar': 'Calendario Académico',
             'inscriptions': 'Periodos de Inscripción',
             'system_config': 'Configuración del Sistema'
         };
@@ -714,12 +670,10 @@ function filterTable(input, tableBodyId) {
         currentSection = tabId;
 
         if (tabId === 'careers') loadCareers();
-        if (tabId === 'events') loadEvents();
         if (tabId === 'preuniversity') loadPreuniversity();
         if (tabId === 'faqs') loadFaqs();
         if (tabId === 'contacts') loadContacts();
         if (tabId === 'scholarships') loadScholarships();
-        if (tabId === 'calendar') loadCalendar();
         if (tabId === 'inscriptions') loadInscriptions();
         if (tabId === 'system_config') loadConfig();
     }
@@ -837,23 +791,6 @@ function filterTable(input, tableBodyId) {
         `).join('');
     }
 
-    async function loadEvents() {
-        const res = await apiFetch(`${API_URL}/events?upcoming_only=false`);
-        if(!res) return;
-        const data = await res.json();
-        document.getElementById('eventsTableBody').innerHTML = data.map(e => `
-            <tr>
-                <td>${e.date}</td>
-                <td><strong>${e.title}</strong></td>
-                <td>${e.location || '-'}</td>
-                <td class="actions">
-                    <button class="action-btn action-edit" onclick='openEventModal(${JSON.stringify(e)})'><i class="fas fa-edit"></i></button>
-                    <button class="action-btn action-delete" onclick="deleteItem('events', ${e.id})"><i class="fas fa-trash"></i></button>
-                </td>
-            </tr>
-        `).join('');
-    }
-
     async function loadPreuniversity() {
         const res = await apiFetch(`${API_URL}/preuniversity?active_only=false`);
         if(!res) return;
@@ -919,65 +856,6 @@ function filterTable(input, tableBodyId) {
                 </td>
             </tr>
         `).join('');
-    }
-
-   async function loadCalendar() {
-        try {
-            const res = await apiFetch(`${API_URL}/calendar?active_only=false`);
-            if(!res) return;
-            const data = await res.json();
-            
-            const tbody = document.getElementById('calendarTableBody');
-            if (!data || data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center">No hay eventos registrados</td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = data.map(i => {
-                const fecha = i.start_date || '-';
-                const nombre = i.event_name || i.activity || 'Sin Título';
-                const tipo = i.event_type || 'General';
-                const periodo = i.academic_period || '-';
-                
-                return `
-                <tr>
-                    <td>${fecha}</td>
-                    <td><strong>${nombre}</strong></td>
-                    <td><span class="badge" style="background:#e0f2fe; color:#0369a1">${tipo}</span></td>
-                    <td>${periodo}</td>
-                    <td class="actions">
-                        <button class="action-btn action-edit" onclick='openCalendarModal(${JSON.stringify(i)})'><i class="fas fa-edit"></i></button>
-                        <button class="action-btn action-delete" onclick="deleteItem('calendar', ${i.id})"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>`;
-            }).join('');
-        } catch (error) {
-            console.error("Error en calendario:", error);
-        }
-    }
-
-    function openCalendarModal(i=null) {
-        currentSection = 'calendar';
-        setupModal(i, 'Evento', `
-            <div class="form-group"><label>Nombre del Evento</label><input class="form-control" name="event_name" value="${i?.event_name||''}" required></div>
-            <div style="display:flex; gap:10px;">
-                <div class="form-group" style="flex:1"><label>Fecha Inicio</label><input type="date" class="form-control" name="start_date" value="${i?.start_date||''}" required></div>
-                <div class="form-group" style="flex:1"><label>Fecha Fin</label><input type="date" class="form-control" name="end_date" value="${i?.end_date||''}"></div>
-            </div>
-            <div style="display:flex; gap:10px;">
-                <div class="form-group" style="flex:1"><label>Tipo</label>
-                    <select name="event_type" class="form-control">
-                        <option value="Académico" ${i?.event_type==='Académico'?'selected':''}>Académico</option>
-                        <option value="Administrativo" ${i?.event_type==='Administrativo'?'selected':''}>Administrativo</option>
-                        <option value="Feriado" ${i?.event_type==='Feriado'?'selected':''}>Feriado</option>
-                        <option value="Examen" ${i?.event_type==='Examen'?'selected':''}>Examen</option>
-                        <option value="Otro" ${i?.event_type==='Otro'?'selected':''}>Otro</option>
-                    </select>
-                </div>
-                <div class="form-group" style="flex:1"><label>Periodo Acad.</label><input class="form-control" name="academic_period" value="${i?.academic_period||''}" placeholder="Ej: I-2024"></div>
-            </div>
-            <div class="form-group"><label>Descripción</label><textarea class="form-control" name="description">${i?.description||''}</textarea></div>
-        `, i?.id);
     }
 
     async function loadInscriptions() {
@@ -1049,26 +927,6 @@ function filterTable(input, tableBodyId) {
         `, c?.id);
     }
 
-    function openEventModal(e=null) {
-        currentSection = 'events';
-        setupModal(e, 'Evento', `
-            <div class="form-group"><label>Título</label><input class="form-control" name="title" value="${e?.title||''}" required></div>
-            <div class="form-group"><label>Tipo</label>
-                <select name="event_type" class="form-control">
-                    <option value="academico" ${e?.event_type==='academico'?'selected':''}>Académico</option>
-                    <option value="cultural" ${e?.event_type==='cultural'?'selected':''}>Cultural</option>
-                    <option value="deportivo" ${e?.event_type==='deportivo'?'selected':''}>Deportivo</option>
-                </select>
-            </div>
-            <div class="form-group"><label>Fecha</label><input type="date" class="form-control" name="date" value="${e?.date||''}" required></div>
-            <div style="display:flex; gap:10px;">
-                <div class="form-group" style="flex:1"><label>Inicio</label><input type="time" class="form-control" name="start_time" value="${e?.start_time||''}"></div>
-                <div class="form-group" style="flex:1"><label>Fin</label><input type="time" class="form-control" name="end_time" value="${e?.end_time||''}"></div>
-            </div>
-            <div class="form-group"><label>Lugar</label><input class="form-control" name="location" value="${e?.location||''}"></div>
-            <div class="form-group"><label>Descripción</label><textarea class="form-control" name="description">${e?.description||''}</textarea></div>
-        `, e?.id);
-    }
 
     function openPreuModal(i=null) {
         currentSection = 'preuniversity';

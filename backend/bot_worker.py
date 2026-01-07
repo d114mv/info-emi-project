@@ -26,7 +26,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-TOKEN = os.getenv("BOT_TOKEN", "8577123738:AAEV7SP2oYjW8XIl65k7B_lzxiD0m9DeNxE")
+TOKEN = os.getenv("BOT_TOKEN", "8187579719:AAHsl9bV_hLo-rjUsPQOcrfh0WVmsMpK9rs")
 API_URL = os.getenv("API_URL", "https://info-emi-backend.onrender.com")
 
 bot = telebot.TeleBot(TOKEN, parse_mode="HTML")
@@ -233,11 +233,9 @@ def handle_start(message):
     
     btn_carreras = types.KeyboardButton("🎓 Carreras")
     btn_pre = types.KeyboardButton("📚 Preuniversitarios")
-    btn_eventos = types.KeyboardButton("📅 Eventos")
     btn_becas = types.KeyboardButton("💰 Becas")
     btn_faq = types.KeyboardButton("❓ FAQ")
     btn_contactos = types.KeyboardButton("📞 Contactos")
-    btn_calendario = types.KeyboardButton("📆 Calendario")
     btn_ayuda = types.KeyboardButton("ℹ️ Ayuda")
     
     markup.add(btn_carreras, btn_pre, btn_eventos, btn_becas, 
@@ -250,11 +248,9 @@ Tu asistente virtual de la universidad.
 <b>Puedes usar los botones o comandos:</b>
 /carreras - Ver oferta académica
 /preuniversitario - Cursos de nivelación
-/eventos - Próximas actividades
 /becas - Becas disponibles
 /faq - Preguntas frecuentes
 /contacto - Contactos por área
-/calendario - Fechas importantes
 /inscripciones - Info de matrícula
 /help - Mostrar todos los comandos
 
@@ -280,11 +276,9 @@ def handle_help(message):
 /start - Iniciar conversación
 /carreras - Ver todas las carreras
 /preuniversitario - Cursos preuniversitarios
-/eventos - Eventos próximos
 /becas - Becas y descuentos
 /faq - Preguntas frecuentes
 /contacto - Números de contacto
-/calendario - Calendario académico
 /inscripciones - Información de matrícula
 
 <u>También puedes usar:</u>
@@ -819,7 +813,6 @@ def start_bot():
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith('faq:'))
 def handle_faq_click(call):
-    """Maneja el clic en una categoría de FAQ"""
     try:
         category_selected = call.data.split(':', 1)[1]
         
