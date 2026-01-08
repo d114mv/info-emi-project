@@ -613,7 +613,6 @@ async def create_preuniversity(
     program: PreUniversityCreate, 
     admin: dict = Depends(authenticate_admin)
 ):
-    """Crear nuevo programa preuniversitario"""
     conn = get_db_connection()
     cur = conn.cursor()
     
