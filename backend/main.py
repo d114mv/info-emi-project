@@ -68,4 +68,5 @@ async def chat_endpoint(request: ChatRequest):
         response = model.generate_content(system_instruction)
         return {"response": response.text}
     except Exception as e:
+        print(f"🔴 ERROR REAL DE GEMINI: {e}")
         return {"response": "Lo siento, hubo un error de conexión."}
