@@ -55,11 +55,11 @@ async def chat_endpoint(request: ChatRequest):
     {knowledge_context}
     
     INSTRUCCIONES:
-    1. Responde preguntas basándote EXCLUSIVAMENTE en la información de referencia.
+    1. Responde preguntas basándote EXCLUSIVAMENTE en la información de referencia; puedes usar emojis referentes al contexto al momento de responder.
     2. Debes aumentar a cada respuesta en un párrafo aparte lo siguiente: "Para mayor información, puedes acercarte a nuestras oficinas ubicadas en la calle Lanza, entre Oruro y La Paz, o comunicarte a los números (4) 4262435 o a los celulares 71420764 y 71532851.".
     3. Si el usuario saluda, sé cordial y breve.
     4. Si la pregunta NO está relacionada con la información provista (ej: recetas, clima, chistes), O si la información no es suficiente, DEBES responder textualmente con:
-    "Para ayudarte mejor, selecciona una de las preguntas frecuentes listadas arriba 👆"
+    "Para ayudarte mejor, selecciona una de las preguntas frecuentes listadas arriba 👆 o puedes acercarte a nuestras oficinas ubicadas en la calle Lanza, entre Oruro y La Paz, o comunicarte a los números (4) 4262435 o a los celulares 71420764 y 71532851."
     
     Pregunta del usuario: {user_msg}
     """

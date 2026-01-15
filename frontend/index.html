@@ -80,6 +80,58 @@
         button { background: var(--emi-blue); color: white; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; }
         
         .typing { font-size: 0.75rem; color: #555; margin: 5px 20px; display: none; font-style: italic;}
+    
+        .whatsapp-container {
+            position: absolute;
+            bottom: 80px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            z-index: 100;
+        }
+
+        .wa-btn {
+            width: 55px;
+            height: 55px;
+            background-color: #25D366;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .wa-btn:hover {
+            transform: scale(1.1);
+            background-color: #128C7E;
+        }
+
+        .wa-btn i {
+            font-size: 30px;
+        }
+
+        .wa-label {
+            position: absolute;
+            right: 65px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.75rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            white-space: nowrap;
+        }
+
+        .wa-btn:hover .wa-label {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -119,6 +171,17 @@
     </div>
     <div class="typing" id="typingIndicator">Escribiendo...</div>
 
+    <div class="whatsapp-container">
+        <a href="https://api.whatsapp.com/send?phone=59171532851&text=Hola%2C%20requiero%20m%C3%A1s%20informaci%C3%B3n%20acerca%20de...%20" target="_blank" class="wa-btn">
+            <i class="fab fa-whatsapp"></i>
+            <span class="wa-label">Contacto 1 (715-32851)</span>
+        </a>
+
+        <a href="https://api.whatsapp.com/send?phone=59171420764&text=Hola%2C%20requiero%20m%C3%A1s%20informaci%C3%B3n%20acerca%20de...%20" target="_blank" class="wa-btn">
+            <i class="fab fa-whatsapp"></i>
+            <span class="wa-label">Contacto 2 (714-20764)</span>
+        </a>
+    </div>
     <div class="input-area">
         <input type="text" id="userInput" placeholder="Escribe tu consulta aquí..." onkeypress="handleEnter(event)">
         <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
