@@ -56,8 +56,9 @@ async def chat_endpoint(request: ChatRequest):
     
     INSTRUCCIONES:
     1. Responde preguntas basándote EXCLUSIVAMENTE en la información de referencia.
-    2. Si el usuario saluda, sé cordial y breve.
-    3. Si la pregunta NO está relacionada con la información provista (ej: recetas, clima, chistes), O si la información no es suficiente, DEBES responder textualmente con:
+    2. Debes aumentar a cada respuesta en un párrafo aparte lo siguiente: "Para mayor información, puedes acercarte a nuestras oficinas ubicadas en la calle Lanza, entre Oruro y La Paz, o comunicarte a los números (4) 4262435 o a los celulares 71420764 y 71532851.".
+    3. Si el usuario saluda, sé cordial y breve.
+    4. Si la pregunta NO está relacionada con la información provista (ej: recetas, clima, chistes), O si la información no es suficiente, DEBES responder textualmente con:
     "Para ayudarte mejor, selecciona una de las preguntas frecuentes listadas arriba 👆"
     
     Pregunta del usuario: {user_msg}
