@@ -22,7 +22,7 @@ if not DB_URI or not GOOGLE_API_KEY:
     raise ValueError("Faltan las variables de entorno DB_URI o GOOGLE_API_KEY")
 
 genai.configure(api_key=GOOGLE_API_KEY)
-model = genai.GenerativeModel('gemini-pro')
+model = genai.GenerativeModel('models/gemini-2.5-flash')
 
 class ChatRequest(BaseModel):
     message: str
