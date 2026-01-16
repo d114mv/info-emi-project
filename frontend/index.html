@@ -7,6 +7,7 @@
     <title>Asistente EMI COCHABAMBA</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
     <style>
         :root {
@@ -18,7 +19,7 @@
         
         .chat-container {
             width: 100%; max-width: 450px; height: 100%; display: flex; flex-direction: column;
-            background: #fff; box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            background: #fff; box-shadow: 0 0 20px rgba(0,0,0,0.1); position: relative;
         }
 
         .header {
@@ -29,7 +30,6 @@
         .info h3 { margin: 0; font-size: 16px; font-weight: 600; }
         .info p { margin: 0; font-size: 11px; opacity: 0.8; }
 
-        /* CONTACTO SIEMPRE VISIBLE */
         .contact-banner {
             background: var(--emi-gold); 
             color: var(--emi-blue); 
@@ -40,34 +40,27 @@
             position: sticky; 
             top: 0; 
             z-index: 5;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
+            display: flex; flex-direction: column; gap: 4px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .contact-row {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .contact-row i {
-            color: var(--emi-blue);
-            margin-right: 2px;
+            display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap;
         }
 
         .messages {
             flex: 1; overflow-y: auto; padding: 20px; background-color: #e5ddd5;
-            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7z' fill='%239C92AC' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 3.134 7 7 7z' fill='%239C92AC' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
         }
 
         .msg { max-width: 80%; padding: 10px 15px; border-radius: 12px; margin-bottom: 10px; font-size: 0.9rem; line-height: 1.4; }
         .msg.bot { background: white; align-self: flex-start; border-top-left-radius: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         .msg.user { background: #dcf8c6; margin-left: auto; border-top-right-radius: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         
+        .msg.bot strong { color: var(--emi-blue); font-weight: 700; }
+        .msg.bot ul { padding-left: 20px; margin: 5px 0; }
+        .msg.bot li { margin-bottom: 4px; }
+
         .option-btn {
             display: block; width: 100%; background: #fff; border: 1px solid var(--emi-blue); color: var(--emi-blue);
             padding: 8px 12px; margin: 5px 0; border-radius: 20px; cursor: pointer; font-size: 0.85rem; transition: 0.2s;
@@ -92,46 +85,27 @@
         }
 
         .wa-btn {
-            width: 55px;
-            height: 55px;
-            background-color: #25D366;
-            color: white;
+            width: 55px; height: 55px;
+            background-color: #25D366; color: white;
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             text-decoration: none;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             transition: all 0.3s ease;
             position: relative;
         }
-
-        .wa-btn:hover {
-            transform: scale(1.1);
-            background-color: #128C7E;
-        }
-
-        .wa-btn i {
-            font-size: 30px;
-        }
+        .wa-btn:hover { transform: scale(1.1); background-color: #128C7E; }
+        .wa-btn i { font-size: 30px; }
 
         .wa-label {
-            position: absolute;
-            right: 65px;
-            background: rgba(0,0,0,0.7);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 0.75rem;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
+            position: absolute; right: 65px;
+            background: rgba(0,0,0,0.7); color: white;
+            padding: 5px 10px; border-radius: 5px;
+            font-size: 0.75rem; opacity: 0;
+            pointer-events: none; transition: opacity 0.3s;
             white-space: nowrap;
         }
-
-        .wa-btn:hover .wa-label {
-            opacity: 1;
-        }
+        .wa-btn:hover .wa-label { opacity: 1; }
     </style>
 </head>
 <body>
@@ -147,7 +121,7 @@
     
     <div class="contact-banner">
         <div class="contact-row">
-            <span><b>📍 Campus Lanza:</b> C. Lanza #811, entre La Paz y Oruro</span>
+            <span><b>📍 Campus Lanza:</b> C. Lanza #811</span>
             <span>📱 71420764 - 71532851</span>
         </div>
         <div class="contact-row">
@@ -174,14 +148,15 @@
     <div class="whatsapp-container">
         <a href="https://api.whatsapp.com/send?phone=59171532851&text=Hola%2C%20requiero%20m%C3%A1s%20informaci%C3%B3n%20acerca%20de...%20" target="_blank" class="wa-btn">
             <i class="fab fa-whatsapp"></i>
-            <span class="wa-label">Contacto 1 (715-32851)</span>
+            <span class="wa-label">Info General (715-32851)</span>
         </a>
 
         <a href="https://api.whatsapp.com/send?phone=59171420764&text=Hola%2C%20requiero%20m%C3%A1s%20informaci%C3%B3n%20acerca%20de...%20" target="_blank" class="wa-btn">
             <i class="fab fa-whatsapp"></i>
-            <span class="wa-label">Contacto 2 (714-20764)</span>
+            <span class="wa-label">Admisiones (714-20764)</span>
         </a>
     </div>
+
     <div class="input-area">
         <input type="text" id="userInput" placeholder="Escribe tu consulta aquí..." onkeypress="handleEnter(event)">
         <button onclick="sendMessage()"><i class="fas fa-paper-plane"></i></button>
@@ -198,7 +173,8 @@
     function handleEnter(e) { if(e.key === 'Enter') sendMessage(); }
 
     function sendOption(btn) {
-        userInput.value = btn.innerText;
+        let text = btn.innerText;
+        userInput.value = text;
         sendMessage();
     }
 
@@ -231,7 +207,13 @@
     function addMessage(text, sender) {
         const div = document.createElement('div');
         div.className = `msg ${sender}`;
-        div.innerHTML = text.replace(/\n/g, '<br>');
+        
+        if (sender === 'bot') {
+            div.innerHTML = marked.parse(text); 
+        } else {
+            div.innerText = text;
+        }
+        
         chatBox.appendChild(div);
         chatBox.scrollTop = chatBox.scrollHeight;
     }
